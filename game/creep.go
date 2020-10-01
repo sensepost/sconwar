@@ -40,7 +40,7 @@ func (c *Creep) IsInRangeOf(o hasPosition) bool {
 	return false
 }
 
-func (c *Creep) TakeDamage(dmg int) int {
+func (c *Creep) TakeDamage(dmg int) (int, int) {
 
 	if dmg > 100 {
 		dmg = -1
@@ -56,5 +56,5 @@ func (c *Creep) TakeDamage(dmg int) int {
 		c.Health = 0
 	}
 
-	return dmg
+	return dmg, c.Health
 }
