@@ -18,6 +18,7 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
+	//Game loop
 	game.Setup()
 	api.SetupRouter().Run(":8080")
 }
