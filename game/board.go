@@ -51,6 +51,7 @@ func (b *Board) Run() {
 
 		if len(b.aliveCreep()) == 1 {
 			log.Error().Msg("Game finished, last man standing!")
+			return
 		}
 	}
 }

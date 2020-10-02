@@ -33,15 +33,29 @@ func (p *Position) MoveRandom(distance int) {
 	if rand.Float32() < 0.5 {
 		p.X = p.X + distance
 	} else {
-		// TODO, bounds check
 		p.X = p.X - distance
+	}
+
+	if p.X > BoardX {
+		p.X = BoardX
+	}
+
+	if p.X < 0 {
+		p.X = 0
 	}
 
 	// Y
 	if rand.Float32() < 0.5 {
 		p.Y = p.Y + distance
 	} else {
-		// TODO, bounds check
 		p.Y = p.Y - distance
+	}
+
+	if p.Y > BoardY {
+		p.Y = BoardY
+	}
+
+	if p.Y < 0 {
+		p.Y = 0
 	}
 }
