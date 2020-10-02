@@ -7,6 +7,7 @@ type Player struct {
 	ID       string
 	Health   uint
 	Position *Position
+	Command  int
 }
 
 func NewPlayer(name string) *Player {

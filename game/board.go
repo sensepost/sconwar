@@ -37,14 +37,18 @@ func (b *Board) Run() {
 
 		b.moveAndAttackCreep()
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		log.Info().
 			Str("board.id", b.ID).
 			Int("creep.count", len(b.aliveCreep())).
 			Int("player.count", len(b.Players)).
 			Msg("10 sec sleep")
 
+		// players random order
+		// 30 seconds
+
 		// cleanup dead creep/people
+
 		if len(b.aliveCreep()) == 1 {
 			log.Error().Msg("Game finished, last man standing!")
 		}

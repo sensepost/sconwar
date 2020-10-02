@@ -4,5 +4,5 @@ package game
 const (
 	BoardX     = 20
 	BoardY     = 20
-	CreepCount = 10
+	CreepCount = 15
 )
