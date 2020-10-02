@@ -21,6 +21,9 @@ func newGame(c *gin.Context) {
 	id := uuid.New().String()
 	game.Games[id] = game.NewBoard(id)
 
+	// todo: maybe we should not start the loop here
+	// but rather wait for all players to join then
+	// kick off a /game/start/:uuid call to run
 	go game.Games[id].Run()
 
 	c.JSON(http.StatusOK, &NewGameResponse{
