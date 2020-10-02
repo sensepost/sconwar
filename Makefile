@@ -5,11 +5,14 @@ PWD := $(shell pwd)
 LD_FLAGS := -ldflags="-s -w"
 BIN_DIR := build
 
-default: clean darwin linux windows integrity
+default: clean swagger darwin linux windows integrity
 
 clean:
 	$(RM) $(BIN_DIR)/sconwar*
 	go clean -x
+
+swagger:
+	swag init -g api/router.go
 
 install:
 	go install
