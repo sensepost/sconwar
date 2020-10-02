@@ -4,7 +4,7 @@ import "github.com/sensepost/sconwar/game"
 
 type ErrorResponse struct {
 	Message string
-	Error   error
+	Error   string
 }
 
 type NewGameResponse struct {
@@ -18,4 +18,8 @@ type AllGamesResponse struct {
 
 type GameResponse struct {
 	Game *game.Board
+}
+
+type StatusResponse struct {
+	Success bool
 }

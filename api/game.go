@@ -55,21 +55,65 @@ func allGames(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} GameResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /games/get/:uuid [get]
+// @Router /games/get/:game_id [get]
 func getGame(c *gin.Context) {
 
-	p := &struct {
-		UUID string `uri:"uuid" binding:"required,uuid"`
-	}{}
+	params := &GetGameDetailRequest{}
 
-	if err := c.ShouldBindUri(&p); err != nil {
+	if err := c.BindUri(&params); err != nil {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `failed to read uri param`,
-			Error:   err,
+			Error:   err.Error(),
 		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, &GameResponse{
-		Game: game.Games[p.UUID],
+		Game: game.Games[params.GameID],
+	})
+}
+
+// JoinGame godoc
+// @Summary Join a game
+// @Description Joins a player to an existing game
+// @Tags Games
+// @Accept json
+// @Produce json
+// @Param data body	JoinPlayerRequest true "Join Request"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /games/join [post]
+func joinGame(c *gin.Context) {
+
+	params := &JoinPlayerRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read post params`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// todo: actually join the game
+
+	c.JSON(http.StatusOK, &StatusResponse{
+		Success: true,
 	})
 }
