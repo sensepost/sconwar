@@ -36,6 +36,28 @@ func (p *Position) MoveRandom(distance int) {
 		p.X = p.X - distance
 	}
 
+	// Y
+	if rand.Float32() < 0.5 {
+		p.Y = p.Y + distance
+	} else {
+		p.Y = p.Y - distance
+	}
+
+	p.floorAndCeilPosition()
+
+}
+
+func (p *Position) MoveTo(x int, y int) {
+
+	p.X = x
+	p.Y = y
+
+	p.floorAndCeilPosition()
+}
+
+func (p *Position) floorAndCeilPosition() {
+
+	// x
 	if p.X > BoardX {
 		p.X = BoardX
 	}
@@ -44,17 +66,11 @@ func (p *Position) MoveRandom(distance int) {
 		p.X = 0
 	}
 
-	// Y
-	if rand.Float32() < 0.5 {
-		p.Y = p.Y + distance
-	} else {
-		p.Y = p.Y - distance
-	}
-
 	if p.Y > BoardY {
 		p.Y = BoardY
 	}
 
+	// y
 	if p.Y < 0 {
 		p.Y = 0
 	}

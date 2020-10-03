@@ -1,6 +1,8 @@
 package game
 
 import (
+	"errors"
+
 	"github.com/sensepost/sconwar/storage"
 )
 
@@ -9,20 +11,36 @@ type Player struct {
 	ID       string
 	Health   uint
 	Position *Position
-	Command  int
+	Commands chan Action `json:"-"`
 }
 
 func NewPlayer(p *storage.Player) *Player {
+
 	return &Player{
 		Name:     p.Name,
 		ID:       p.UUID,
 		Health:   100,
 		Position: NewPosition(),
+		Commands: make(chan Action, RoundMoves),
 	}
+}
+
+func (p *Player) AddAction(action Action) error {
+	select {
+	case p.Commands <- action:
+	default:
+		return errors.New(`player action buffer full`)
+	}
+
+	return nil
 }
 
 func (p *Player) Move() {
 	p.Position.MoveRandom(1)
+}
+
+func (p *Player) MoveTo(x int, y int) {
+	p.Position.MoveTo(x, y)
 }
 
 func (p *Player) GetPosition() (int, int) {

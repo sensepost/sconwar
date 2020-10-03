@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -33,8 +32,6 @@ func NewBoard(id string) *Board {
 
 	b.setFowDistance()
 
-	fmt.Println(b.FOWDistance)
-
 	for i := 0; i <= CreepCount; i++ {
 		b.Creeps = append(b.Creeps, NewCreep())
 	}
@@ -50,7 +47,7 @@ func (b *Board) setFowDistance() {
 
 	distance := math.Sqrt(first + second)
 
-	b.FOWDistance = distance / 100 * FOWPercent
+	b.FOWDistance = distance / 100 * FogOfWarPercent
 }
 
 // JoinPlayer joins a new human player to the board
@@ -74,10 +71,10 @@ func (b *Board) Run() {
 			Int("player.count", len(b.Players)).
 			Msg("10 sec sleep")
 
-		// players random order
-		// 30 seconds
+		// todo: add a timeout context for player moves to handle action timeouts
+		b.processPlayerActions()
 
-		// cleanup dead creep/people
+		// todo: cleanup dead creep/people
 
 		if len(b.aliveCreep()) == 1 {
 			log.Error().Msg("Game finished, last man standing!")
@@ -137,6 +134,18 @@ func (b *Board) moveAndAttackCreep() {
 					log.Error().Str("target.id", target.ID).Msg("creep has been killed!")
 				}
 			}
+		}
+	}
+}
+
+func (b *Board) processPlayerActions() {
+
+	for _, p := range b.alivePlayers() {
+
+		// todo: limit moves
+		// todo: the range here blocks. fix that.
+		for action := range p.Commands {
+			action.Execute()
 		}
 	}
 }
