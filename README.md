@@ -1,5 +1,10 @@
 # sconwar
+
 a bring your own client programming game
+
+## building
+
+run `make swagger install`
 
 ## test information
 
@@ -39,7 +44,7 @@ Date: Sat, 03 Oct 2020 15:32:09 GMT
 
 ### join the registered game
 
-```tex
+```text
 $ post localhost:8080/api/game/join game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292 player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
 HTTP/1.1 200 OK
 Content-Length: 16
