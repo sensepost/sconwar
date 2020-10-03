@@ -8,4 +8,5 @@ const (
 	FogOfWarPercent = 10
 	AttackRange     = 1
 	RoundMoves      = 2
+	MaxRoundSeconds = 30
 )

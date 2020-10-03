@@ -1,6 +1,7 @@
 package game
 
 import (
+	"context"
 	"math"
 	"time"
 
@@ -62,17 +63,20 @@ func (b *Board) Run() {
 
 	for {
 
-		b.moveAndAttackCreep()
-
-		time.Sleep(100 * time.Millisecond)
 		log.Info().
 			Str("board.id", b.ID).
 			Int("creep.count", len(b.aliveCreep())).
 			Int("player.count", len(b.Players)).
-			Msg("10 sec sleep")
+			Msg("game stats")
 
-		// todo: add a timeout context for player moves to handle action timeouts
-		b.processPlayerActions()
+		b.moveAndAttackCreep()
+
+		for _, p := range b.alivePlayers() {
+			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
+			defer cancel()
+
+			b.processPlayerActions(ctx, *p)
+		}
 
 		// todo: cleanup dead creep/people
 
@@ -138,13 +142,15 @@ func (b *Board) moveAndAttackCreep() {
 	}
 }
 
-func (b *Board) processPlayerActions() {
+// processPlayerActions executes the actions for a player
+func (b *Board) processPlayerActions(ctx context.Context, p Player) {
 
-	for _, p := range b.alivePlayers() {
-
-		// todo: limit moves
-		// todo: the range here blocks. fix that.
-		for action := range p.Commands {
+	// only execute the max number of actions
+	for i := 0; i < RoundMoves; i++ {
+		select {
+		case <-ctx.Done():
+			return
+		case action := <-p.Actions:
 			action.Execute()
 		}
 	}

@@ -11,7 +11,7 @@ type Player struct {
 	ID       string
 	Health   uint
 	Position *Position
-	Commands chan Action `json:"-"`
+	Actions  chan Action `json:"-"`
 }
 
 func NewPlayer(p *storage.Player) *Player {
@@ -21,13 +21,13 @@ func NewPlayer(p *storage.Player) *Player {
 		ID:       p.UUID,
 		Health:   100,
 		Position: NewPosition(),
-		Commands: make(chan Action, RoundMoves),
+		Actions:  make(chan Action, RoundMoves),
 	}
 }
 
 func (p *Player) AddAction(action Action) error {
 	select {
-	case p.Commands <- action:
+	case p.Actions <- action:
 	default:
 		return errors.New(`player action buffer full`)
 	}
