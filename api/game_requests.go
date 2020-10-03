@@ -15,7 +15,7 @@ type GetGameDetailRequest struct {
 func (r *GetGameDetailRequest) Validation() error {
 
 	if game.Games[r.GameID] == nil {
-		return errors.New("unable to find a game by that id")
+		return errors.New("invalid game uuid")
 	}
 
 	return nil
@@ -29,7 +29,7 @@ type JoinPlayerRequest struct {
 func (r *JoinPlayerRequest) Validation() error {
 
 	if game.Games[r.GameID] == nil {
-		return errors.New("unable to find a game by that id")
+		return errors.New("invalid game uuid")
 	}
 
 	var player storage.Player

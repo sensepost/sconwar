@@ -13,15 +13,18 @@ type Board struct {
 	SizeY   int
 	Creeps  []*Creep
 	Players []*Player
+	Created time.Time
+	Started time.Time
 }
 
 // NewBoard starts a new Board
 func NewBoard(id string) *Board {
 
 	b := &Board{
-		ID:    id,
-		SizeX: BoardX,
-		SizeY: BoardY,
+		ID:      id,
+		SizeX:   BoardX,
+		SizeY:   BoardY,
+		Created: time.Now(),
 	}
 
 	for i := 0; i <= CreepCount; i++ {
@@ -31,11 +34,15 @@ func NewBoard(id string) *Board {
 	return b
 }
 
+// JoinPlayer joins a new human player to the board
 func (b *Board) JoinPlayer(p *Player) {
 	b.Players = append(b.Players, p)
 }
 
+// Run runs the game loop
 func (b *Board) Run() {
+
+	b.Started = time.Now()
 
 	for {
 
@@ -65,6 +72,17 @@ func (b *Board) aliveCreep() (a []*Creep) {
 	for _, c := range b.Creeps {
 		if c.Health > 0 {
 			a = append(a, c)
+		}
+	}
+
+	return
+}
+
+func (b *Board) alivePlayers() (a []*Player) {
+
+	for _, p := range b.Players {
+		if p.Health > 0 {
+			a = append(a, p)
 		}
 	}
 

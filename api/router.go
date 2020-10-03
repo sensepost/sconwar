@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/sensepost/sconwar/docs" // import auto generated docs
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -18,9 +20,10 @@ import (
 func SetupRouter() (r *gin.Engine) {
 	r = gin.Default()
 
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	r.GET("/ping", ping)
 
 	ui := r.Group("/ui")
 	{
@@ -30,19 +33,28 @@ func SetupRouter() (r *gin.Engine) {
 	api := r.Group("/api")
 	{
 
-		games := api.Group("/games")
+		game := api.Group("/game")
 		{
-			games.GET("/", allGames)
-			games.GET("/new", newGame)
-			games.POST("/join", joinGame)
-			games.GET("/get/:game_id", getGame)
-			games.PUT("/start/:game_id", startGame)
+			game.GET("/", allGames)
+			game.GET("/new", newGame)
+			game.POST("/join", joinGame)
+			game.GET("/get/:game_id", getGame)
+			game.PUT("/start/:game_id", startGame)
 		}
 
 		player := api.Group("/player")
 		{
-			player.POST("/status")
 			player.POST("/register", registerPlayer)
+
+			player.POST("/status", playerStatus)
+			player.POST("/inventory")
+		}
+
+		action := api.Group("/action")
+		{
+			action.POST("/attack")
+			action.POST("/move")
+			action.POST("/pickup")
 		}
 	}
 
