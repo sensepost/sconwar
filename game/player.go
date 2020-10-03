@@ -1,6 +1,8 @@
 package game
 
-import "github.com/google/uuid"
+import (
+	"github.com/sensepost/sconwar/storage"
+)
 
 type Player struct {
 	Name     string
@@ -10,10 +12,10 @@ type Player struct {
 	Command  int
 }
 
-func NewPlayer(name string) *Player {
+func NewPlayer(p *storage.Player) *Player {
 	return &Player{
-		Name:     name,
-		ID:       uuid.New().String(),
+		Name:     p.Name,
+		ID:       p.UUID,
 		Health:   100,
 		Position: NewPosition(),
 	}

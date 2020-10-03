@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"github.com/sensepost/sconwar/game"
+	"github.com/sensepost/sconwar/storage"
+	"gorm.io/gorm"
 )
 
 type GetGameDetailRequest struct {
@@ -30,7 +32,11 @@ func (r *JoinPlayerRequest) Validation() error {
 		return errors.New("unable to find a game by that id")
 	}
 
-	// todo: validate player_id
+	var player storage.Player
+	res := storage.Storage.Get().Where("UUID = ?", r.PlayerID).First(&player)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return errors.New("invalid player uuid")
+	}
 
 	return nil
 }

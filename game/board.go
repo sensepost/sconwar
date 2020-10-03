@@ -31,6 +31,10 @@ func NewBoard(id string) *Board {
 	return b
 }
 
+func (b *Board) JoinPlayer(p *Player) {
+	b.Players = append(b.Players, p)
+}
+
 func (b *Board) Run() {
 
 	for {
@@ -79,6 +83,9 @@ func (b *Board) moveAndAttackCreep() {
 			}
 
 			if creep.IsInRangeOf(target) {
+
+				// todo: limit moves. atm the creep will
+				// shoot all others in range
 
 				dmg, h := target.TakeDamage(-1)
 				log.Warn().

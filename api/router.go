@@ -11,7 +11,7 @@ import (
 // @version 1.0
 // @description This is the sconwar API documentation.
 
-// @host localhost
+// @host localhost:8080
 // @BasePath /api
 
 // SetupRouter configures the HTTP routes we have
@@ -32,11 +32,11 @@ func SetupRouter() (r *gin.Engine) {
 
 		games := api.Group("/games")
 		{
-			games.GET("/new", newGame)
 			games.GET("/", allGames)
-			games.GET("/get/:game_id", getGame)
-
+			games.GET("/new", newGame)
 			games.POST("/join", joinGame)
+			games.GET("/get/:game_id", getGame)
+			games.PUT("/start/:game_id", startGame)
 		}
 
 		player := api.Group("/player")

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sensepost/sconwar/game"
+	"github.com/sensepost/sconwar/storage"
 )
 
 // NewGame godoc
@@ -20,11 +21,6 @@ func newGame(c *gin.Context) {
 
 	id := uuid.New().String()
 	game.Games[id] = game.NewBoard(id)
-
-	// todo: maybe we should not start the loop here
-	// but rather wait for all players to join then
-	// kick off a /game/start/:uuid call to run
-	go game.Games[id].Run()
 
 	c.JSON(http.StatusOK, &NewGameResponse{
 		Created: true,
@@ -56,9 +52,10 @@ func allGames(c *gin.Context) {
 // @Tags Games
 // @Accept json
 // @Produce json
+// @Param game_id path string true "game uuid"
 // @Success 200 {object} GameResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /games/get/:game_id [get]
+// @Router /games/get/{game_id} [get]
 func getGame(c *gin.Context) {
 
 	params := &GetGameDetailRequest{}
@@ -84,6 +81,44 @@ func getGame(c *gin.Context) {
 	})
 }
 
+// StartGame godoc
+// @Summary Start a game
+// @Description Starts a game
+// @Tags Games
+// @Accept json
+// @Produce json
+// @Param game_id path string true "game uuid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /games/start/{game_id} [put]
+func startGame(c *gin.Context) {
+
+	params := &GetGameDetailRequest{}
+
+	if err := c.BindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read uri param`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// start the game
+	go game.Games[params.GameID].Run()
+
+	c.JSON(http.StatusOK, &StatusResponse{
+		Success: true,
+	})
+}
+
 // JoinGame godoc
 // @Summary Join a game
 // @Description Joins a player to an existing game
@@ -95,6 +130,9 @@ func getGame(c *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Router /games/join [post]
 func joinGame(c *gin.Context) {
+
+	// todo: check that player is not already in the game
+	// todo: check that the game is not already running
 
 	params := &JoinPlayerRequest{}
 
@@ -114,7 +152,11 @@ func joinGame(c *gin.Context) {
 		return
 	}
 
-	// todo: actually join the game
+	var player storage.Player
+	storage.Storage.Get().Where("UUID = ?", params.PlayerID).First(&player)
+
+	gamePlayer := game.NewPlayer(&player)
+	game.Games[params.GameID].JoinPlayer(gamePlayer)
 
 	c.JSON(http.StatusOK, &StatusResponse{
 		Success: true,
