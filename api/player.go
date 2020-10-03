@@ -61,13 +61,13 @@ func registerPlayer(c *gin.Context) {
 // @Tags Player
 // @Accept json
 // @Produce json
-// @Param data body	PlayerStatusRequest true "PlayerStatusRequest Request"
+// @Param data body	PlayerGameRequest true "PlayerGameRequest Request"
 // @Success 200 {object} PlayerStatusResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /player/status [post]
 func playerStatus(c *gin.Context) {
 
-	params := &PlayerStatusRequest{}
+	params := &PlayerGameRequest{}
 
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
@@ -95,4 +95,63 @@ func playerStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, &PlayerStatusResponse{
 		Player: status,
 	})
+}
+
+// PlayerSurrounding godoc
+// @Summary Get a player's surroundings
+// @Description Get's the surroundings of a player in a game, outside of fog of war
+// @Tags Player
+// @Accept json
+// @Produce json
+// @Param data body	PlayerGameRequest true "PlayerGameRequest Request"
+// @Success 200 {object} PlayerSurroundingResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /player/surroundings [post]
+func playerSurrounding(c *gin.Context) {
+
+	params := &PlayerGameRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read uri param`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	var player *game.Player
+	for _, p := range game.Games[params.GameID].Players {
+		if p.ID == params.PlayerID {
+			player = p
+		}
+	}
+
+	distances := &PlayerSurroundingResponse{}
+	board := game.Games[params.GameID]
+
+	for _, c := range board.Creeps {
+		if player.DistanceFrom(c) <= board.FOWDistance {
+			distances.Creep = append(distances.Creep, c)
+		}
+	}
+
+	for _, p := range board.Players {
+		if player.ID == p.ID {
+			continue
+		}
+
+		if player.DistanceFrom(p) <= board.FOWDistance {
+			distances.Players = append(distances.Players, p)
+		}
+	}
+
+	c.JSON(http.StatusOK, &distances)
 }

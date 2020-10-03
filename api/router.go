@@ -47,6 +47,7 @@ func SetupRouter() (r *gin.Engine) {
 			player.POST("/register", registerPlayer)
 
 			player.POST("/status", playerStatus)
+			player.POST("/surroundings", playerSurrounding)
 			player.POST("/inventory")
 		}
 

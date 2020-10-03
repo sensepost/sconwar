@@ -33,7 +33,7 @@ func (p *Creep) GetPosition() (int, int) {
 func (c *Creep) IsInRangeOf(o hasPosition) bool {
 	distance := distanceBetween(o, c.Position)
 
-	if distance <= 2 {
+	if distance <= AttackRange {
 		return true
 	}
 

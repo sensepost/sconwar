@@ -23,12 +23,12 @@ func (r *RegisterPlayerRequest) Validation() error {
 	return nil
 }
 
-type PlayerStatusRequest struct {
+type PlayerGameRequest struct {
 	GameID   string `json:"game_id" binding:"required,uuid" example:"1df69d53-3468-43df-a43b-a9c674240cab"`
 	PlayerID string `json:"player_id" binding:"required,uuid" example:"6d950e36-b82b-4253-93d7-faa63d3a0e63"`
 }
 
-func (r *PlayerStatusRequest) Validation() error {
+func (r *PlayerGameRequest) Validation() error {
 
 	var player storage.Player
 	res := storage.Storage.Get().Where("UUID = ?", r.PlayerID).First(&player)

@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+	"math"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -8,11 +10,13 @@ import (
 
 // Board is the game board
 type Board struct {
-	ID      string
-	SizeX   int
-	SizeY   int
-	Creeps  []*Creep
-	Players []*Player
+	ID          string
+	SizeX       int
+	SizeY       int
+	FOWDistance float64
+	Creeps      []*Creep
+	Players     []*Player
+
 	Created time.Time
 	Started time.Time
 }
@@ -27,11 +31,26 @@ func NewBoard(id string) *Board {
 		Created: time.Now(),
 	}
 
+	b.setFowDistance()
+
+	fmt.Println(b.FOWDistance)
+
 	for i := 0; i <= CreepCount; i++ {
 		b.Creeps = append(b.Creeps, NewCreep())
 	}
 
 	return b
+}
+
+// setFowDistance calculates the visible fog of war distance
+func (b *Board) setFowDistance() {
+
+	first := math.Pow(float64(BoardX), 2)
+	second := math.Pow(float64(BoardY), 2)
+
+	distance := math.Sqrt(first + second)
+
+	b.FOWDistance = distance / 100 * FOWPercent
 }
 
 // JoinPlayer joins a new human player to the board

@@ -10,3 +10,8 @@ type NewPlayerResponse struct {
 type PlayerStatusResponse struct {
 	Player *game.Player
 }
+
+type PlayerSurroundingResponse struct {
+	Creep   []*game.Creep
+	Players []*game.Player
+}

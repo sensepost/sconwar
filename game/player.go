@@ -28,3 +28,7 @@ func (p *Player) Move() {
 func (p *Player) GetPosition() (int, int) {
 	return p.Position.GetPosition()
 }
+
+func (c *Player) DistanceFrom(o hasPosition) float64 {
+	return distanceBetween(o, c.Position)
+}
