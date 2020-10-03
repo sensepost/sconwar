@@ -66,7 +66,7 @@ func (b *Board) Run() {
 		log.Info().
 			Str("board.id", b.ID).
 			Int("creep.count", len(b.aliveCreep())).
-			Int("player.count", len(b.Players)).
+			Int("player.count", len(b.alivePlayers())).
 			Msg("game stats")
 
 		b.moveAndAttackCreep()
