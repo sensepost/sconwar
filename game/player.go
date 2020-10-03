@@ -11,7 +11,7 @@ type Player struct {
 	ID       string
 	Health   uint
 	Position *Position
-	Actions  chan Action `json:"-"`
+	Actions  chan Action `json:"-" swaggerignore:"true"`
 }
 
 func NewPlayer(p *storage.Player) *Player {

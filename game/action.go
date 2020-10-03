@@ -13,15 +13,13 @@ const (
 )
 
 type Action struct {
-	Player Player
 	Action Actions
 	X      int
 	Y      int
 }
 
-func NewAction(player Player, action Actions) *Action {
+func NewAction(action Actions) *Action {
 	return &Action{
-		Player: player,
 		Action: action,
 	}
 }
@@ -31,11 +29,11 @@ func (a *Action) SetXY(x int, y int) {
 	a.Y = y
 }
 
-func (a *Action) Execute() {
+func (a *Action) Execute(player *Player) {
 	switch a.Action {
 	case Move:
 		log.Info().Str("action", "move").Msg("executing a move command")
-		a.Player.MoveTo(a.X, a.Y)
+		player.MoveTo(a.X, a.Y)
 		break
 	}
 }

@@ -75,7 +75,7 @@ func (b *Board) Run() {
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
 
-			b.processPlayerActions(ctx, *p)
+			b.processPlayerActions(ctx, p)
 		}
 
 		// todo: cleanup dead creep/people
@@ -143,7 +143,7 @@ func (b *Board) moveAndAttackCreep() {
 }
 
 // processPlayerActions executes the actions for a player
-func (b *Board) processPlayerActions(ctx context.Context, p Player) {
+func (b *Board) processPlayerActions(ctx context.Context, p *Player) {
 
 	// only execute the max number of actions
 	for i := 0; i < RoundMoves; i++ {
@@ -151,7 +151,7 @@ func (b *Board) processPlayerActions(ctx context.Context, p Player) {
 		case <-ctx.Done():
 			return
 		case action := <-p.Actions:
-			action.Execute()
+			action.Execute(p)
 		}
 	}
 }

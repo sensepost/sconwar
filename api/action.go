@@ -44,7 +44,7 @@ func moveAction(c *gin.Context) {
 		}
 	}
 
-	action := game.NewAction(*player, game.Move)
+	action := game.NewAction(game.Move)
 	action.SetXY(params.X, params.Y)
 
 	if err := player.AddAction(*action); err != nil {
