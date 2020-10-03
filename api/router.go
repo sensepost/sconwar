@@ -41,8 +41,8 @@ func SetupRouter() (r *gin.Engine) {
 
 		player := api.Group("/player")
 		{
-			player.GET("/")
-			player.POST("/register")
+			player.POST("/status")
+			player.POST("/register", registerPlayer)
 		}
 	}
 

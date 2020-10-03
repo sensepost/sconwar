@@ -10,6 +10,7 @@ import (
 
 	"github.com/sensepost/sconwar/api"
 	"github.com/sensepost/sconwar/game"
+	"github.com/sensepost/sconwar/storage"
 )
 
 func main() {
@@ -18,7 +19,8 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	//Game loop
+	storage.InitDb()
+
 	game.Setup()
 	api.SetupRouter().Run(":8080")
 }
