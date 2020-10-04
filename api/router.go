@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/sensepost/sconwar/docs" // import auto generated docs
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -19,6 +20,7 @@ import (
 // SetupRouter configures the HTTP routes we have
 func SetupRouter() (r *gin.Engine) {
 	r = gin.Default()
+	r.Use(cors.Default())
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
@@ -58,6 +60,8 @@ func SetupRouter() (r *gin.Engine) {
 			action.POST("/pickup")
 		}
 	}
+
+	r.Static("/static", "./static")
 
 	return
 }
