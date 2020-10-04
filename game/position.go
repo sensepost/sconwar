@@ -8,6 +8,8 @@ type Position struct {
 	Y int
 }
 
+// NewPosition returns a new position.
+// The position itself is random
 func NewPosition() *Position {
 
 	x := rand.Intn(BoardX)
@@ -19,10 +21,13 @@ func NewPosition() *Position {
 	}
 }
 
+// GetPosition returns the x, y of a position
 func (p *Position) GetPosition() (int, int) {
 	return p.X, p.Y
 }
 
+// MoveRandom moves to a random position for a
+// specific distance
 func (p *Position) MoveRandom(distance int) {
 
 	if distance > BoardX || distance > BoardY {
@@ -47,6 +52,7 @@ func (p *Position) MoveRandom(distance int) {
 
 }
 
+// MoveTo moves to a specific x, y
 func (p *Position) MoveTo(x int, y int) {
 
 	p.X = x
@@ -55,6 +61,8 @@ func (p *Position) MoveTo(x int, y int) {
 	p.floorAndCeilPosition()
 }
 
+// floorAndCeilPosition ensures that the current x, y
+// is in bounds.
 func (p *Position) floorAndCeilPosition() {
 
 	// x

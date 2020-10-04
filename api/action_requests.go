@@ -8,11 +8,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// ActionGamePlayerRequest is a request with the game and player is
 type ActionGamePlayerRequest struct {
 	GameID   string `json:"game_id" binding:"required,uuid" example:"1df69d53-3468-43df-a43b-a9c674240cab"`
 	PlayerID string `json:"player_id" binding:"required,uuid" example:"6d950e36-b82b-4253-93d7-faa63d3a0e63"`
 }
 
+// Validation validates request values
 func (r *ActionGamePlayerRequest) Validation() error {
 
 	if game.Games[r.GameID] == nil {
@@ -30,12 +32,14 @@ func (r *ActionGamePlayerRequest) Validation() error {
 	return nil
 }
 
+// ActionMoveRequest is a request to move a player
 type ActionMoveRequest struct {
 	GamePlayerIDs ActionGamePlayerRequest `json:"game_player_id" binding:"required"`
 	X             int                     `json:"x" binding:"required" example:"10"`
 	Y             int                     `json:"y" binding:"required" example:"9"`
 }
 
+// Validation validates request values
 func (r *ActionMoveRequest) Validation() error {
 
 	if err := r.GamePlayerIDs.Validation(); err != nil {

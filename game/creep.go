@@ -13,8 +13,8 @@ type Creep struct {
 	ID       string
 }
 
+// NewCreep returns a new initialised Creep
 func NewCreep() *Creep {
-
 	return &Creep{
 		Position: NewPosition(),
 		ID:       uuid.New().String(),
@@ -22,14 +22,17 @@ func NewCreep() *Creep {
 	}
 }
 
+// Move moves a creep in a random position
 func (c *Creep) Move() {
 	c.Position.MoveRandom(1)
 }
 
-func (p *Creep) GetPosition() (int, int) {
-	return p.Position.GetPosition()
+// GetPosition gets the x, y position of a creep
+func (c *Creep) GetPosition() (int, int) {
+	return c.Position.GetPosition()
 }
 
+// IsInRangeOf checks if something is within attack range
 func (c *Creep) IsInRangeOf(o hasPosition) bool {
 	distance := distanceBetween(o, c.Position)
 
@@ -40,6 +43,9 @@ func (c *Creep) IsInRangeOf(o hasPosition) bool {
 	return false
 }
 
+// TakeDamage deals damage to the creep.
+// An argument of -1 will make the damage taken
+// random with a ceil of 30
 func (c *Creep) TakeDamage(dmg int) (int, int) {
 
 	if dmg > 100 {
