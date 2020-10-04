@@ -6,13 +6,18 @@ import (
 	"github.com/sensepost/sconwar/storage"
 )
 
+// ActionChannel is the channel a player will recieve actions on.
+// This is actually a workaround as detailed in:
+//	https://github.com/swaggo/swag/issues/680#issue-602785690
+type ActionChannel chan Action
+
 // Player represents a player of the game
 type Player struct {
 	Name     string
 	ID       string
 	Health   uint
 	Position *Position
-	Actions  chan Action `json:"-" swaggerignore:"true"`
+	Actions  ActionChannel `json:"-"`
 }
 
 // NewPlayer starts a new Player instance

@@ -4,25 +4,25 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Actions is an Action that can be invoked
-type Actions int
+// ActionType is an Action that can be invoked
+type ActionType int
 
 // Supported Actions
 const (
-	Move Actions = iota
+	Move ActionType = iota
 	Attack
 	Pickup
 )
 
 // Action is the action that can be taken by a player
 type Action struct {
-	Action Actions
+	Action ActionType
 	X      int
 	Y      int
 }
 
 // NewAction starts a new action instance
-func NewAction(action Actions) *Action {
+func NewAction(action ActionType) *Action {
 	return &Action{
 		Action: action,
 	}
