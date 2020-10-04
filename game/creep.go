@@ -15,6 +15,7 @@ type Creep struct {
 
 // NewCreep returns a new initialised Creep
 func NewCreep() *Creep {
+	// todo: choose random names for creep
 	return &Creep{
 		Position: NewPosition(),
 		ID:       uuid.New().String(),

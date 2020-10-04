@@ -50,3 +50,22 @@ func (r *ActionMoveRequest) Validation() error {
 
 	return nil
 }
+
+// ActionAttackRequest is a request to move a player
+type ActionAttackRequest struct {
+	GamePlayerIDs ActionGamePlayerRequest `json:"game_player_id" binding:"required"`
+	X             int                     `json:"x" binding:"required" example:"10"`
+	Y             int                     `json:"y" binding:"required" example:"9"`
+}
+
+// Validation validates request values
+func (r *ActionAttackRequest) Validation() error {
+
+	if err := r.GamePlayerIDs.Validation(); err != nil {
+		return err
+	}
+
+	// todo: validate distance
+
+	return nil
+}

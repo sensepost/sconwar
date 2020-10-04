@@ -151,7 +151,7 @@ func (b *Board) processPlayerActions(ctx context.Context, p *Player) {
 		case <-ctx.Done():
 			return
 		case action := <-p.Actions:
-			action.Execute(p)
+			action.Execute(p, b)
 		}
 	}
 }

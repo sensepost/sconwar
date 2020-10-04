@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"math/rand"
 
 	"github.com/sensepost/sconwar/storage"
 )
@@ -15,7 +16,7 @@ type ActionChannel chan Action
 type Player struct {
 	Name     string
 	ID       string
-	Health   uint
+	Health   int
 	Position *Position
 	Actions  ActionChannel `json:"-"`
 }
@@ -61,4 +62,26 @@ func (p *Player) GetPosition() (int, int) {
 // DistanceFrom calculates the distance from another entity
 func (p *Player) DistanceFrom(o hasPosition) float64 {
 	return distanceBetween(o, p.Position)
+}
+
+// TakeDamage deals damage to the creep.
+// An argument of -1 will make the damage taken
+// random with a ceil of 30
+func (p *Player) TakeDamage(dmg int) (int, int) {
+
+	if dmg > 100 {
+		dmg = -1
+	}
+
+	if dmg == -1 {
+		dmg = rand.Intn(30)
+	}
+
+	p.Health -= dmg
+
+	if p.Health < 0 {
+		p.Health = 0
+	}
+
+	return dmg, p.Health
 }

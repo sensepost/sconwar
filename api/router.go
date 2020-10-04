@@ -53,7 +53,7 @@ func SetupRouter() (r *gin.Engine) {
 
 		action := api.Group("/action")
 		{
-			action.POST("/attack")
+			action.POST("/attack", attackAction)
 			action.POST("/move", moveAction)
 			action.POST("/pickup")
 		}
