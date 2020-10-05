@@ -12,13 +12,17 @@ type Position struct {
 // The position itself is random
 func NewPosition() *Position {
 
-	x := rand.Intn(BoardX-1)
-	y := rand.Intn(BoardY-1)
+	x := rand.Intn(BoardX)
+	y := rand.Intn(BoardY)
 
-	return &Position{
+	p := &Position{
 		X: x,
 		Y: y,
 	}
+
+	p.floorAndCeilPosition()
+
+	return p
 }
 
 // GetPosition returns the x, y of a position
@@ -70,8 +74,8 @@ func (p *Position) floorAndCeilPosition() {
 		p.X = BoardX
 	}
 
-	if p.X < 0 {
-		p.X = 0
+	if p.X < 1 {
+		p.X = 1
 	}
 
 	if p.Y > BoardY {
@@ -79,7 +83,7 @@ func (p *Position) floorAndCeilPosition() {
 	}
 
 	// y
-	if p.Y < 0 {
-		p.Y = 0
+	if p.Y < 1 {
+		p.Y = 1
 	}
 }
