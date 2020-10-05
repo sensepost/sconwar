@@ -17,50 +17,53 @@
     currentGameUUID = gameID;
   }
 
-  $: if (currentGameUUID != "") {
-    getGameDetails();
+  let cells = [];
+
+  function updateGameBoard(data) {
+    let x = data.game.size_x;
+    let y = data.game.size_y;
+
+    let c = [];
+    for (var i = 0; i < x; i++) {
+      c.push(
+        Array.apply(null, Array(y)).map(function () {
+          return 0;
+        })
+      );
+    }
+    if (data.game.creeps) {
+      data.game.creeps.forEach(function (cc) {
+        c[cc.position.x][cc.position.y] = 1;
+      });
+    }
+    if (data.game.players) {
+      data.game.players.forEach(function (cc) {
+        c[cc.position.x][cc.position.y] = 2;
+      });
+    }
+    if (data.game.powerups) {
+      data.game.powerups.forEach(function (cc) {
+        c[cc.position.x][cc.position.y] = "P" + cc.type;
+      });
+    }
+    cells = c;
   }
 
-  let cells = [];
   async function getGameDetails() {
     const res = await fetch(`${baseURL}/api/game/get/${currentGameUUID}`);
     const data = await res.json();
 
     if (res.ok) {
-      let x = data.game.size_x;
-      let y = data.game.size_y;
-
-      let c = [];
-      for (var i = 0; i < x; i++) {
-        var a = Array.apply(null, Array(y)).map(function (
-          currentValue,
-          mapIndex
-        ) {
-          return 0;
-        });
-        c.push(a);
-      }
-      if (data.game.creeps) {
-        data.game.creeps.forEach(function (cc) {
-          c[cc.position.x][cc.position.y] = 1;
-        });
-      }
-      if (data.game.players) {
-        data.game.players.forEach(function (cc) {
-          c[cc.position.x][cc.position.y] = 2;
-        });
-      }
-      if (data.game.powerups) {
-        data.game.powerups.forEach(function (cc) {
-          c[cc.position.x][cc.position.y] = 'P' + cc.type;
-        });
-      }
-      cells = c;
-
       return data;
     } else {
       throw new Error(text);
     }
+  }
+
+  function redrawGameBoard() {
+    getGameDetails().then(function (data) {
+      updateGameBoard(data);
+    });
   }
 
   function getCellClass(currentCellValue) {
@@ -68,11 +71,10 @@
       return "creep";
     } else if (currentCellValue == 2) {
       return "human";
-    } else if (typeof(currentCellValue) == 'string') {
-      if (currentCellValue[0] == 'P') {
+    } else if (typeof currentCellValue == "string") {
+      if (currentCellValue[0] == "P") {
         return "powerup";
       }
-      
     }
     return "open";
   }
@@ -90,11 +92,15 @@
 
   var intervalPointer;
   $: if (currentGameUUID != "") {
-    intervalPointer = setInterval(() => getGameDetails(), 1000);
+    intervalPointer = setInterval(() => redrawGameBoard(), 1000);
   } else {
     if (intervalPointer) {
       clearInterval(intervalPointer);
     }
+  }
+
+  $: if (currentGameUUID != "") {
+    redrawGameBoard();
   }
 </script>
 
@@ -173,7 +179,9 @@
       <button on:click={newGame}>Start New Game</button>
     {/if}
   {:catch error}
-    <p style="color: red">Failed to get game list (check that the server is running)</p>
+    <p style="color: red">
+      Failed to get game list (check that the server is running)
+    </p>
   {/await}
 
   <div class="board">
