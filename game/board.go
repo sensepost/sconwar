@@ -39,8 +39,10 @@ func NewBoard(id string) *Board {
 		b.Creeps = append(b.Creeps, NewCreep())
 	}
 
-	for i := 0; i <= MaxPowerUpCount; i++ {
-		b.PowerUps = append(b.PowerUps, NewPowerUp())
+	for i := 0; i <= PowerUpMax; i++ {
+		if pup := NewPowerUp(); pup != nil {
+			b.PowerUps = append(b.PowerUps, pup)
+		}
 	}
 
 	return b
@@ -69,13 +71,20 @@ func (b *Board) Run() {
 
 	for {
 
-		// todo: reseed powerups if needed
-
 		log.Info().
 			Str("board.id", b.ID).
 			Int("creep.count", len(b.aliveCreep())).
 			Int("player.count", len(b.alivePlayers())).
 			Msg("game stats")
+
+		// respawn powerups. this is a chance-based thing so everytime
+		// we get below the max amount of powerups we will try and
+		// spawn new ones.
+		if len(b.PowerUps) < PowerUpMax {
+			if pup := NewPowerUp(); pup != nil {
+				b.PowerUps = append(b.PowerUps, pup)
+			}
+		}
 
 		b.moveAndAttackCreep()
 

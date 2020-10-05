@@ -23,8 +23,13 @@ type PowerUp struct {
 	Position *Position   `json:"position"`
 }
 
-// NewPowerUp creates a new random powerup
+// NewPowerUp creates a new random powerup.
+// This is a chance based function and can return nil.
 func NewPowerUp() *PowerUp {
+
+	if rand.Intn(100) > PowerUpChance {
+		return nil
+	}
 
 	// todo: add a chance that the powerup wont spawn,
 	// say by setting an Invalid property when
