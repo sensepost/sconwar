@@ -150,10 +150,6 @@ func (b *Board) moveAndAttackCreep() {
 			}
 
 			if creep.IsInRangeOf(target) {
-
-				// todo: limit moves. atm the creep will
-				// shoot all others in range
-
 				dmg, h := target.TakeDamage(-1)
 				log.Warn().
 					Str("game", b.ID).
@@ -166,6 +162,7 @@ func (b *Board) moveAndAttackCreep() {
 				if h == 0 {
 					log.Error().Str("target.id", target.ID).Msg("creep has been killed!")
 				}
+				break
 			}
 		}
 	}

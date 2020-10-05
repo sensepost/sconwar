@@ -12,8 +12,8 @@ type Position struct {
 // The position itself is random
 func NewPosition() *Position {
 
-	x := rand.Intn(BoardX)
-	y := rand.Intn(BoardY)
+	x := rand.Intn(BoardX-1)
+	y := rand.Intn(BoardY-1)
 
 	return &Position{
 		X: x,

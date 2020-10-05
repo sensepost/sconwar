@@ -29,3 +29,6 @@ windows:
 
 integrity:
 	cd $(BIN_DIR) && shasum *
+
+test:
+	go test  ./...
