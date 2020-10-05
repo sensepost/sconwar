@@ -14,3 +14,8 @@ type hasInRange interface {
 type takesDamage interface {
 	TakeDamange(int)
 }
+
+// usesPowerUps indicates that the entity can use power ups
+type usesPowerUps interface {
+	GetPowerUp(PowerUp)
+}

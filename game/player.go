@@ -14,10 +14,12 @@ type ActionChannel chan Action
 
 // Player represents a player of the game
 type Player struct {
-	Name     string        `json:"name"`
-	ID       string        `json:"id"`
-	Health   int           `json:"health"`
+	Name   string `json:"name"`
+	ID     string `json:"id"`
+	Health int    `json:"health"`
+
 	Position *Position     `json:"position"`
+	PowerUps []PowerUp     `json:"powerups"`
 	Actions  ActionChannel `json:"-"`
 }
 
@@ -84,4 +86,9 @@ func (p *Player) TakeDamage(dmg int) (int, int) {
 	}
 
 	return dmg, p.Health
+}
+
+// GivePowerUp adds a powerup to the player
+func (p *Player) GivePowerUp(powerup PowerUp) {
+	p.PowerUps = append(p.PowerUps, powerup)
 }

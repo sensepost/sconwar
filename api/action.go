@@ -112,3 +112,58 @@ func attackAction(c *gin.Context) {
 		Success: true,
 	})
 }
+
+// PickupAction godoc
+// @Summary Pick up an item
+// @Description Pick's an item up and places it in the players inventory
+// @Tags Action
+// @Accept json
+// @Produce json
+// @Param data body	ActionPickupRequest true "ActionPickupRequest Request"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /action/pickup [post]
+func pickupAction(c *gin.Context) {
+
+	params := &ActionPickupRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read post params`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	var player *game.Player
+	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
+		if p.ID == params.GamePlayerIDs.PlayerID {
+			player = p
+		}
+	}
+
+	// todo: check that the powerup is in range
+
+	action := game.NewAction(game.Pickup)
+	action.SetXY(params.X, params.Y)
+
+	if err := player.AddAction(*action); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to buffer new action`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, &StatusResponse{
+		Success: true,
+	})
+}

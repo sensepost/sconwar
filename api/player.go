@@ -137,6 +137,12 @@ func playerSurrounding(c *gin.Context) {
 	distances := &PlayerSurroundingResponse{}
 	board := game.Games[params.GameID]
 
+	for _, u := range board.PowerUps {
+		if player.DistanceFrom(u) <= board.FOWDistance {
+			distances.PowerUps = append(distances.PowerUps, u)
+		}
+	}
+
 	for _, c := range board.Creeps {
 		if player.DistanceFrom(c) <= board.FOWDistance {
 			distances.Creep = append(distances.Creep, c)

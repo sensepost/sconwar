@@ -9,4 +9,5 @@ const (
 	AttackRange     = 1
 	RoundMoves      = 2
 	MaxRoundSeconds = 30
+	MaxPowerUpCount = 5
 )

@@ -10,12 +10,14 @@ import (
 
 // Board is the game board
 type Board struct {
-	ID          string    `json:"id"`
-	SizeX       int       `json:"size_x"`
-	SizeY       int       `json:"size_y"`
-	FOWDistance float64   `json:"fow_distance"`
-	Creeps      []*Creep  `json:"creeps"`
-	Players     []*Player `json:"players"`
+	ID          string  `json:"id"`
+	SizeX       int     `json:"size_x"`
+	SizeY       int     `json:"size_y"`
+	FOWDistance float64 `json:"fow_distance"`
+
+	Creeps   []*Creep   `json:"creeps"`
+	Players  []*Player  `json:"players"`
+	PowerUps []*PowerUp `json:"powerups"`
 
 	Created time.Time `json:"created"`
 	Started time.Time `json:"started"`
@@ -35,6 +37,10 @@ func NewBoard(id string) *Board {
 
 	for i := 0; i <= CreepCount; i++ {
 		b.Creeps = append(b.Creeps, NewCreep())
+	}
+
+	for i := 0; i <= MaxPowerUpCount; i++ {
+		b.PowerUps = append(b.PowerUps, NewPowerUp())
 	}
 
 	return b
@@ -63,6 +69,8 @@ func (b *Board) Run() {
 
 	for {
 
+		// todo: reseed powerups if needed
+
 		log.Info().
 			Str("board.id", b.ID).
 			Int("creep.count", len(b.aliveCreep())).
@@ -85,6 +93,27 @@ func (b *Board) Run() {
 			return
 		}
 	}
+}
+
+// RemovePowerUp removes a powerup from the board
+func (b *Board) RemovePowerUp(powerup *PowerUp) {
+
+	// copy the slice to be trimmed
+	s := b.PowerUps
+
+	for i, p := range b.PowerUps {
+		if p != powerup {
+			continue
+		}
+
+		log.Info().Msg("removing powerup from board")
+
+		s[i] = s[len(s)-1]
+		b.PowerUps = s[:len(s)-1]
+
+		break
+	}
+
 }
 
 func (b *Board) aliveCreep() (a []*Creep) {

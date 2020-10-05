@@ -36,6 +36,9 @@ func (a *Action) SetXY(x int, y int) {
 
 // Execute executes an action
 func (a *Action) Execute(player *Player, board *Board) {
+
+	// todo: this may be racy? especially for powerup pickups
+
 	switch a.Action {
 	case Move:
 		log.Info().Str("action", "move").Msg("executing a move command")
@@ -63,5 +66,22 @@ func (a *Action) Execute(player *Player, board *Board) {
 
 		// todo: log this in the player/creep structs.
 		// todo: resolve names for the creep / player that is attacked
+		break
+	case Pickup:
+		log.Info().Str("action", "pickup").Msg("executing a pickup command")
+
+		for _, u := range board.PowerUps {
+			ux, uy := u.GetPosition()
+			if ux == a.X && uy == a.Y {
+				log.Info().Str("id", u.ID).Msg("found target pickup entity")
+				player.GivePowerUp(*u)
+				board.RemovePowerUp(u)
+			}
+		}
+
+		break
+	default:
+		// todo: log this in the game log instead of a panic
+		panic(`no idea how you managed to queue an invalid action, but there you go`)
 	}
 }
