@@ -14,10 +14,10 @@ type ActionChannel chan Action
 
 // Player represents a player of the game
 type Player struct {
-	Name     string
-	ID       string
-	Health   int
-	Position *Position
+	Name     string        `json:"name"`
+	ID       string        `json:"id"`
+	Health   int           `json:"health"`
+	Position *Position     `json:"position"`
 	Actions  ActionChannel `json:"-"`
 }
 

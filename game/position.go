@@ -4,8 +4,8 @@ import "math/rand"
 
 // Position is the position of an entity
 type Position struct {
-	X int
-	Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 // NewPosition returns a new position.

@@ -4,16 +4,16 @@ import "github.com/sensepost/sconwar/game"
 
 // NewGameResponse is a new game response
 type NewGameResponse struct {
-	Created bool
-	UUID    string
+	Created bool   `json:"created"`
+	UUID    string `json:"uuid"`
 }
 
 // AllGamesResponse is a response with all games
 type AllGamesResponse struct {
-	Games []string
+	Games []string `json:"games"`
 }
 
 // GameResponse is a response with a single game
 type GameResponse struct {
-	Game *game.Board
+	Game *game.Board `json:"game"`
 }

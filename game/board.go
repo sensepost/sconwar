@@ -10,15 +10,15 @@ import (
 
 // Board is the game board
 type Board struct {
-	ID          string
-	SizeX       int
-	SizeY       int
-	FOWDistance float64
-	Creeps      []*Creep
-	Players     []*Player
+	ID          string    `json:"id"`
+	SizeX       int       `json:"size_x"`
+	SizeY       int       `json:"size_y"`
+	FOWDistance float64   `json:"fow_distance"`
+	Creeps      []*Creep  `json:"creeps"`
+	Players     []*Player `json:"players"`
 
-	Created time.Time
-	Started time.Time
+	Created time.Time `json:"created"`
+	Started time.Time `json:"started"`
 }
 
 // NewBoard starts a new Board

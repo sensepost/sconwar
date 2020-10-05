@@ -8,9 +8,9 @@ import (
 
 // Creep is a creep
 type Creep struct {
-	Position *Position
-	Health   int
-	ID       string
+	Position *Position `json:"position"`
+	Health   int       `json:"health"`
+	ID       string    `json:"id"`
 }
 
 // NewCreep returns a new initialised Creep

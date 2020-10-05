@@ -61,7 +61,5 @@ func SetupRouter() (r *gin.Engine) {
 		}
 	}
 
-	r.Static("/static", "./static")
-
 	return
 }
