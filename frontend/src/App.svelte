@@ -10,7 +10,7 @@
   async function newGame() {
     const res = await fetch(`${baseURL}/api/game/new`);
     const data = await res.json();
-    if (res.ok && data.Created) {
+    if (res.ok && data.created) {
       return data;
     } else {
       throw new Error(text);
@@ -31,9 +31,9 @@
     const data = await res.json();
 
     if (res.ok) {
-      //   creeps = data.Game.Creeps;
-      x = data.Game.SizeX;
-      y = data.Game.SizeY;
+      //   creeps = data.game.creeps;
+      x = data.game.size_x;
+      y = data.game.size_y;
 
       let c = [];
       for (var i = 0; i < x; i++) {
@@ -45,14 +45,14 @@
         });
         c.push(a);
       }
-      if (data.Game.Creeps) {
-        data.Game.Creeps.forEach(function (cc) {
-          c[cc.Position.X][cc.Position.Y] = 1;
+      if (data.game.creeps) {
+        data.game.creeps.forEach(function (cc) {
+          c[cc.position.x][cc.position.y] = 1;
         });
       }
-      if (data.Game.Players) {
-        data.Game.Players.forEach(function (cc) {
-          c[cc.Position.X][cc.Position.Y] = 2;
+      if (data.game.players) {
+        data.game.players.forEach(function (cc) {
+          c[cc.position.x][cc.position.y] = 2;
         });
       }
       cells = c;
@@ -182,9 +182,9 @@
   {#await promise}
     <p>...waiting</p>
   {:then number}
-    {#if number.Games}
+    {#if number.games}
       <p>Running Games</p>
-      {#each number.Games as gameUUID}
+      {#each number.games as gameUUID}
         <li>
           <button on:click={() => selectGame(gameUUID)}> {gameUUID} </button>
         </li>
