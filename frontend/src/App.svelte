@@ -2,6 +2,8 @@
   let baseURL = "http://localhost:8080";
   let promise = getGames();
   let currentGameUUID = "";
+  let creeps = [];
+  let players = [];
 
   async function newGame() {
     const res = await fetch(`${baseURL}/api/game/new`);
@@ -31,16 +33,25 @@
         })
       );
     }
+    
     if (data.game.creeps) {
+      creeps = data.game.creeps;
       data.game.creeps.forEach(function (cc) {
         c[cc.position.x][cc.position.y] = 1;
       });
+    }else {
+      creeps = [];
     }
+
     if (data.game.players) {
+      players = data.game.players;
       data.game.players.forEach(function (cc) {
         c[cc.position.x][cc.position.y] = 2;
       });
+    } else {
+      players = [];
     }
+
     if (data.game.powerups) {
       data.game.powerups.forEach(function (cc) {
         c[cc.position.x][cc.position.y] = "P" + cc.type;
@@ -125,13 +136,13 @@
     }
   }
 
-  .cell {
+  .row {
     margin: 1px;
     border: 1px black;
     display: flex;
   }
 
-  .cell1 {
+  .cell {
     width: 10px;
     height: 10px;
     padding: 10px;
@@ -156,7 +167,6 @@
   }
 
   .board {
-    display: flex;
     display: block;
   }
 </style>
@@ -184,13 +194,30 @@
     </p>
   {/await}
 
-  <div class="board">
-    {#each cells as r}
-      <div class="cell">
-        {#each r as c}
-          <div class="cell1 {getCellClass(c)}">{c}</div>
-        {/each}
+  <div style="display:flex">
+    <div class="board">
+      {#each cells as r}
+        <div class="row">
+          {#each r as c}
+            <div class="cell {getCellClass(c)}">{c}</div>
+          {/each}
+        </div>
+      {/each}
+    </div>
+    <div class="sidebar">
+      [Creeps]
+      {#each creeps as cre}
+      <div class="row">
+        {cre.health} - {cre.id}
       </div>
     {/each}
+    [Players]
+      {#each players as ply}
+      <div class="row">
+        {ply.health} - {ply.name} - {ply.id}
+      </div>
+    {/each}
+    </div>
   </div>
+  
 </main>
