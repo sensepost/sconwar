@@ -11,6 +11,9 @@ clean:
 	$(RM) $(BIN_DIR)/sconwar*
 	go clean -x
 
+swagger-install:
+	go get -u github.com/swaggo/swag/cmd/swag
+
 swagger:
 	swag init -g api/router.go
 
