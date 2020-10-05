@@ -111,8 +111,16 @@ func startGame(c *gin.Context) {
 		return
 	}
 
+	game := game.Games[params.GameID]
+	if len(game.Players) <= 0 {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `cannot start game without players`,
+		})
+		return
+	}
+
 	// start the game
-	go game.Games[params.GameID].Run()
+	go game.Run()
 
 	c.JSON(http.StatusOK, &StatusResponse{
 		Success: true,
