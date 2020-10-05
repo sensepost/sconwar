@@ -12,12 +12,9 @@ type Position struct {
 // The position itself is random
 func NewPosition() *Position {
 
-	x := rand.Intn(BoardX)
-	y := rand.Intn(BoardY)
-
 	p := &Position{
-		X: x,
-		Y: y,
+		X: rand.Intn(BoardX),
+		Y: rand.Intn(BoardY),
 	}
 
 	p.floorAndCeilPosition()
