@@ -1,11 +1,7 @@
 <script>
-  export let name = "Joe";
   let baseURL = "http://localhost:8080";
   let promise = getGames();
   let currentGameUUID = "";
-  let creeps = [];
-  let x = 20;
-  let y = 20;
 
   async function newGame() {
     const res = await fetch(`${baseURL}/api/game/new`);
@@ -31,9 +27,8 @@
     const data = await res.json();
 
     if (res.ok) {
-      //   creeps = data.game.creeps;
-      x = data.game.size_x;
-      y = data.game.size_y;
+      let x = data.game.size_x;
+      let y = data.game.size_y;
 
       let c = [];
       for (var i = 0; i < x; i++) {
@@ -55,6 +50,11 @@
           c[cc.position.x][cc.position.y] = 2;
         });
       }
+      if (data.game.powerups) {
+        data.game.powerups.forEach(function (cc) {
+          c[cc.position.x][cc.position.y] = 'P' + cc.type;
+        });
+      }
       cells = c;
 
       return data;
@@ -68,6 +68,11 @@
       return "creep";
     } else if (currentCellValue == 2) {
       return "human";
+    } else if (typeof(currentCellValue) == 'string') {
+      if (currentCellValue[0] == 'P') {
+        return "powerup";
+      }
+      
     }
     return "open";
   }
@@ -91,36 +96,6 @@
       clearInterval(intervalPointer);
     }
   }
-  //   let creepMap = {};
-  //   //   $: creeps.forEach(function (c) {
-  //   //     creepMap[c.Position.x + "," + c.Position.y] = 1;
-  //   //   });
-  //   let humans = [{ x: 11, y: 4 }];
-  //   let humanMap = {};
-  //   humans.forEach(function (c) {
-  //     humanMap[c.x + "," + c.y] = 1;
-  //   });
-  //   console.log(creepMap);
-
-  //   let final = '<div class="board">';
-
-  //   for (var i = 0; i < x; i++) {
-  //     final += '<div class="cell">';
-  //     for (var k = 0; k < y; k++) {
-  //       final += '<div class="cell1">';
-  //       if (creepMap[i + "," + k]) {
-  //         final += "C";
-  //       } else if (humanMap[i + "," + k]) {
-  //         final += "H";
-  //       } else {
-  //         final += "";
-  //       }
-  //       final += "</div>";
-  //     }
-  //     final += "</div>";
-  //   }
-
-  //   final += "</div>";
 </script>
 
 <style>
@@ -153,22 +128,25 @@
   .cell1 {
     width: 10px;
     height: 10px;
-    background: slategray;
     padding: 10px;
     margin: 1px;
     border: 1px black;
   }
 
   .creep {
-    color: red;
+    background-color: red;
   }
 
   .human {
-    color: greenyellow;
+    background-color: greenyellow;
   }
 
-  .human {
-    color: pink;
+  .open {
+    background-color: pink;
+  }
+
+  .powerup {
+    background-color: blueviolet;
   }
 
   .board {
@@ -178,7 +156,7 @@
 </style>
 
 <main>
-  <h1>Hello {name}!</h1>
+  <h1>Welcome to SCONWAR</h1>
   {#await promise}
     <p>...waiting</p>
   {:then number}
@@ -195,7 +173,7 @@
       <button on:click={newGame}>Start New Game</button>
     {/if}
   {:catch error}
-    <p style="color: red">{error.message}</p>
+    <p style="color: red">Failed to get game list (check that the server is running)</p>
   {/await}
 
   <div class="board">
