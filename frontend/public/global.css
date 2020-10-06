@@ -1,63 +1,669 @@
-html, body {
+	html, body {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
+	body {
+		color: #333;
+		margin: 0;
+		box-sizing: border-box;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	}
+
+	a {
+		color: rgb(0,100,200);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
+	a:visited {
+		color: rgb(0,80,160);
+	}
+
+	label {
+		display: block;
+	}
+
+	input, button, select, textarea {
+		font-family: inherit;
+		font-size: inherit;
+		-webkit-padding: 0.4em 0;
+		padding: 0.4em;
+		margin: 0 0 0.5em 0;
+		box-sizing: border-box;
+		border: 1px solid #ccc;
+		border-radius: 2px;
+	}
+
+	input:disabled {
+		color: #ccc;
+	}
+
+	button {
+		color: #333;
+		background-color: #f4f4f4;
+		outline: none;
+	}
+
+	button:disabled {
+		color: #999;
+	}
+
+	button:not(:disabled):active {
+		background-color: #ddd;
+	}
+
+	button:focus {
+		border-color: #666;
+	}
+
+	/** GAME STYLING **/
+
+	.creep {
+		-webkit-mask-image: url('./images/spaceinvader.svg');
+		mask-image: url('./images/spaceinvader.svg');
+	}
+
+	.powerup {
+		background: url('./images/mushroom.svg');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+
+	.player {
+		background: url('./images/bomberman.svg');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+
+	.open {
+		background: url('./images/empty.svg');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+
+	.hi {
+		background-color: green;
+	}
+
+	.med {
+		background-color: orange;
+	}
+
+	.low {
+		background-color: red;
+	}
+
+	/** LOADING SCREEN **/
+	#movetxt {
+		position: relative;
+		top: 300px;
+		height: 200px;
+		-webkit-animation: moving 5s;
+		animation: moving 5s;
+		color: black;
+	}
+			
+	@-webkit-keyframes moving {
+		from {top: 0px;}
+		to {top: 300px;}
+	}
+
+	@keyframes moving {
+		from {top: 0px;}
+		to {top: 300px;}
+	}
+
+   /** GAME BOY STUFF **/
+  .gb-body {
+	background-color: rgb(3,142,159);
+	border: 3px solid rgb(14,100,120);
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	border-bottom-left-radius: 50% 30px;
+	border-bottom-right-radius: 50% 30px;
+	height: 965px;
+	width: 800px;
+	top: 20px;
+	left: 10px;
+	position: absolute;
+	z-index: -1;
+  }
+
+  .power-button.on {
+	background-color: rgb(54,58,61);
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	box-shadow: 1px 1px black;
+	height: 15px;
+	width: 25px;
 	position: relative;
-	width: 100%;
-	height: 100%;
-}
+	margin-left: auto;
+	margin-right: auto;
+	top: -7px;
+	left: -220px;
+  }		
 
-body {
-	color: #333;
-	margin: 0;
-	padding: 8px;
+  .power-button {
+	background-color: rgb(54,58,61);
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	box-shadow: 1px 1px black;
+	height: 15px;
+	width: 25px;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	top: -7px;
+	left: -245px;
+  }	
+  
+  .power-box {
+  /*   background-color: blue; */
+	top: 78px;
+	left: 9px;
+	height: 22px;
+	position: absolute;
+  }
+  
+  .power-light {
+	background-color: black;
+	position: relative;
+	left: 1px;
+	height: 10px;
+	width: 10px;
+	border-radius: 50%;
+  }
+
+  .power-light.on {
+	background-color: red;
+	position: relative;
+	left: 1px;
+	height: 10px;
+	width: 10px;
+	border-radius: 50%;
+  }
+  
+  .power-light:hover {
+	background-color: red;
+  }
+  
+  .power-status {
+	color: darkgray;
+	font-weight: bold;
+	line-height: .5;
+	position: absolute;
+	right: 1px;
+	top: 0px;
+	transform: scaleY(.5);
+  }
+  
+  .power-text {
+	color: darkgray;
+	font-family: "Gill Sans";
+	font-size: xx-small;
+  }
+  
+  .screen-box {
+	background-color: rgb(54,58,61);
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	border-bottom-left-radius: 50% 15px;
+	border-bottom-right-radius: 50% 15px;
+	box-shadow: 1px 1px black;
+	height: 760px;
+	width: 750px;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	top: 17px;
+  }
+    
+  .screen-display {
+	background-color: lightgray;
+	border: 5px solid black;
+	border-radius: 3px;
+	box-shadow: inset 0 0 10px gray;
+	height: 670px;
+	width: 655px;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	top: 25px;
+	text-align: center;
+  }
+  
+  .screen-logo {
+	background-image: linear-gradient(to right, blue 19%, green, magenta 45%, red, yellow 75%);
+	-webkit-background-clip: text;
+	background-clip: text; 
+	color: transparent;
+	font: italic bold x-large "futura", sans-serif;
+	position: relative;
+	top: 30%;
+	z-index: 1;
+  }
+  
+  .screen-logo-shadow {
+	font: italic bold x-large "futura", sans-serif;
+	position: relative;
+	top: 19px;
+	transform: translateX(1px);
+  }
+  
+  .nintendo-logo-screen {
+	font-family: "Gill Sans", sans-serif;
+	font-weight: bold;
+	font-size: small;
+	position: relative;
+	margin-top: 30px;
+  }
+  
+  .gameboy-color-logo {
+	position: relative;
+	bottom: -43px;
+	height: 30px;
+	margin-left: auto;
+	margin-right: auto;
+	transform: scaleY(1.2);
+	width: 165px;
+  }
+  
+  .logo-gb {
+	color: darkgray;
+	font: italic bold large "futura", sans-serif;
+	position: relative;
+  }
+  
+  .logo-color {
+	display: inline-block;
+	font-family: "Comic Sans MS";
+	font-weight: bold;
+	position: relative;
+  }
+  
+  .logo-color-c {
+	color: mediumvioletred;
+	display: inline-block;
+	transform: scaleY(1.2);
+  }
+  
+  .logo-color-o1 {
+	color: slateblue;
+  }
+  
+  .logo-color-l {
+	color: limegreen;
+	display: inline-block;
+	transform: rotate(-10deg) scaleY(1.1);
+  }
+  
+  .logo-color-o2 {
+	color: yellow;
+  }
+  
+  .logo-color-r {
+	color: teal;
+	display: inline-block;
+	transform: scaleY(1.2);
+  }
+  
+  .nintendo-logo-body {
+	border: 2px solid rgb(0,107,128);
+	border-radius: 10px/50%;
 	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-}
+	color: rgb(0,107,128);
+	font-family: "Gill Sans", sans-serif;
+	font-weight: bold;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 2px;
+	position: relative;
+	text-align: center;
+	top: 40px;
+	height: 25px;
+	width: 100px;
+  }
+  
+  .button-box {
+  /*   background-color: blue; */
+	height: 85px;
+	width: 382px;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	top: 45px;
+  }
+  
+  .arrow-group {
+	height: 85px;
+	width: 85px;
+  /*   background-color: yellow; */
+	position: absolute;
+  }
+  
+  .up-box {
+	background-color: rgb(127,117,116);
+	border-radius: 4px 4px 0 0;
+	box-shadow: 2px 2px 4px black, inset 2px 2px 4px darkgray, -1px -1px 2px black;
+	height: 33%;
+	width: 33%;
+	left: 33%;
+	position: absolute;
+  }
+  
+  .right-box {
+	background-color: rgb(127,117,116);
+	border-radius: 0 4px 4px 0;
+	box-shadow: 2px 2px 4px black, inset 0px 4px 4px -2px darkgray, -1px -1px 2px black;
+	height: 33%;
+	width: 33%;
+	right: 0%;
+	top: 33%;
+	position: absolute;
+  }
+  
+  .down-box {
+	background-color: rgb(127,117,116);
+	border-radius: 0 0 4px 4px;
+	box-shadow: 2px 2px 4px black, inset 4px 0px 4px -2px darkgray, -1px -1px 2px black;
+	height: 34%;
+	width: 33%;
+	bottom: 0%;
+	left: 33%;
+	position: absolute;
+  }
+  
+  .center-box {
+	background-color: rgb(127,117,116);
+	height: 33%;
+	width: 33%;
+	left: 33%;
+	top: 33%;
+	position: absolute;
+  }
+  
+  .left-box {
+	background-color: rgb(127,117,116);
+	border-radius: 4px 0 0 4px;
+	box-shadow: 0px 4px 4px -2px black, inset 2px 2px 4px darkgray, -1px -1px 2px black;
+	height: 33%;
+	width: 33%;
+	top: 33%;
+	position: absolute;
+  }
+  
+  .arrow {
+	height: 0;
+	width: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-bottom: 18px solid rgb(75,70,66);
+	left: 6px;
+	top: 5px;
+	position: absolute;
+	z-index: 1;
+  }
+  
+  .arrow::after {
+	content: "";
+	height: 0;
+	width: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-bottom: 15px solid rgb(89,79,77);
+	left: -7px;
+	top: 3px;
+	position: absolute;
+  }
+  
+  .right {
+	transform: rotate(90deg);
+  }
+  
+  .down {
+	transform: rotate(180deg);
+  }
+  
+  .left {
+	transform: rotate(270deg);
+  }
+  
+  .dent {
+	background-color: rgb(75,70,66);
+	border-radius: 50%;
+	left: 6px;
+	top: 6px;
+	position: absolute;
+	height: 17px;
+	width: 17px;
+  }
+  
+  .dent-highlight {
+	background-color: rgb(155,145,144);
+	border-radius: 50%;
+	box-shadow: 0 0 6px 3px rgb(155,145,144);
+	height: 5px;
+	width: 5px;
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
+  }
+  
+  .ab-button {
+	background-color: rgb(78,70,68);
+	border-radius: 50%;
+	box-shadow: 2px 2px 2px black, inset 2px 2px 2px darkgray, -1px -1px 2px black;
+	font-family: "Gill Sans", sans-serif;
+	color: rgb(55,40,47);
+	text-shadow: 1px 1px 1px rgb(89,79,77);
+	height: 40px;
+	width: 40px;
+	position: absolute;
+  }
+  
+  .a {
+	right: 0px;
+	top: 10px;
+  }
+  
+  .b {
+	bottom: 13px;
+	right: 62px;
+  }
+  
+  .button-text-height {
+	transform: scaleY(2);
+	position: absolute;
+	top: 11px;
+	left: 14px;
+  }
+  
+  .pill-button {
+	background-color: rgb(81,88,80);
+	border-radius: 8px/50%;
+	box-shadow: 2px 2px 2px black, inset 2px 1px 2px darkgray, -1px -1px 2px black;
+	color: rgb(24,152,165);
+	font-family: "Gill Sans", sans-serif;
+	font-size: 10px;
+	text-shadow: 1px 1px rgb(1,127,148), -1px -1px .5px rgb(76,199,215);
+	height: 10px;
+	width: 33px;
+	position: absolute;
+	bottom: 32px;
+  }
+  
+  .button-select {
+	left: 350px;
+  }
+  
+  .button-start {
+	right: 350px;
+  }
+  
+  .select {
+	margin-top: 20px;
+	position: absolute;
+  }
+  
+  .start {
+	margin-top: 20px;
+	left: 4px;
+	position: absolute;
+  }
+  
+  .speaker {
+	top: 820px;
+	left: 638px;
+	position: absolute;
+	transform: skew(0, -10deg);
+  }
+  
+  .row1 {
+	position: relative;
+	top: -8px;
+	left: 10px;
+  }
+  
+  .row2 {
+	position: relative;
+	top: -15px;
+  }
+  
+  .row3 {
+	position: relative;
+	top: -20px;
+	transform: rotate(180deg);
+  }
+  
+  .row4 {
+	position: relative;
+	top: -32px;
+  }
+  
+  .row5 {
+	position: relative;
+	top: -37px;
+	transform: rotate(180deg);
+  }
+  
+  .row6 {
+	position: relative;
+	top: -49px;
+  }
+  
+  .row7 {
+	position: relative;
+	top: -53px;
+	transform: rotate(180deg);
+  }
 
-a {
-	color: rgb(0,100,200);
-	text-decoration: none;
-}
+  .row8 {
+	position: relative;
+	top: -68px;
+  }
 
-a:hover {
-	text-decoration: underline;
-}
+  .row9 {
+	position: relative;
+	top: -70px;
+	transform: rotate(180deg);
+  }
 
-a:visited {
-	color: rgb(0,80,160);
-}
+  .row10 {
+	position: relative;
+	top: -83px;
+  }
 
-label {
-	display: block;
-}
-
-input, button, select, textarea {
-	font-family: inherit;
-	font-size: inherit;
-	-webkit-padding: 0.4em 0;
-	padding: 0.4em;
-	margin: 0 0 0.5em 0;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-	border-radius: 2px;
-}
-
-input:disabled {
-	color: #ccc;
-}
-
-button {
-	color: #333;
-	background-color: #f4f4f4;
-	outline: none;
-}
-
-button:disabled {
-	color: #999;
-}
-
-button:not(:disabled):active {
-	background-color: #ddd;
-}
-
-button:focus {
-	border-color: #666;
-}
+  .row11 {
+	position: relative;
+	top: -87px;
+	transform: rotate(180deg);
+  }
+  
+  .row12 {
+	position: relative;
+	right: 10px;
+	top: -92px;
+	transform: rotate(180deg);
+  }
+  
+  .dot-hole {
+	background-color: black;
+	border-radius: 50%;
+	display: inline-block;
+	height: 6px;
+	width: 6px;
+	margin-right: 10px;
+	position: relative;
+  }
+  
+  .dot-hole::after {
+	content:"";
+	background-color: rgb(3,106,121);
+	border-radius: 50%;
+	height: 6px;
+	width: 6px;
+	position: absolute;
+	top: 0;
+	left: 10px;
+  }
+  
+  .row1 .dot-hole,
+  .row2 .dot-hole,
+  .row4 .dot-hole,
+  .row6 .dot-hole,
+  .row9 .dot-hole,
+  .row11 .dot-hole {
+	box-shadow: 1px 1px 1px rgb(76,199,215);
+  }
+  
+  .row3 .dot-hole,
+  .row5 .dot-hole,
+  .row7 .dot-hole,
+  .row8 .dot-hole,
+  .row10 .dot-hole,
+  .row12 .dot-hole {
+	box-shadow: -1px -1px 1px rgb(76,199,215);
+  }
+  
+  .row1 .dot-hole::before,
+  .row2 .dot-hole::before,
+  .row4 .dot-hole::before,
+  .row6 .dot-hole::before,
+  .row9 .dot-hole::before,
+  .row11 .dot-hole::before {
+	content: "";
+	background-color: rgb(76,199,215);
+	border-radius: 50%;
+	box-shadow: 0 0 1px 1px rgb(76,199,215);
+	display: inline-block;
+	height: 1px;
+	width: 1px;
+	left: 13px;
+	bottom: 1px;
+	position: absolute;
+	z-index: 1;
+  }
+  
+  .row3 .dot-hole::before,
+  .row5 .dot-hole::before,
+  .row7 .dot-hole::before,
+  .row8 .dot-hole::before,
+  .row10 .dot-hole::before,
+  .row12 .dot-hole::before {
+	content: "";
+	background-color: rgb(76,199,215);
+	border-radius: 50%;
+	box-shadow: 0 0 1px 1px rgb(76,199,215);
+	display: inline-block;
+	height: 1px;
+	width: 1px;
+	left: 12px;
+	bottom: 3px;
+	position: absolute;
+	z-index: 1;
+  }
