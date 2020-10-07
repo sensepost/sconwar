@@ -17,6 +17,8 @@
   let left = false;
   let right = false;
 
+  let stream;
+
   function hitButton(button){
     if(button === 'select'){
       select = true;
@@ -53,6 +55,10 @@
 
   function tooglePower(){
     power = !power;
+    currentGameUUID = "";
+    if(!power){
+      location.reload();
+    }
   }
 
   async function newGame() {
@@ -67,6 +73,7 @@
 
   function selectGame(gameID) {
     currentGameUUID = gameID;
+    new Audio('./soundtrack.mp3').play();
   }
 
   let cells = [];
@@ -159,7 +166,6 @@
   function getCellHealthClass(currentCellValue) {
     let s = String(currentCellValue);
     if(s.includes('/')){
-      console.log(s.split("/")[1]);
       return s.split("/")[1];
     }
   }
@@ -232,7 +238,6 @@
 
 <main>
   <div style="position: absolute; left: 1000px; top: 10px;">
-
     <h1>Welcome to SCONWAR</h1>
     {#await promise}
       <p>...waiting</p>
@@ -271,32 +276,6 @@
     </div>
   </div>
 
-  <!-- <div style="display:flex">
-    <div class="board">
-      {#each cells as r}
-        <div class="row">
-          {#each r as c}
-            <div class="cell {getCellImageClass(c)} {getCellHealthClass(c)}"></div>
-          {/each}
-        </div>
-      {/each}
-    </div>
-    <div class="sidebar">
-      [Creeps]
-      {#each creeps as cre}
-      <div class="row">
-        {cre.health} - {cre.id}
-      </div>
-    {/each}
-    [Players]
-      {#each players as ply}
-      <div class="row">
-        {ply.health} - {ply.name} - {ply.id}
-      </div>
-    {/each}
-    </div>
-  </div> -->
-
   <div class="gameboy">
     <div class="{ power ? 'power-button on' : 'power-button' }" on:click={() => tooglePower()}></div>
     <div class="gb-body">
@@ -308,8 +287,7 @@
         </div>  
         <div class="screen-display">
 
-
-          {#if currentGameUUID}
+          {#if currentGameUUID && power}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 {#each cells as r}
@@ -323,8 +301,10 @@
             </div>
           {/if}
 
-          {#if power}
+          {#if power && !currentGameUUID}
             <div id="movetxt">
+              <h3>Welcome to SCONWAR</h3>
+              <br/>
               <img style="height:150px" src='./images/invader.gif'/>
               <br/>
               Click to start

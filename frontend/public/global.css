@@ -65,7 +65,7 @@
 
 	.creep {
 		-webkit-mask-image: url('./images/spaceinvader.svg');
-		mask-image: url('./images/spaceinvader.svg');
+		mask-image: url('./images/spaceinvader.svg'); 
 	}
 
 	.powerup {
@@ -101,7 +101,7 @@
 	/** LOADING SCREEN **/
 	#movetxt {
 		position: relative;
-		top: 300px;
+		top: 200px;
 		height: 200px;
 		-webkit-animation: moving 5s;
 		animation: moving 5s;
@@ -110,13 +110,98 @@
 			
 	@-webkit-keyframes moving {
 		from {top: 0px;}
-		to {top: 300px;}
+		to {top: 200px;}
 	}
 
 	@keyframes moving {
 		from {top: 0px;}
-		to {top: 300px;}
+		to {top: 200px;}
 	}
+
+	/** ANIMATE CREEPERS **/
+	.moveleft {
+		position: relative;
+		top: 0;
+		left:32px;
+		height: 200px;
+		-webkit-animation: movingleft 2s;
+		animation: movingleft 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingleft {
+		from {left: 0px;}
+		to {left: 32px;}
+	}
+
+	@keyframes movingleft {
+		from {left: 0px;}
+		to {left: 32px;}
+	}
+
+	.moveright {
+		position: relative;
+		top: 0;
+		left:-32px;
+		height: 200px;
+		-webkit-animation: movingright 2s;
+		animation: movingright 2s;
+		color: black; 
+	}
+
+	@-webkit-keyframes movingright {
+		from {left: 0px;}
+		to {left: -32px;}
+	}
+
+	@keyframes movingright {
+		from {left: 0px;}
+		to {left: -32px;}
+	}
+
+	.movedown {
+		position: relative;
+		left:0;
+		top: 32px;
+		height: 200px;
+		-webkit-animation: movingdown 2s;
+		animation: movingdown 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingdown {
+		from {top: 0px;}
+		to {top: 32px;}
+	}
+
+	@keyframes movingdown {
+		from {top: 0px;}
+		to {top: 32px;}
+	}
+
+	.moveup {
+		position: relative;
+		left:0;
+		top:-32px;
+		height: 200px;
+		-webkit-animation: movingup 2s;
+		animation: movingup 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingup {
+		from {top: 0px;}
+		to {top: -32px;}
+	}
+
+	@keyframes movingup {
+		from {top: 0px;}
+		to {top: -32px;}
+	}
+
+
+
+
 
    /** GAME BOY STUFF **/
   .gb-body {
@@ -145,7 +230,7 @@
 	margin-left: auto;
 	margin-right: auto;
 	top: -7px;
-	left: -220px;
+	left: -180px;
   }		
 
   .power-button {
@@ -159,7 +244,7 @@
 	margin-left: auto;
 	margin-right: auto;
 	top: -7px;
-	left: -245px;
+	left: -200px;
   }	
   
   .power-box {
