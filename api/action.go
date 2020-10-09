@@ -14,7 +14,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body	ActionMoveRequest true "ActionMoveRequest Request"
-// @Success 200 {object} StatusResponse
+// @Success 201 {object} StatusResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /action/move [post]
 func moveAction(c *gin.Context) {
@@ -55,7 +55,7 @@ func moveAction(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &StatusResponse{
+	c.JSON(http.StatusCreated, &StatusResponse{
 		Success: true,
 	})
 }

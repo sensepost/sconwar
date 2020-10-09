@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body	NewGameRequest true "NewGameRequest"
-// @Success 200 {object} NewGameResponse
+// @Success 201 {object} NewGameResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /game/new [post]
 func newGame(c *gin.Context) {
@@ -42,7 +42,7 @@ func newGame(c *gin.Context) {
 	id := uuid.New().String()
 	game.Games[id] = game.NewBoard(id, params.Name)
 
-	c.JSON(http.StatusOK, &NewGameResponse{
+	c.JSON(http.StatusCreated, &NewGameResponse{
 		Created: true,
 		UUID:    id,
 	})

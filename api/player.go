@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param data body	RegisterPlayerRequest true "RegisterPlayerRequest Request"
-// @Success 200 {object} NewPlayerResponse
+// @Success 201 {object} NewPlayerResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
 // @Router /player/register [post]
@@ -49,7 +49,7 @@ func registerPlayer(c *gin.Context) {
 
 	storage.Storage.Get().Create(newPlayer)
 
-	c.JSON(http.StatusOK, &NewPlayerResponse{
+	c.JSON(http.StatusCreated, &NewPlayerResponse{
 		Created: true,
 		UUID:    id,
 	})
