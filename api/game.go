@@ -15,12 +15,32 @@ import (
 // @Tags Game
 // @Accept json
 // @Produce json
+// @Param data body	NewGameRequest true "NewGameRequest"
 // @Success 200 {object} NewGameResponse
-// @Router /game/new [get]
+// @Failure 400 {object} ErrorResponse
+// @Router /game/new [post]
 func newGame(c *gin.Context) {
 
+	params := &NewGameRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read post params`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
 	id := uuid.New().String()
-	game.Games[id] = game.NewBoard(id)
+	game.Games[id] = game.NewBoard(id, params.Name)
 
 	c.JSON(http.StatusOK, &NewGameResponse{
 		Created: true,

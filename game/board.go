@@ -11,6 +11,7 @@ import (
 // Board is the game board
 type Board struct {
 	ID          string  `json:"id"`
+	Name        string  `json:"name"`
 	SizeX       int     `json:"size_x"`
 	SizeY       int     `json:"size_y"`
 	FOWDistance float64 `json:"fow_distance"`
@@ -24,10 +25,11 @@ type Board struct {
 }
 
 // NewBoard starts a new Board
-func NewBoard(id string) *Board {
+func NewBoard(id string, name string) *Board {
 
 	b := &Board{
 		ID:      id,
+		Name:    name,
 		SizeX:   BoardX,
 		SizeY:   BoardY,
 		Created: time.Now(),

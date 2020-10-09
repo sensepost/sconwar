@@ -38,7 +38,7 @@ func SetupRouter() (r *gin.Engine) {
 		game := api.Group("/game")
 		{
 			game.GET("/", allGames)
-			game.GET("/new", newGame)
+			game.POST("/new", newGame)
 			game.POST("/join", joinGame)
 			game.GET("/get/:game_id", getGame)
 			game.PUT("/start/:game_id", startGame)

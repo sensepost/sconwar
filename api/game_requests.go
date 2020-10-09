@@ -8,6 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
+// NewGameRequest is a request with a game uuid
+type NewGameRequest struct {
+	Name string `uri:"name" binding:"required" example:"pew pew"`
+}
+
+// Validation validates request values
+func (r *NewGameRequest) Validation() error {
+
+	for _, g := range game.Games {
+		if g.Name == r.Name {
+			return errors.New("a game with that name already exists")
+		}
+	}
+
+	return nil
+}
+
 // GetGameDetailRequest is a request with a game uuid
 type GetGameDetailRequest struct {
 	GameID string `uri:"game_id" binding:"required,uuid" example:"1df69d53-3468-43df-a43b-a9c674240cab"`
