@@ -1,5 +1,6 @@
 <link href="./css/hacker.css" rel="stylesheet">
 <script>
+
   let baseURL = "http://localhost:8080";
   let promise = getGames();
   let currentGameUUID = "";
@@ -16,8 +17,6 @@
   let down = false;
   let left = false;
   let right = false;
-
-  let stream;
 
   function hitButton(button){
     if(button === 'select'){
@@ -37,8 +36,6 @@
     }else if(button === 'right'){
       right = true;
     }
-    console.log(select && start && a && b && up && down && left && right);
-
     if(select && start && a && b && up && down && left && right){
       //do easter egg
       new Audio('./pwned.mp3').play();
@@ -77,12 +74,15 @@
   }
 
   let cells = [];
+  let creepPositions = new Map();
 
   function updateGameBoard(data) {
     let x = data.game.size_x;
     let y = data.game.size_y;
 
     let c = [];
+    let creepNewPos = new Map()
+
     for (var i = 0; i < x; i++) {
       c.push(
         Array.apply(null, Array(y)).map(function () {
@@ -97,12 +97,26 @@
         let ch;
         if(cc.health > 75){
           ch = 'hi';
-        }else if(cc.health < 75 > 40) {
+        }else if(cc.health < 76 && cc.health > 40) {
           ch = 'med';
+        }else if(cc.health < 40) {
+          ch = 'low';
         }else{
-          ch = 'low'
+          ch = '';
         }
-        c[cc.position.x][cc.position.y] = 1 + '/' + ch;
+
+        let pieceObj = {};
+        pieceObj.type = 1;
+        pieceObj.health = cc.health;
+        pieceObj.healthString = ch;
+        pieceObj.id = cc.id;
+        pieceObj.x = cc.position.x - 1;
+        pieceObj.y = cc.position.y - 1;
+
+        c[cc.position.x - 1][cc.position.y-1] = pieceObj;
+        creepNewPos.set(cc.id, pieceObj);
+       
+        //c[cc.position.x][cc.position.y] = 2 + '/' + ch;
       });
     }else {
       creeps = [];
@@ -114,12 +128,23 @@
         let ch;
         if(cc.health > 75){
           ch = 'hi';
-        }else if(cc.health < 75 > 40) {
+        }else if(cc.health < 76 && cc.health > 40) {
           ch = 'med';
+        }else if(cc.health < 40) {
+          ch = 'low';
         }else{
-          ch = 'low'
+          ch = '';
         }
-        c[cc.position.x][cc.position.y] = 2 + '/' + ch;
+
+        let pieceObj = {};
+        pieceObj.type = 2;
+        pieceObj.health = cc.health;
+        pieceObj.healthString = ch;
+        pieceObj.id = cc.id;
+        pieceObj.x = cc.position.x - 1;
+        pieceObj.y = cc.position.y - 1;
+
+        c[cc.position.x - 1][cc.position.y-1] = pieceObj;
       });
     } else {
       players = [];
@@ -127,10 +152,48 @@
 
     if (data.game.powerups) {
       data.game.powerups.forEach(function (cc) {
-        c[cc.position.x][cc.position.y] = "P" + cc.type;
+        let pieceObj = {};
+        pieceObj.type = "P" + cc.type;
+        c[cc.position.x][cc.position.y] = pieceObj
       });
     }
-    cells = c;
+
+    // find out what creeps have moved where by diffing to previous state stored in cells
+    // create map of creep id and position moved
+    if(creepPositions.size > 0){
+
+      console.log(creepPositions);
+
+      for (const [key, oldPos] of creepPositions.entries()) {   
+        let newPos = creepNewPos.get(oldPos.id);
+        let xdiff = newPos.x - oldPos.x;
+        let ydiff = newPos.y - oldPos.y;
+        console.log(xdiff + ',' + ydiff + '-' + oldPos.id);
+        if(xdiff === -1 && ydiff === 0){
+          document.getElementById(oldPos.id).classList.add("moveleft");
+        }else if (xdiff === 1 && ydiff === 0){
+          document.getElementById(oldPos.id).classList.add("moveright");
+        }else if (ydiff === -1 && xdiff === 0){
+          document.getElementById(oldPos.id).classList.add("moveup");
+        }else if (ydiff === 1 && xdiff === 0){
+          document.getElementById(oldPos.id).classList.add("movedown");
+
+        }else if(xdiff === -1 && ydiff === -1){
+          document.getElementById(oldPos.id).classList.add("moveupleft");
+        }else if (xdiff === 1 && ydiff === -1){
+          document.getElementById(oldPos.id).classList.add("movedownleft");
+        }else if (xdiff === -1 && ydiff === 1){
+          document.getElementById(oldPos.id).classList.add("moveupright");
+        }else if (xdiff === 1 && ydiff === 1){
+          document.getElementById(oldPos.id).classList.add("movedownright");
+        }
+      }
+    }
+
+    setTimeout(() => {
+      cells = c;
+      creepPositions = creepNewPos;
+    }, 2000);
   }
 
   async function getGameDetails() {
@@ -165,9 +228,10 @@
 
   function getCellHealthClass(currentCellValue) {
     let s = String(currentCellValue);
-    if(s.includes('/')){
-      return s.split("/")[1];
-    }
+    // if(s.includes('/')){
+    //   return s.split("/")[1];
+    // }
+    return s;
   }
 
 
@@ -293,7 +357,7 @@
                 {#each cells as r}
                   <div class="row">
                     {#each r as c}
-                      <div class="cell {getCellImageClass(c)} {getCellHealthClass(c)}"></div>
+                      <div id="{c.id}" class="cell {getCellImageClass(c.type)} {getCellHealthClass(c.healthString)}"></div>
                     {/each}
                   </div>
                 {/each}

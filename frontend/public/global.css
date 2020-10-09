@@ -74,7 +74,7 @@
 		background-size: 30px 30px;
 	}
 
-	.player {
+	.human {
 		background: url('./images/bomberman.svg');
 		background-repeat: no-repeat;
 		background-size: 30px 30px;
@@ -199,7 +199,85 @@
 		to {top: -32px;}
 	}
 
+	.moveupleft {
+		position: relative;
+		left:-32px;
+		top:-32px;
+		height: 200px;
+		-webkit-animation: movingupleft 2s;
+		animation: movingupleft 2s;
+		color: black;
+	}
 
+	@-webkit-keyframes movingupleft {
+		from {top: 0px; left: 0px;}
+		to {top: -32px; left: -32px;}
+	}
+
+	@keyframes movingupleft {
+		from {top: 0px; left: 0px;}
+		to {top: -32px; left: -32px;}
+	}
+
+	.movedownleft {
+		position: relative;
+		left:32px;
+		top:-32px;
+		height: 200px;
+		-webkit-animation: movingdownleft 2s;
+		animation: movingdownleft 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingdownleft {
+		from {top: 0px; left: 0px;}
+		to {top: 32px; left: -32px;}
+	}
+
+	@keyframes movingdownleft {
+		from {top: 0px; left: 0px;}
+		to {top: 32px; left: -32px;}
+	}
+
+	.moveupright {
+		position: relative;
+		left:32px;
+		top:-32px;
+		height: 200px;
+		-webkit-animation: movingupright 2s;
+		animation: movingupright 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingupright {
+		from {top: 0px; left: 0px;}
+		to {top: -32px; left: 32px;}
+	}
+
+	@keyframes movingupright {
+		from {top: 0px; left: 0px;}
+		to {top: -32px; left: 32px;}
+	}
+
+	.movedownright {
+		position: relative;
+		left:32px;
+		top:32px;
+		height: 200px;
+		-webkit-animation: movingdownright 2s;
+		animation: movingdownright 2s;
+		color: black;
+	}
+
+	@-webkit-keyframes movingdownright {
+		from {top: 0px; left: 0px;}
+		to {top: 32px; left: 32px;}
+	}
+
+	@keyframes movingdownright {
+		from {top: 0px; left: 0px;}
+		to {top: 32px; left: 32px;}
+	}
 
 
 
@@ -227,10 +305,8 @@
 	height: 15px;
 	width: 25px;
 	position: relative;
-	margin-left: auto;
-	margin-right: auto;
 	top: -7px;
-	left: -180px;
+	left: 675px;
   }		
 
   .power-button {
@@ -241,10 +317,8 @@
 	height: 15px;
 	width: 25px;
 	position: relative;
-	margin-left: auto;
-	margin-right: auto;
 	top: -7px;
-	left: -200px;
+	left: 700px;
   }	
   
   .power-box {
