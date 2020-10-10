@@ -3,7 +3,6 @@ package storage
 import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 // Storage is the db connection
@@ -18,7 +17,8 @@ type Db struct {
 func InitDb() error {
 
 	conn, err := gorm.Open(sqlite.Open("db.sqlite?cache=shared"), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Error),
+		// Logger: logger.Default.LogMode(logger.Error),
+		// todo: silence this when done
 	})
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func InitDb() error {
 }
 
 func (db *Db) migrate() {
-	db.Conn.AutoMigrate(&Player{})
+	db.Conn.AutoMigrate(&Player{}, &Board{}, &Event{})
 }
 
 // Get gets a db handle

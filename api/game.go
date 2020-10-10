@@ -75,7 +75,7 @@ func allGames(c *gin.Context) {
 // @Param game_id path string true "game uuid"
 // @Success 200 {object} GameResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /game/get/{game_id} [get]
+// @Router /game/detail/{game_id} [get]
 func getGame(c *gin.Context) {
 
 	params := &GetGameDetailRequest{}
@@ -98,6 +98,41 @@ func getGame(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &GameResponse{
 		Game: game.Games[params.GameID],
+	})
+}
+
+// GetEvents godoc
+// @Summary Get game events
+// @Description Get's the events for a game defined by UUID
+// @Tags Game
+// @Accept json
+// @Produce json
+// @Param game_id path string true "game uuid"
+// @Success 200 {object} EventsResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /game/events/{game_id} [get]
+func getEvents(c *gin.Context) {
+
+	params := &GetGameDetailRequest{}
+
+	if err := c.BindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read uri param`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, &EventsResponse{
+		Events: game.Games[params.GameID].Events,
 	})
 }
 

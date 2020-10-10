@@ -1,6 +1,9 @@
 package api
 
-import "github.com/sensepost/sconwar/game"
+import (
+	"github.com/sensepost/sconwar/game"
+	"github.com/sensepost/sconwar/storage"
+)
 
 // NewGameResponse is a new game response
 type NewGameResponse struct {
@@ -16,4 +19,9 @@ type AllGamesResponse struct {
 // GameResponse is a response with a single game
 type GameResponse struct {
 	Game *game.Board `json:"game"`
+}
+
+// EventsResponse is a response with a games' events
+type EventsResponse struct {
+	Events []*storage.Event
 }

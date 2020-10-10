@@ -22,6 +22,22 @@ func NewPosition() *Position {
 	return p
 }
 
+// NewPositionFromValue returns a new Position struct
+// using the packed x & y value from v
+func NewPositionFromValue(v int) *Position {
+
+	x := v >> 32
+	y := v - ((v >> 32) << 32)
+
+	p := &Position{
+		X: x, Y: y,
+	}
+
+	p.floorAndCeilPosition()
+
+	return p
+}
+
 // GetPosition returns the x, y of a position
 func (p *Position) GetPosition() (int, int) {
 	return p.X, p.Y
@@ -60,6 +76,11 @@ func (p *Position) MoveTo(x int, y int) {
 	p.Y = y
 
 	p.floorAndCeilPosition()
+}
+
+// ToSingleValue packs the X, Y into a single value
+func (p *Position) ToSingleValue() int {
+	return (p.X << 32) + p.Y
 }
 
 // floorAndCeilPosition ensures that the current x, y

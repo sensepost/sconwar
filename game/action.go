@@ -1,7 +1,10 @@
 package game
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
+	"time"
+
+	"github.com/sensepost/sconwar/storage"
 )
 
 // ActionType is an Action that can be invoked
@@ -37,45 +40,78 @@ func (a *Action) SetXY(x int, y int) {
 // Execute executes an action
 func (a *Action) Execute(player *Player, board *Board) {
 
+	e := &storage.Event{
+		Date:        time.Now(),
+		SrcEntity:   int(PlayerEntity),
+		SrcEntityID: player.ID,
+		SrcPos:      player.Position.ToSingleValue(),
+	}
+
 	// todo: this may be racy? especially for powerup pickups
 
 	switch a.Action {
 	case Move:
-		log.Info().Str("action", "move").Msg("executing a move command")
 		player.MoveTo(a.X, a.Y)
+
+		e.DstEntity = int(PlayerEntity)
+		e.DstEntityID = player.ID
+		e.DstPos = player.Position.ToSingleValue()
+		e.Action = int(Move)
+		e.Msg = `moved to a new position`
+
 		break
 	case Attack:
-		log.Info().Str("action", "attack").Msg("executing an attack command")
-
 		// find entities on the x, y and if there is something, take damage
 		for _, c := range board.aliveCreep() {
 			cx, cy := c.GetPosition()
 			if cx == a.X && cy == a.Y {
-				dmg, h := c.TakeDamage(-1)
-				log.Info().Int("damage", dmg).Int("health", h).Msg("attacked creep")
+				dmg, _ := c.TakeDamage(-1)
+
+				e.DstEntity = int(CreepEntity)
+				e.DstEntityID = c.ID
+				e.DstPos = c.Position.ToSingleValue()
+				e.Action = int(Move)
+				e.Msg = fmt.Sprintf(`attacked a creep for %d damage`, dmg)
+
+				// todo: log creep death
+
+				break
 			}
 		}
 
 		for _, p := range board.alivePlayers() {
 			px, py := p.GetPosition()
 			if px == a.X && py == a.Y {
-				dmg, h := p.TakeDamage(-1)
-				log.Info().Int("damage", dmg).Int("health", h).Msg("attacked player")
+				dmg, _ := p.TakeDamage(-1)
+
+				e.DstEntity = int(PlayerEntity)
+				e.DstEntityID = p.ID
+				e.DstPos = p.Position.ToSingleValue()
+				e.Action = int(Move)
+				e.Msg = fmt.Sprintf(`attacked a player for %d damage`, dmg)
+
+				// todo: log player death
+
+				break
 			}
 		}
 
-		// todo: log this in the player/creep structs.
 		// todo: resolve names for the creep / player that is attacked
 		break
 	case Pickup:
-		log.Info().Str("action", "pickup").Msg("executing a pickup command")
-
 		for _, u := range board.PowerUps {
 			ux, uy := u.GetPosition()
 			if ux == a.X && uy == a.Y {
-				log.Info().Str("id", u.ID).Msg("found target pickup entity")
 				player.GivePowerUp(*u)
 				board.RemovePowerUp(u)
+
+				e.DstEntity = int(PowerupEntity)
+				e.DstEntityID = u.ID
+				e.DstPos = u.Position.ToSingleValue()
+				e.Action = int(Pickup)
+				e.Msg = fmt.Sprintf(`picked up a powerup of type %d`, u.Type)
+
+				break
 			}
 		}
 
@@ -84,4 +120,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 		// todo: log this in the game log instead of a panic
 		panic(`no idea how you managed to queue an invalid action, but there you go`)
 	}
+
+	board.LogEvent(e)
 }

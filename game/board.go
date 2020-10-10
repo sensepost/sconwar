@@ -2,10 +2,13 @@ package game
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/sensepost/sconwar/storage"
+	"gorm.io/gorm"
 )
 
 // Board is the game board
@@ -15,6 +18,9 @@ type Board struct {
 	SizeX       int     `json:"size_x"`
 	SizeY       int     `json:"size_y"`
 	FOWDistance float64 `json:"fow_distance"`
+	Events      []*storage.Event
+
+	dbModel *storage.Board
 
 	Creeps   []*Creep   `json:"creeps"`
 	Players  []*Player  `json:"players"`
@@ -36,6 +42,14 @@ func NewBoard(id string, name string) *Board {
 	}
 
 	b.setFowDistance()
+
+	// persist the board
+	b.dbModel = &storage.Board{
+		UUID:    id,
+		Name:    b.Name,
+		Created: b.Created,
+	}
+	storage.Storage.Get().Create(b.dbModel)
 
 	for i := 0; i <= CreepCount; i++ {
 		b.Creeps = append(b.Creeps, NewCreep())
@@ -61,6 +75,27 @@ func (b *Board) setFowDistance() {
 	b.FOWDistance = distance / 100 * FogOfWarPercent
 }
 
+func (b *Board) updateDbModel() *gorm.DB {
+	return storage.Storage.Get().Save(b.dbModel)
+}
+
+// LogEvent logs a game event for this board
+func (b *Board) LogEvent(event *storage.Event) {
+
+	b.Events = append(b.Events, event)
+	b.dbModel.Events = b.Events
+	b.updateDbModel()
+
+	log.Info().
+		Str("time", event.Date.Format(time.Stamp)).
+		Str("src.entityid", event.SrcEntityID).
+		Int("src.pos", event.SrcPos).
+		Str("dst.entityid", event.DstEntityID).
+		Int("dst.pos", event.DstPos).
+		Str("msg", event.Msg).
+		Msg("event log")
+}
+
 // JoinPlayer joins a new human player to the board
 func (b *Board) JoinPlayer(p *Player) {
 	b.Players = append(b.Players, p)
@@ -70,6 +105,7 @@ func (b *Board) JoinPlayer(p *Player) {
 func (b *Board) Run() {
 
 	b.Started = time.Now()
+	b.updateDbModel()
 
 	for {
 
@@ -153,7 +189,22 @@ func (b *Board) moveAndAttackCreep() {
 
 	for _, creep := range b.aliveCreep() {
 
+		// todo: move events are pretty noisy, maybe we don't need to record those?
+
+		sourcepos := creep.Position.ToSingleValue()
+
 		creep.Move()
+
+		b.LogEvent(&storage.Event{
+			Date:        time.Now(),
+			SrcEntity:   int(CreepEntity),
+			SrcEntityID: creep.ID,
+			SrcPos:      sourcepos,
+			DstPos:      creep.Position.ToSingleValue(),
+			Action:      int(Move),
+			// todo: add creep name
+			Msg: `creep moved position`,
+		})
 
 		for _, target := range b.aliveCreep() {
 			if creep == target {
@@ -161,21 +212,39 @@ func (b *Board) moveAndAttackCreep() {
 			}
 
 			if creep.IsInRangeOf(target) {
+
 				dmg, h := target.TakeDamage(-1)
-				log.Warn().
-					Str("game", b.ID).
-					Str("attacker", creep.ID).
-					Str("victim", target.ID).
-					Int("damage", dmg).
-					Int("health", h).
-					Msg("attacked in range creep")
+
+				b.LogEvent(&storage.Event{
+					Date:        time.Now(),
+					SrcEntity:   int(CreepEntity),
+					SrcEntityID: creep.ID,
+					SrcPos:      creep.Position.ToSingleValue(),
+					DstEntity:   int(CreepEntity),
+					DstEntityID: target.ID,
+					DstPos:      target.Position.ToSingleValue(),
+					Action:      int(Attack),
+					// todo: add creep name
+					Msg: fmt.Sprintf(`attacked another creep for %d damage`, dmg),
+				})
 
 				if h == 0 {
-					log.Error().Str("target.id", target.ID).Msg("creep has been killed!")
+					b.LogEvent(&storage.Event{
+						Date:        time.Now(),
+						SrcEntity:   int(CreepEntity),
+						SrcEntityID: target.ID,
+						SrcPos:      target.Position.ToSingleValue(),
+						Action:      int(Attack),
+						// todo: add creep name
+						Msg: fmt.Sprintf(`creep has been killed`),
+					})
 				}
+
 				break
 			}
 		}
+
+		// todo: attack players
 	}
 }
 

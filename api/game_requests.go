@@ -22,6 +22,8 @@ func (r *NewGameRequest) Validation() error {
 		}
 	}
 
+	// todo: check db for the name
+
 	return nil
 }
 
