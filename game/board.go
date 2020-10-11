@@ -225,7 +225,7 @@ func (b *Board) moveAndAttackCreep() {
 					DstPos:      target.Position.ToSingleValue(),
 					Action:      int(Attack),
 					// todo: add creep name
-					Msg: fmt.Sprintf(`attacked another creep for %d damage`, dmg),
+					Msg: fmt.Sprintf(`creep attacked another creep for %d damage`, dmg),
 				})
 
 				if h == 0 {
@@ -258,6 +258,7 @@ func (b *Board) processPlayerActions(ctx context.Context, p *Player) {
 			return
 		case action := <-p.Actions:
 			action.Execute(p, b)
+			p.ActionCount--
 		}
 	}
 }

@@ -18,9 +18,10 @@ type Player struct {
 	ID     string `json:"id"`
 	Health int    `json:"health"`
 
-	Position *Position     `json:"position"`
-	PowerUps []PowerUp     `json:"powerups"`
-	Actions  ActionChannel `json:"-"`
+	Position    *Position     `json:"position"`
+	PowerUps    []PowerUp     `json:"powerups"`
+	Actions     ActionChannel `json:"-"`
+	ActionCount int           `json:"action_count"`
 }
 
 // NewPlayer starts a new Player instance
@@ -42,6 +43,8 @@ func (p *Player) AddAction(action Action) error {
 	default:
 		return errors.New(`player action buffer full`)
 	}
+
+	p.ActionCount++
 
 	return nil
 }

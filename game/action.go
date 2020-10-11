@@ -57,7 +57,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 		e.DstEntityID = player.ID
 		e.DstPos = player.Position.ToSingleValue()
 		e.Action = int(Move)
-		e.Msg = `moved to a new position`
+		e.Msg = `player moved to a new position`
 
 		break
 	case Attack:
@@ -71,7 +71,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 				e.DstEntityID = c.ID
 				e.DstPos = c.Position.ToSingleValue()
 				e.Action = int(Move)
-				e.Msg = fmt.Sprintf(`attacked a creep for %d damage`, dmg)
+				e.Msg = fmt.Sprintf(`player attacked a creep for %d damage`, dmg)
 
 				// todo: log creep death
 
@@ -88,7 +88,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 				e.DstEntityID = p.ID
 				e.DstPos = p.Position.ToSingleValue()
 				e.Action = int(Move)
-				e.Msg = fmt.Sprintf(`attacked a player for %d damage`, dmg)
+				e.Msg = fmt.Sprintf(`player attacked a player for %d damage`, dmg)
 
 				// todo: log player death
 
@@ -109,7 +109,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 				e.DstEntityID = u.ID
 				e.DstPos = u.Position.ToSingleValue()
 				e.Action = int(Pickup)
-				e.Msg = fmt.Sprintf(`picked up a powerup of type %d`, u.Type)
+				e.Msg = fmt.Sprintf(`player picked up a powerup of type %d`, u.Type)
 
 				break
 			}

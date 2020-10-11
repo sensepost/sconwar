@@ -29,18 +29,18 @@ type Board struct {
 type Event struct {
 	gorm.Model
 
-	BoardID uint
+	BoardID uint `json:"board_id"`
 
-	Date time.Time
+	Date time.Time `json:"date_created"`
 
-	SrcEntity   int
-	SrcEntityID string
-	SrcPos      int
+	SrcEntity   int    `json:"src_entity"`
+	SrcEntityID string `json:"src_entity_id"`
+	SrcPos      int    `json:"src_pos"`
 
-	DstEntity   int
-	DstEntityID string
-	DstPos      int
+	DstEntity   int    `json:"dst_entity"`
+	DstEntityID string `json:"dst_entity_id"`
+	DstPos      int    `json:"dst_pos"`
 
-	Action int
-	Msg    string
+	Action int    `json:"action"`
+	Msg    string `json:"msg"`
 }
