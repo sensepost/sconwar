@@ -35,5 +35,5 @@ type GameInfoResponse struct {
 
 // EventsResponse is a response with a games' events
 type EventsResponse struct {
-	Events []*storage.Event
+	Events []*storage.Event `json:"events"`
 }
