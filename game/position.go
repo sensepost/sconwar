@@ -47,6 +47,10 @@ func (p *Position) GetPosition() (int, int) {
 // specific distance
 func (p *Position) MoveRandom(distance int) {
 
+	// todo: add a chance that either x or y does not
+	// change, meaning we just go up, down, left or
+	// right. right now we only go diag.
+
 	if distance > BoardX || distance > BoardY {
 		return
 	}

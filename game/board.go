@@ -13,12 +13,13 @@ import (
 
 // Board is the game board
 type Board struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	SizeX       int     `json:"size_x"`
-	SizeY       int     `json:"size_y"`
-	FOWDistance float64 `json:"fow_distance"`
-	Events      []*storage.Event
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	SizeX         int     `json:"size_x"`
+	SizeY         int     `json:"size_y"`
+	FOWDistance   float64 `json:"fow_distance"`
+	Events        []*storage.Event
+	CurrentPlayer string `json:"current_player"`
 
 	dbModel *storage.Board
 
@@ -57,6 +58,7 @@ func NewBoard(id string, name string) *Board {
 
 	for i := 0; i <= PowerUpMax; i++ {
 		if pup := NewPowerUp(); pup != nil {
+			// todo: log a new powerup spawning
 			b.PowerUps = append(b.PowerUps, pup)
 		}
 	}
@@ -127,15 +129,17 @@ func (b *Board) Run() {
 		b.moveAndAttackCreep()
 
 		for _, p := range b.alivePlayers() {
+			b.CurrentPlayer = p.ID
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
 
 			b.processPlayerActions(ctx, p)
 		}
 
-		// todo: cleanup dead creep/people
+		// todo: last _player standing_ is the better win here
 
 		if len(b.aliveCreep()) == 1 {
+			// todo: log the win
 			log.Error().Msg("Game finished, last man standing!")
 			return
 		}
@@ -188,6 +192,9 @@ func (b *Board) alivePlayers() (a []*Player) {
 func (b *Board) moveAndAttackCreep() {
 
 	for _, creep := range b.aliveCreep() {
+		b.CurrentPlayer = creep.ID
+
+		// time.Sleep(time.Millisecond * 500) //todo: remove
 
 		// todo: move events are pretty noisy, maybe we don't need to record those?
 
@@ -205,6 +212,9 @@ func (b *Board) moveAndAttackCreep() {
 			// todo: add creep name
 			Msg: `creep moved position`,
 		})
+
+		// todo: let creep move once more if there was noone in range
+		// todo: let creep choose to attack if someone is in range first
 
 		for _, target := range b.aliveCreep() {
 			if creep == target {

@@ -25,12 +25,13 @@ type GameDetailResponse struct {
 
 // GameInfoResponse is a response summary for a game
 type GameInfoResponse struct {
-	Name    string    `json:"name"`
-	SizeX   int       `json:"size_x"`
-	SizeY   int       `json:"size_y"`
-	Fow     float64   `json:"fow"`
-	Created time.Time `json:"created"`
-	Started time.Time `json:"started"`
+	Name          string    `json:"name"`
+	SizeX         int       `json:"size_x"`
+	SizeY         int       `json:"size_y"`
+	Fow           float64   `json:"fow"`
+	CurrentPlayer string    `json:"current_player"`
+	Created       time.Time `json:"created"`
+	Started       time.Time `json:"started"`
 }
 
 // EventsResponse is a response with a games' events

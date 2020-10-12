@@ -134,12 +134,13 @@ func getGameInfo(c *gin.Context) {
 	game := game.Games[params.GameID]
 
 	i := &GameInfoResponse{
-		Name:    game.Name,
-		SizeX:   game.SizeX,
-		SizeY:   game.SizeY,
-		Fow:     game.FOWDistance,
-		Created: game.Created,
-		Started: game.Started,
+		Name:          game.Name,
+		SizeX:         game.SizeX,
+		SizeY:         game.SizeY,
+		CurrentPlayer: game.CurrentPlayer,
+		Fow:           game.FOWDistance,
+		Created:       game.Created,
+		Started:       game.Started,
 	}
 
 	c.JSON(http.StatusOK, &i)

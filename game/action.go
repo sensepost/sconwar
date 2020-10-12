@@ -65,6 +65,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 		for _, c := range board.aliveCreep() {
 			cx, cy := c.GetPosition()
 			if cx == a.X && cy == a.Y {
+				// todo: limit attack distance
 				dmg, _ := c.TakeDamage(-1)
 
 				e.DstEntity = int(CreepEntity)
@@ -82,6 +83,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 		for _, p := range board.alivePlayers() {
 			px, py := p.GetPosition()
 			if px == a.X && py == a.Y {
+				// todo: limit attack distance
 				dmg, _ := p.TakeDamage(-1)
 
 				e.DstEntity = int(PlayerEntity)

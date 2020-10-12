@@ -5,7 +5,7 @@ const (
 	BoardX          = 20
 	BoardY          = 20
 	CreepCount      = 15
-	FogOfWarPercent = 10
+	FogOfWarPercent = 100
 	AttackRange     = 1
 	RoundMoves      = 2
 	MaxRoundSeconds = 30

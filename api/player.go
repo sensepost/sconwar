@@ -144,7 +144,7 @@ func playerSurrounding(c *gin.Context) {
 	}
 
 	for _, c := range board.Creeps {
-		if player.DistanceFrom(c) <= board.FOWDistance {
+		if player.DistanceFrom(c) <= board.FOWDistance && c.Health > 0 {
 			distances.Creep = append(distances.Creep, c)
 		}
 	}
@@ -154,7 +154,7 @@ func playerSurrounding(c *gin.Context) {
 			continue
 		}
 
-		if player.DistanceFrom(p) <= board.FOWDistance {
+		if player.DistanceFrom(p) <= board.FOWDistance && p.Health > 0 {
 			distances.Players = append(distances.Players, p)
 		}
 	}
