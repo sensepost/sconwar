@@ -86,7 +86,9 @@ func (b *Board) LogEvent(event *storage.Event) {
 
 	b.Events = append(b.Events, event)
 	b.dbModel.Events = b.Events
-	b.updateDbModel()
+	b.updateDbModel() // todo: this eventually dies,
+	// because of the logs being upserted, sqlite
+	// will complain about too many sql variables
 
 	log.Info().
 		Str("time", event.Date.Format(time.Stamp)).
