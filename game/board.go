@@ -85,10 +85,9 @@ func (b *Board) updateDbModel() *gorm.DB {
 func (b *Board) LogEvent(event *storage.Event) {
 
 	b.Events = append(b.Events, event)
-	b.dbModel.Events = b.Events
-	b.updateDbModel() // todo: this eventually dies,
-	// because of the logs being upserted, sqlite
-	// will complain about too many sql variables
+	if err := storage.Storage.Get().Model(&b.dbModel).Association("Events").Append(event); err != nil {
+		log.Fatal().Err(err).Msg("failed to append event")
+	}
 
 	log.Info().
 		Str("time", event.Date.Format(time.Stamp)).
@@ -97,7 +96,7 @@ func (b *Board) LogEvent(event *storage.Event) {
 		Str("dst.entityid", event.DstEntityID).
 		Int("dst.pos", event.DstPos).
 		Str("msg", event.Msg).
-		Msg("event log")
+		Msg("event")
 }
 
 // JoinPlayer joins a new human player to the board
@@ -196,7 +195,7 @@ func (b *Board) moveAndAttackCreep() {
 	for _, creep := range b.aliveCreep() {
 		b.CurrentPlayer = creep.ID
 
-		// time.Sleep(time.Millisecond * 500) //todo: remove
+		time.Sleep(time.Millisecond * 500) //todo: remove
 
 		// todo: move events are pretty noisy, maybe we don't need to record those?
 
