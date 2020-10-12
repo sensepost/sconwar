@@ -88,3 +88,21 @@ func (r *ActionPickupRequest) Validation() error {
 
 	return nil
 }
+
+// ActionUseRequest is a request to move a player
+type ActionUseRequest struct {
+	GamePlayerIDs ActionGamePlayerRequest `json:"game_player_id" binding:"required"`
+	PowerUpID     string                  `json:"powerup_id" binding:"required,uuid" example:"6d950e36-b82b-4253-93d7-faa63d3a0e63"`
+}
+
+// Validation validates request values
+func (r *ActionUseRequest) Validation() error {
+
+	if err := r.GamePlayerIDs.Validation(); err != nil {
+		return err
+	}
+
+	// todo: validate that the player owns the powerupid
+
+	return nil
+}

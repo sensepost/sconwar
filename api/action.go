@@ -167,3 +167,47 @@ func pickupAction(c *gin.Context) {
 		Success: true,
 	})
 }
+
+// UseAction godoc
+// @Summary Use a powerup
+// @Description Uses's a powerup and activates it buff
+// @Tags Action
+// @Accept json
+// @Produce json
+// @Param data body	ActionUseRequest true "ActionUseRequest Request"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /action/use [post]
+func useAction(c *gin.Context) {
+
+	params := &ActionUseRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read post params`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	var player *game.Player
+	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
+		if p.ID == params.GamePlayerIDs.PlayerID {
+			player = p
+		}
+	}
+
+	player.UsePowerUp(params.PowerUpID)
+
+	c.JSON(http.StatusOK, &StatusResponse{
+		Success: true,
+	})
+}

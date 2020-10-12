@@ -19,7 +19,7 @@ type Player struct {
 	Health int    `json:"health"`
 
 	Position    *Position     `json:"position"`
-	PowerUps    []PowerUp     `json:"powerups"`
+	PowerUps    []*PowerUp    `json:"powerups"`
 	Actions     ActionChannel `json:"-"`
 	ActionCount int           `json:"action_count"`
 }
@@ -93,5 +93,52 @@ func (p *Player) TakeDamage(dmg int) (int, int) {
 
 // GivePowerUp adds a powerup to the player
 func (p *Player) GivePowerUp(powerup PowerUp) {
-	p.PowerUps = append(p.PowerUps, powerup)
+	p.PowerUps = append(p.PowerUps, &powerup)
+}
+
+// UsePowerUp uses a powerup
+func (p *Player) UsePowerUp(powerupID string) {
+
+	var powerup *PowerUp
+	for _, u := range p.PowerUps {
+		if powerupID == u.ID {
+			powerup = u
+		}
+	}
+
+	// this shouldn't happen, bu ok just in case
+	if powerup == nil {
+		return
+	}
+
+	switch powerup.Type {
+	case Health:
+		p.Health += PowerUpHealthBonus
+		// todo: upper limit health to say 120?
+		break
+	case Teleport:
+		break
+	case DoubleDamage:
+		break
+	}
+
+	p.RemovePowerUp(powerup)
+}
+
+// RemovePowerUp removes a powerup from the player
+func (p *Player) RemovePowerUp(powerup *PowerUp) {
+
+	// copy the slice to be trimmed
+	s := p.PowerUps
+
+	for i, u := range p.PowerUps {
+		if u != powerup {
+			continue
+		}
+
+		s[i] = s[len(s)-1]
+		p.PowerUps = s[:len(s)-1]
+
+		break
+	}
 }
