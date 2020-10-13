@@ -349,6 +349,15 @@ func (b *Board) processPlayerTurn(ctx context.Context, p *Player) {
 	for i := 0; i < PlayerRoundMoves; i++ {
 		select {
 		case <-ctx.Done():
+			b.LogEvent(&storage.Event{
+				Date:        time.Now(),
+				SrcEntity:   int(CreepEntity),
+				SrcEntityID: p.ID,
+				SrcPos:      p.Position.ToSingleValue(),
+				DstEntity:   int(PlayerEntity),
+				// todo: add creep name
+				Msg: fmt.Sprintf(`timeout while waiting for player`),
+			})
 			return
 		case action := <-p.Actions:
 			action.Execute(p, b)
