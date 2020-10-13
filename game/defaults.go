@@ -9,6 +9,7 @@ const (
 	AttackRange        = 1
 	RoundMoves         = 2
 	MaxRoundSeconds    = 30
+	MaxMoveDistance    = 1
 	PowerUpMax         = 5
 	PowerUpChance      = 50
 	PowerUpHealthBonus = 50

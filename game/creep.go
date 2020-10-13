@@ -46,8 +46,10 @@ func (c *Creep) IsInRangeOf(o hasPosition) bool {
 
 // TakeDamage deals damage to the creep.
 // An argument of -1 will make the damage taken
-// random with a ceil of 30
-func (c *Creep) TakeDamage(dmg int) (int, int) {
+// random with a ceil of 30.
+// The multiplier can be used to apply multiplication to the
+// final damange taken.
+func (c *Creep) TakeDamage(dmg int, multiplier int) (int, int) {
 
 	if dmg > 100 {
 		dmg = -1
@@ -56,6 +58,8 @@ func (c *Creep) TakeDamage(dmg int) (int, int) {
 	if dmg == -1 {
 		dmg = rand.Intn(30)
 	}
+
+	dmg = dmg * multiplier
 
 	c.Health -= dmg
 

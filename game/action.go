@@ -51,12 +51,28 @@ func (a *Action) Execute(player *Player, board *Board) {
 
 	switch a.Action {
 	case Move:
-		player.MoveTo(a.X, a.Y)
 
 		e.DstEntity = int(PlayerEntity)
 		e.DstEntityID = player.ID
 		e.DstPos = player.Position.ToSingleValue()
 		e.Action = int(Move)
+
+		// todo: diag moves seem to be further than 1 :(
+		distance := distanceBetween(player, &Position{X: a.X, Y: a.Y})
+
+		if player.HasAvailableBuf(Teleport) {
+			// for moves > MaxMoveDistance, use the teleport buf
+			if distance > MaxMoveDistance {
+				player.RemoveBuf(Teleport)
+			}
+		} else {
+			if distance > MaxMoveDistance {
+				e.Msg = `player tried to move to a position that is out of range`
+				break
+			}
+		}
+
+		player.MoveTo(a.X, a.Y)
 		e.Msg = `player moved to a new position`
 
 		break
@@ -65,8 +81,14 @@ func (a *Action) Execute(player *Player, board *Board) {
 		for _, c := range board.aliveCreep() {
 			cx, cy := c.GetPosition()
 			if cx == a.X && cy == a.Y {
+
+				multiplier := 1
+				if player.HasAvailableBuf(DoubleDamage) {
+					multiplier = 2
+					player.RemoveBuf(DoubleDamage)
+				}
 				// todo: limit attack distance
-				dmg, _ := c.TakeDamage(-1)
+				dmg, _ := c.TakeDamage(-1, multiplier)
 
 				e.DstEntity = int(CreepEntity)
 				e.DstEntityID = c.ID
@@ -83,8 +105,14 @@ func (a *Action) Execute(player *Player, board *Board) {
 		for _, p := range board.alivePlayers() {
 			px, py := p.GetPosition()
 			if px == a.X && py == a.Y {
+
+				multiplier := 1
+				if player.HasAvailableBuf(DoubleDamage) {
+					multiplier = 2
+					player.RemoveBuf(DoubleDamage)
+				}
 				// todo: limit attack distance
-				dmg, _ := p.TakeDamage(-1)
+				dmg, _ := p.TakeDamage(-1, multiplier)
 
 				e.DstEntity = int(PlayerEntity)
 				e.DstEntityID = p.ID

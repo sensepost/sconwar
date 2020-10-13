@@ -224,7 +224,7 @@ func (b *Board) moveAndAttackCreep() {
 
 			if creep.IsInRangeOf(target) {
 
-				dmg, h := target.TakeDamage(-1)
+				dmg, h := target.TakeDamage(-1, 1)
 
 				b.LogEvent(&storage.Event{
 					Date:        time.Now(),

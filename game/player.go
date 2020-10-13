@@ -18,10 +18,11 @@ type Player struct {
 	ID     string `json:"id"`
 	Health int    `json:"health"`
 
-	Position    *Position     `json:"position"`
-	PowerUps    []*PowerUp    `json:"powerups"`
-	Actions     ActionChannel `json:"-"`
-	ActionCount int           `json:"action_count"`
+	Position     *Position     `json:"position"`
+	PowerUps     []*PowerUp    `json:"powerups"`
+	PowerUpBuffs []PowerUpType `json:"buffs"`
+	Actions      ActionChannel `json:"-"`
+	ActionCount  int           `json:"action_count"`
 }
 
 // NewPlayer starts a new Player instance
@@ -71,8 +72,10 @@ func (p *Player) DistanceFrom(o hasPosition) float64 {
 
 // TakeDamage deals damage to the creep.
 // An argument of -1 will make the damage taken
-// random with a ceil of 30
-func (p *Player) TakeDamage(dmg int) (int, int) {
+// random with a ceil of 30.
+// The multiplier can be used to apply multiplication to the
+// final damange taken.
+func (p *Player) TakeDamage(dmg int, multiplier int) (int, int) {
 
 	if dmg > 100 {
 		dmg = -1
@@ -81,6 +84,8 @@ func (p *Player) TakeDamage(dmg int) (int, int) {
 	if dmg == -1 {
 		dmg = rand.Intn(30)
 	}
+
+	dmg = dmg * multiplier
 
 	p.Health -= dmg
 
@@ -96,7 +101,32 @@ func (p *Player) GivePowerUp(powerup PowerUp) {
 	p.PowerUps = append(p.PowerUps, &powerup)
 }
 
-// UsePowerUp uses a powerup
+// HasAvailableBuf checks of a player has a buff enabled
+func (p *Player) HasAvailableBuf(buf PowerUpType) bool {
+	for _, u := range p.PowerUpBuffs {
+		if u == buf {
+			return true
+		}
+	}
+
+	return false
+}
+
+// RemoveBuf removes a buf from a player
+func (p *Player) RemoveBuf(buf PowerUpType) {
+	bufs := p.PowerUpBuffs
+
+	for i, u := range bufs {
+		if u == buf {
+			bufs[i] = bufs[len(bufs)-1]
+			p.PowerUpBuffs = bufs[:len(bufs)-1]
+
+			break
+		}
+	}
+}
+
+// UsePowerUp uses a powerup, applying the relevant buf
 func (p *Player) UsePowerUp(powerupID string) {
 
 	var powerup *PowerUp
@@ -106,19 +136,22 @@ func (p *Player) UsePowerUp(powerupID string) {
 		}
 	}
 
-	// this shouldn't happen, bu ok just in case
+	// this shouldn't happen, but ok just in case
 	if powerup == nil {
 		return
 	}
 
 	switch powerup.Type {
+	// todo: log events
 	case Health:
 		p.Health += PowerUpHealthBonus
 		// todo: upper limit health to say 120?
 		break
 	case Teleport:
+		p.PowerUpBuffs = append(p.PowerUpBuffs, Teleport)
 		break
 	case DoubleDamage:
+		p.PowerUpBuffs = append(p.PowerUpBuffs, DoubleDamage)
 		break
 	}
 
