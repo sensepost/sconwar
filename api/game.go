@@ -131,16 +131,24 @@ func getGameInfo(c *gin.Context) {
 		return
 	}
 
-	game := game.Games[params.GameID]
+	board := game.Games[params.GameID]
 
 	i := &GameInfoResponse{
-		Name:          game.Name,
-		SizeX:         game.SizeX,
-		SizeY:         game.SizeY,
-		CurrentPlayer: game.CurrentPlayer,
-		Fow:           game.FOWDistance,
-		Created:       game.Created,
-		Started:       game.Started,
+		Name:          board.Name,
+		SizeX:         board.SizeX,
+		SizeY:         board.SizeY,
+		CurrentPlayer: board.CurrentPlayer,
+		Fow:           board.FOWDistance,
+		Created:       board.Created,
+		Started:       board.Started,
+		GameOptions: GameOptionsResponse{
+			FogOfWarPercent:       game.FogOfWarPercent,
+			AttackRange:           game.AttackRange,
+			PlayerRoundMoves:      game.PlayerRoundMoves,
+			MaxRoundSeconds:       game.MaxRoundSeconds,
+			MaxPlayerMoveDistance: game.MaxPlayerMoveDistance,
+			PowerUpMax:            game.PowerUpMax,
+		},
 	}
 
 	c.JSON(http.StatusOK, &i)
