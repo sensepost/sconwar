@@ -62,11 +62,11 @@ func (a *Action) Execute(player *Player, board *Board) {
 
 		if player.HasAvailableBuf(Teleport) {
 			// for moves > MaxMoveDistance, use the teleport buf
-			if distance > MaxMoveDistance {
+			if distance > MaxPlayerMoveDistance {
 				player.RemoveBuf(Teleport)
 			}
 		} else {
-			if distance > MaxMoveDistance {
+			if distance > MaxPlayerMoveDistance {
 				e.Msg = `player tried to move to a position that is out of range`
 				break
 			}

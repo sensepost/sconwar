@@ -25,7 +25,7 @@ func NewCreep() *Creep {
 
 // Move moves a creep in a random position
 func (c *Creep) Move() {
-	c.Position.MoveRandom(1)
+	c.Position.MoveRandom(MaxCreepMoveDistance)
 }
 
 // GetPosition gets the x, y position of a creep

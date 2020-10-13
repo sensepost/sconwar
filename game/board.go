@@ -338,10 +338,6 @@ func (b *Board) chooseCreepAction() ActionType {
 	)
 
 	return c.Pick().(ActionType)
-
-	// actions := []ActionType{Move, Attack, Nothing}
-
-	// return actions[rand.Intn(len(actions))]
 }
 
 // processPlayerTurn executes the actions for a player
