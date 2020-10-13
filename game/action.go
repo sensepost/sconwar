@@ -15,6 +15,7 @@ const (
 	Move ActionType = iota
 	Attack
 	Pickup
+	Nothing
 )
 
 // Action is the action that can be taken by a player
@@ -57,7 +58,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 		e.DstPos = player.Position.ToSingleValue()
 		e.Action = int(Move)
 
-		// todo: diag moves seem to be further than 1 :(
 		distance := distanceBetween(player, &Position{X: a.X, Y: a.Y})
 
 		if player.HasAvailableBuf(Teleport) {

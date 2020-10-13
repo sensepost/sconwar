@@ -4,13 +4,14 @@ package game
 const (
 	BoardX             = 20
 	BoardY             = 20
-	CreepCount         = 15
-	FogOfWarPercent    = 100 // todo: fix before prod
-	AttackRange        = 1
-	RoundMoves         = 2
-	MaxRoundSeconds    = 30
-	MaxMoveDistance    = 1
-	PowerUpMax         = 5
-	PowerUpChance      = 50
-	PowerUpHealthBonus = 50
+	CreepCount         = 15  // how many initial creep to spawn
+	FogOfWarPercent    = 100 // todo: fix reduce prod; how far a player can see other entities
+	AttackRange        = 2   // distance considered in range for an attack
+	PlayerRoundMoves   = 2   // how many rounds a player gets to move
+	CreepRoundMoves    = 3   // how many rounds a creep gets to move
+	MaxRoundSeconds    = 30  // how long a player can take to issue actions
+	MaxMoveDistance    = 1   // how far a single move can be
+	PowerUpMax         = 5   // the max number of powerups available on the board
+	PowerUpChance      = 50  // the chance of a powerup spawning
+	PowerUpHealthBonus = 50  // how much extra health the health powerup gives
 )

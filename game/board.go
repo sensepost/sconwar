@@ -6,8 +6,10 @@ import (
 	"math"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"github.com/sensepost/sconwar/storage"
+
+	wr "github.com/mroth/weightedrand"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -127,14 +129,14 @@ func (b *Board) Run() {
 			}
 		}
 
-		b.moveAndAttackCreep()
+		b.processCreepTurn()
 
 		for _, p := range b.alivePlayers() {
 			b.CurrentPlayer = p.ID
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
 
-			b.processPlayerActions(ctx, p)
+			b.processPlayerTurn(ctx, p)
 		}
 
 		// todo: last _player standing_ is the better win here
@@ -190,80 +192,163 @@ func (b *Board) alivePlayers() (a []*Player) {
 	return
 }
 
-func (b *Board) moveAndAttackCreep() {
+// processCreepTurn processed the turn for each alive creep
+// actions are chosen between moving and attacking.
+// each creep will perform <CreepRoundMoves> number of moves.
+func (b *Board) processCreepTurn() {
 
 	for _, creep := range b.aliveCreep() {
 		b.CurrentPlayer = creep.ID
 
-		// time.Sleep(time.Millisecond * 500) //todo: remove
+		remMoves := CreepRoundMoves
 
-		// todo: move events are pretty noisy, maybe we don't need to record those?
+		for remMoves > 0 {
 
-		sourcepos := creep.Position.ToSingleValue()
+			time.Sleep(time.Millisecond * 500) //todo: remove
 
-		creep.Move()
+			switch b.chooseCreepAction() {
+			case Nothing:
+				b.LogEvent(&storage.Event{
+					Date:        time.Now(),
+					SrcEntity:   int(CreepEntity),
+					SrcEntityID: creep.ID,
+					Action:      int(Nothing),
+					// todo: add creep name
+					Msg: `creep decided to do nothing`,
+				})
 
-		b.LogEvent(&storage.Event{
-			Date:        time.Now(),
-			SrcEntity:   int(CreepEntity),
-			SrcEntityID: creep.ID,
-			SrcPos:      sourcepos,
-			DstPos:      creep.Position.ToSingleValue(),
-			Action:      int(Move),
-			// todo: add creep name
-			Msg: `creep moved position`,
-		})
+				remMoves--
+				break
 
-		// todo: let creep move once more if there was noone in range
-		// todo: let creep choose to attack if someone is in range first
+			case Move:
+				// todo: move events are pretty noisy, maybe we don't need to record those?
+				sourcepos := creep.Position.ToSingleValue()
 
-		for _, target := range b.aliveCreep() {
-			if creep == target {
-				continue
-			}
-
-			if creep.IsInRangeOf(target) {
-
-				dmg, h := target.TakeDamage(-1, 1)
+				creep.Move()
 
 				b.LogEvent(&storage.Event{
 					Date:        time.Now(),
 					SrcEntity:   int(CreepEntity),
 					SrcEntityID: creep.ID,
-					SrcPos:      creep.Position.ToSingleValue(),
-					DstEntity:   int(CreepEntity),
-					DstEntityID: target.ID,
-					DstPos:      target.Position.ToSingleValue(),
-					Action:      int(Attack),
+					SrcPos:      sourcepos,
+					DstPos:      creep.Position.ToSingleValue(),
+					Action:      int(Move),
 					// todo: add creep name
-					Msg: fmt.Sprintf(`creep attacked another creep for %d damage`, dmg),
+					Msg: `creep moved position`,
 				})
 
-				if h == 0 {
+				remMoves--
+				break
+
+			case Attack:
+				// process alive players before alive creep
+				for _, target := range b.alivePlayers() {
+					if !creep.IsInRangeOf(target) {
+						continue
+					}
+
+					dmg, h := target.TakeDamage(-1, 1)
+
 					b.LogEvent(&storage.Event{
 						Date:        time.Now(),
 						SrcEntity:   int(CreepEntity),
-						SrcEntityID: target.ID,
-						SrcPos:      target.Position.ToSingleValue(),
+						SrcEntityID: creep.ID,
+						SrcPos:      creep.Position.ToSingleValue(),
+						DstEntity:   int(PlayerEntity),
+						DstEntityID: target.ID,
+						DstPos:      target.Position.ToSingleValue(),
 						Action:      int(Attack),
-						// todo: add creep name
-						Msg: fmt.Sprintf(`creep has been killed`),
+						// todo: add player name
+						Msg: fmt.Sprintf(`creep attacked another player for %d damage`, dmg),
 					})
+
+					if h == 0 {
+						b.LogEvent(&storage.Event{
+							Date:        time.Now(),
+							SrcEntity:   int(CreepEntity),
+							SrcEntityID: target.ID,
+							SrcPos:      target.Position.ToSingleValue(),
+							Action:      int(Attack),
+							// todo: add player name
+							Msg: fmt.Sprintf(`player has been killed`),
+						})
+					}
+
+					remMoves--
+
+					break // alivePlayers loop
 				}
 
-				break
+				for _, target := range b.aliveCreep() {
+					// prevent creep suicide
+					if creep.ID == target.ID {
+						continue
+					}
+
+					if !creep.IsInRangeOf(target) {
+						continue
+					}
+
+					dmg, h := target.TakeDamage(-1, 1)
+
+					b.LogEvent(&storage.Event{
+						Date:        time.Now(),
+						SrcEntity:   int(CreepEntity),
+						SrcEntityID: creep.ID,
+						SrcPos:      creep.Position.ToSingleValue(),
+						DstEntity:   int(CreepEntity),
+						DstEntityID: target.ID,
+						DstPos:      target.Position.ToSingleValue(),
+						Action:      int(Attack),
+						// todo: add creep name
+						Msg: fmt.Sprintf(`creep attacked another creep for %d damage`, dmg),
+					})
+
+					if h == 0 {
+						b.LogEvent(&storage.Event{
+							Date:        time.Now(),
+							SrcEntity:   int(CreepEntity),
+							SrcEntityID: target.ID,
+							SrcPos:      target.Position.ToSingleValue(),
+							Action:      int(Attack),
+							// todo: add creep name
+							Msg: fmt.Sprintf(`creep has been killed`),
+						})
+					}
+
+					remMoves--
+
+					break // aliveCreep loop
+				}
+
+				break // attack
 			}
 		}
-
-		// todo: attack players
 	}
 }
 
-// processPlayerActions executes the actions for a player
-func (b *Board) processPlayerActions(ctx context.Context, p *Player) {
+// chooseCreepAction randomly decides on an action to take
+// with a boas towards moving and attacking
+func (b *Board) chooseCreepAction() ActionType {
+
+	c := wr.NewChooser(
+		wr.Choice{Item: Move, Weight: 5},
+		wr.Choice{Item: Attack, Weight: 5},
+		wr.Choice{Item: Nothing, Weight: 2},
+	)
+
+	return c.Pick().(ActionType)
+
+	// actions := []ActionType{Move, Attack, Nothing}
+
+	// return actions[rand.Intn(len(actions))]
+}
+
+// processPlayerTurn executes the actions for a player
+func (b *Board) processPlayerTurn(ctx context.Context, p *Player) {
 
 	// only execute the max number of actions
-	for i := 0; i < RoundMoves; i++ {
+	for i := 0; i < PlayerRoundMoves; i++ {
 		select {
 		case <-ctx.Done():
 			return

@@ -11,6 +11,7 @@ require (
 	github.com/go-openapi/swag v0.19.9 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/mroth/weightedrand v0.3.1
 	github.com/rs/zerolog v1.20.0
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7

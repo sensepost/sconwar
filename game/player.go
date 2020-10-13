@@ -33,7 +33,7 @@ func NewPlayer(p *storage.Player) *Player {
 		ID:       p.UUID,
 		Health:   100,
 		Position: NewPosition(),
-		Actions:  make(chan Action, RoundMoves),
+		Actions:  make(chan Action, PlayerRoundMoves),
 	}
 }
 
