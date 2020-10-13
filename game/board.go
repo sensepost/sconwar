@@ -116,8 +116,8 @@ func (b *Board) Run() {
 
 		log.Info().
 			Str("board.id", b.ID).
-			Int("creep.count", len(b.aliveCreep())).
-			Int("player.count", len(b.alivePlayers())).
+			Int("creep.count", len(b.AliveCreep())).
+			Int("player.count", len(b.AlivePlayers())).
 			Msg("game stats")
 
 		// respawn powerups. this is a chance-based thing so everytime
@@ -131,7 +131,7 @@ func (b *Board) Run() {
 
 		b.processCreepTurn()
 
-		for _, p := range b.alivePlayers() {
+		for _, p := range b.AlivePlayers() {
 			b.CurrentPlayer = p.ID
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
@@ -141,7 +141,7 @@ func (b *Board) Run() {
 
 		// todo: last _player standing_ is the better win here
 
-		if len(b.aliveCreep()) == 1 {
+		if len(b.AliveCreep()) == 1 {
 			// todo: log the win
 			log.Error().Msg("Game finished, last man standing!")
 			return
@@ -170,7 +170,8 @@ func (b *Board) RemovePowerUp(powerup *PowerUp) {
 
 }
 
-func (b *Board) aliveCreep() (a []*Creep) {
+// AliveCreep returns creep that are alive
+func (b *Board) AliveCreep() (a []*Creep) {
 
 	for _, c := range b.Creeps {
 		if c.Health > 0 {
@@ -181,7 +182,8 @@ func (b *Board) aliveCreep() (a []*Creep) {
 	return
 }
 
-func (b *Board) alivePlayers() (a []*Player) {
+// AlivePlayers returns players that are alive
+func (b *Board) AlivePlayers() (a []*Player) {
 
 	for _, p := range b.Players {
 		if p.Health > 0 {
@@ -197,7 +199,7 @@ func (b *Board) alivePlayers() (a []*Player) {
 // each creep will perform <CreepRoundMoves> number of moves.
 func (b *Board) processCreepTurn() {
 
-	for _, creep := range b.aliveCreep() {
+	for _, creep := range b.AliveCreep() {
 		b.CurrentPlayer = creep.ID
 
 		remMoves := CreepRoundMoves
@@ -242,7 +244,7 @@ func (b *Board) processCreepTurn() {
 
 			case Attack:
 				// process alive players before alive creep
-				for _, target := range b.alivePlayers() {
+				for _, target := range b.AlivePlayers() {
 					if !creep.IsInRangeOf(target) {
 						continue
 					}
@@ -279,7 +281,7 @@ func (b *Board) processCreepTurn() {
 					break // alivePlayers loop
 				}
 
-				for _, target := range b.aliveCreep() {
+				for _, target := range b.AliveCreep() {
 					// prevent creep suicide
 					if creep.ID == target.ID {
 						continue

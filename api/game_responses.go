@@ -25,14 +25,15 @@ type GameDetailResponse struct {
 
 // GameInfoResponse is a response summary for a game
 type GameInfoResponse struct {
-	Name          string              `json:"name"`
-	SizeX         int                 `json:"size_x"`
-	SizeY         int                 `json:"size_y"`
-	Fow           float64             `json:"fow"`
-	CurrentPlayer string              `json:"current_player"`
-	Created       time.Time           `json:"created"`
-	Started       time.Time           `json:"started"`
-	GameOptions   GameOptionsResponse `json:"game_options"`
+	Name          string               `json:"name"`
+	SizeX         int                  `json:"size_x"`
+	SizeY         int                  `json:"size_y"`
+	Fow           float64              `json:"fow"`
+	CurrentPlayer string               `json:"current_player"`
+	Created       time.Time            `json:"created"`
+	Started       time.Time            `json:"started"`
+	GameOptions   GameOptionsResponse  `json:"game_options"`
+	GameEntities  GameEntitiesResponse `json:"game_entities"`
 }
 
 // GameOptionsResponse are the options in the GameInfoResponse
@@ -43,6 +44,13 @@ type GameOptionsResponse struct {
 	MaxRoundSeconds       int `json:"player_round_seconds"`
 	MaxPlayerMoveDistance int `json:"player_max_move_range"`
 	PowerUpMax            int `json:"powerup_max"`
+}
+
+// GameEntitiesResponse contains the number of enties in a game
+type GameEntitiesResponse struct {
+	AliveCreep   int `json:"alive_creep"`
+	AlivePlayers int `json:"alive_players"`
+	PowerUps     int `json:"powerups"`
 }
 
 // EventsResponse is a response with a games' events

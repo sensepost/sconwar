@@ -78,7 +78,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 		break
 	case Attack:
 		// find entities on the x, y and if there is something, take damage
-		for _, c := range board.aliveCreep() {
+		for _, c := range board.AliveCreep() {
 			cx, cy := c.GetPosition()
 			if cx == a.X && cy == a.Y {
 
@@ -102,7 +102,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 			}
 		}
 
-		for _, p := range board.alivePlayers() {
+		for _, p := range board.AlivePlayers() {
 			px, py := p.GetPosition()
 			if px == a.X && py == a.Y {
 

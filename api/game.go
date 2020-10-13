@@ -149,6 +149,11 @@ func getGameInfo(c *gin.Context) {
 			MaxPlayerMoveDistance: game.MaxPlayerMoveDistance,
 			PowerUpMax:            game.PowerUpMax,
 		},
+		GameEntities: GameEntitiesResponse{
+			AliveCreep:   len(board.AliveCreep()),
+			AlivePlayers: len(board.AlivePlayers()),
+			PowerUps:     len(board.PowerUps),
+		},
 	}
 
 	c.JSON(http.StatusOK, &i)
