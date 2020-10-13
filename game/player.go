@@ -70,6 +70,17 @@ func (p *Player) DistanceFrom(o hasPosition) float64 {
 	return distanceBetween(o, p.Position)
 }
 
+// IsInAttackRangeOf checks if something is within attack range
+func (p *Player) IsInAttackRangeOf(o hasPosition) bool {
+	distance := distanceBetween(o, p.Position)
+
+	if distance <= AttackRange {
+		return true
+	}
+
+	return false
+}
+
 // TakeDamage deals damage to the creep.
 // An argument of -1 will make the damage taken
 // random with a ceil of 30.

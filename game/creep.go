@@ -33,8 +33,8 @@ func (c *Creep) GetPosition() (int, int) {
 	return c.Position.GetPosition()
 }
 
-// IsInRangeOf checks if something is within attack range
-func (c *Creep) IsInRangeOf(o hasPosition) bool {
+// IsInAttackRangeOf checks if something is within attack range
+func (c *Creep) IsInAttackRangeOf(o hasPosition) bool {
 	distance := distanceBetween(o, c.Position)
 
 	if distance <= AttackRange {

@@ -79,6 +79,11 @@ func (a *Action) Execute(player *Player, board *Board) {
 	case Attack:
 		// find entities on the x, y and if there is something, take damage
 		for _, c := range board.AliveCreep() {
+
+			if !player.IsInAttackRangeOf(c) {
+				continue
+			}
+
 			cx, cy := c.GetPosition()
 			if cx == a.X && cy == a.Y {
 
@@ -103,6 +108,11 @@ func (a *Action) Execute(player *Player, board *Board) {
 		}
 
 		for _, p := range board.AlivePlayers() {
+
+			if !player.IsInAttackRangeOf(p) {
+				continue
+			}
+
 			px, py := p.GetPosition()
 			if px == a.X && py == a.Y {
 
@@ -130,6 +140,13 @@ func (a *Action) Execute(player *Player, board *Board) {
 		break
 	case Pickup:
 		for _, u := range board.PowerUps {
+
+			// use attack range for now. maybe change this to its own
+			// unique value? maybe an argument to IsInRangeOf
+			if !player.IsInAttackRangeOf(u) {
+				continue
+			}
+
 			ux, uy := u.GetPosition()
 			if ux == a.X && uy == a.Y {
 				player.GivePowerUp(*u)
@@ -149,6 +166,10 @@ func (a *Action) Execute(player *Player, board *Board) {
 	default:
 		// todo: log this in the game log instead of a panic
 		panic(`no idea how you managed to queue an invalid action, but there you go`)
+	}
+
+	if len(e.Msg) == 0 {
+		e.Msg = `no action was executed`
 	}
 
 	board.LogEvent(e)

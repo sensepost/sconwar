@@ -245,7 +245,7 @@ func (b *Board) processCreepTurn() {
 			case Attack:
 				// process alive players before alive creep
 				for _, target := range b.AlivePlayers() {
-					if !creep.IsInRangeOf(target) {
+					if !creep.IsInAttackRangeOf(target) {
 						continue
 					}
 
@@ -287,7 +287,7 @@ func (b *Board) processCreepTurn() {
 						continue
 					}
 
-					if !creep.IsInRangeOf(target) {
+					if !creep.IsInAttackRangeOf(target) {
 						continue
 					}
 
