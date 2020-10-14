@@ -22,6 +22,7 @@ type Board struct {
 	UUID    string
 	Created time.Time
 	Started time.Time
+	Ended   time.Time
 	Events  []*Event
 }
 

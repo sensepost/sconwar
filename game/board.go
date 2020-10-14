@@ -139,14 +139,31 @@ func (b *Board) Run() {
 			b.processPlayerTurn(ctx, p)
 		}
 
-		// todo: last _player standing_ is the better win here
+		// win conditions
+		if len(b.AlivePlayers()) == 1 && len(b.AliveCreep()) == 0 {
+			player := b.AlivePlayers()[0]
 
-		if len(b.AliveCreep()) == 1 {
-			// todo: log the win
-			log.Error().Msg("Game finished, last man standing!")
-			return
+			b.LogEvent(&storage.Event{
+				Date:        time.Now(),
+				SrcEntity:   int(PlayerEntity),
+				SrcEntityID: player.ID,
+				// todo: add player name
+				Msg: `player is the last person standing`,
+			})
+			break
+		}
+
+		if len(b.AlivePlayers()) == 0 && len(b.AliveCreep()) > 0 {
+			b.LogEvent(&storage.Event{
+				Date: time.Now(),
+				Msg:  `all players have been eliminated. creep win`,
+			})
+			break
 		}
 	}
+
+	b.dbModel.Ended = time.Now()
+	b.updateDbModel()
 }
 
 // RemovePowerUp removes a powerup from the board
@@ -206,7 +223,7 @@ func (b *Board) processCreepTurn() {
 
 		for remMoves > 0 {
 
-			time.Sleep(time.Millisecond * 500) //todo: remove
+			time.Sleep(time.Millisecond * 100) //todo: remove
 
 			switch b.chooseCreepAction() {
 			case Nothing:

@@ -81,7 +81,7 @@ func (p *Player) IsInAttackRangeOf(o hasPosition) bool {
 	return false
 }
 
-// TakeDamage deals damage to the creep.
+// TakeDamage deals damage to the player.
 // An argument of -1 will make the damage taken
 // random with a ceil of 30.
 // The multiplier can be used to apply multiplication to the
