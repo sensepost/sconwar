@@ -31,7 +31,7 @@ func InitDb() error {
 }
 
 func (db *Db) migrate() {
-	db.Conn.AutoMigrate(&Player{}, &Board{}, &Event{})
+	db.Conn.AutoMigrate(&Player{}, &Board{}, &Event{}, &PlayerGameScore{})
 }
 
 // Get gets a db handle

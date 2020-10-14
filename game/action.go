@@ -92,8 +92,9 @@ func (a *Action) Execute(player *Player, board *Board) {
 					multiplier = 2
 					player.RemoveBuf(DoubleDamage)
 				}
-				// todo: limit attack distance
-				dmg, _ := c.TakeDamage(-1, multiplier)
+
+				dmg, h := c.TakeDamage(-1, multiplier)
+				player.AddDamageDealt(dmg)
 
 				e.DstEntity = int(CreepEntity)
 				e.DstEntityID = c.ID
@@ -101,7 +102,19 @@ func (a *Action) Execute(player *Player, board *Board) {
 				e.Action = int(Move)
 				e.Msg = fmt.Sprintf(`player attacked a creep for %d damage`, dmg)
 
-				// todo: log creep death
+				if h == 0 {
+					board.LogEvent(&storage.Event{
+						Date:        time.Now(),
+						SrcEntity:   int(PlayerEntity),
+						SrcEntityID: player.ID,
+						SrcPos:      player.Position.ToSingleValue(),
+						Action:      int(Attack),
+						// todo: add creep name
+						Msg: fmt.Sprintf(`creep has been killed`),
+					})
+
+					player.RecordCreepKilled()
+				}
 
 				break
 			}
@@ -121,8 +134,9 @@ func (a *Action) Execute(player *Player, board *Board) {
 					multiplier = 2
 					player.RemoveBuf(DoubleDamage)
 				}
-				// todo: limit attack distance
-				dmg, _ := p.TakeDamage(-1, multiplier)
+
+				dmg, h := p.TakeDamage(-1, multiplier)
+				player.AddDamageDealt(dmg)
 
 				e.DstEntity = int(PlayerEntity)
 				e.DstEntityID = p.ID
@@ -130,7 +144,20 @@ func (a *Action) Execute(player *Player, board *Board) {
 				e.Action = int(Move)
 				e.Msg = fmt.Sprintf(`player attacked a player for %d damage`, dmg)
 
-				// todo: log player death
+				if h == 0 {
+					board.LogEvent(&storage.Event{
+						Date:        time.Now(),
+						SrcEntity:   int(CreepEntity),
+						SrcEntityID: player.ID,
+						SrcPos:      player.Position.ToSingleValue(),
+						Action:      int(Attack),
+						// todo: add player name
+						Msg: fmt.Sprintf(`creep has been killed`),
+					})
+
+					player.RecordPlayerKilled()
+					p.SaveFinalScore(board.ID, board.CurrentDeathPosition())
+				}
 
 				break
 			}
@@ -150,6 +177,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 			ux, uy := u.GetPosition()
 			if ux == a.X && uy == a.Y {
 				player.GivePowerUp(*u)
+				player.AddScore(PickedUpPowerup)
 				board.RemovePowerUp(u)
 
 				e.DstEntity = int(PowerupEntity)

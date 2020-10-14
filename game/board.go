@@ -163,6 +163,9 @@ func (b *Board) Run() {
 				// todo: add player name
 				Msg: `player is the last person standing`,
 			})
+
+			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
+
 			break
 		}
 
@@ -203,7 +206,6 @@ func (b *Board) RemovePowerUp(powerup *PowerUp) {
 
 // AliveCreep returns creep that are alive
 func (b *Board) AliveCreep() (a []*Creep) {
-
 	for _, c := range b.Creeps {
 		if c.Health > 0 {
 			a = append(a, c)
@@ -215,7 +217,6 @@ func (b *Board) AliveCreep() (a []*Creep) {
 
 // AlivePlayers returns players that are alive
 func (b *Board) AlivePlayers() (a []*Player) {
-
 	for _, p := range b.Players {
 		if p.Health > 0 {
 			a = append(a, p)
@@ -223,6 +224,16 @@ func (b *Board) AlivePlayers() (a []*Player) {
 	}
 
 	return
+}
+
+// TotalAliveEntities returns the # of alive entities in the game
+func (b *Board) TotalAliveEntities() int {
+	return len(b.AliveCreep()) + len(b.AlivePlayers())
+}
+
+// CurrentDeathPosition determines the current position assuming death
+func (b *Board) CurrentDeathPosition() int {
+	return b.TotalAliveEntities() + 1
 }
 
 // processCreepTurn processed the turn for each alive creep
@@ -305,6 +316,8 @@ func (b *Board) processCreepTurn() {
 							// todo: add player name
 							Msg: fmt.Sprintf(`player has been killed`),
 						})
+
+						target.SaveFinalScore(b.ID, b.CurrentDeathPosition())
 					}
 
 					remMoves--

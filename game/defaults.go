@@ -15,4 +15,9 @@ const (
 	PowerUpMax            = 5   // the max number of powerups available on the board
 	PowerUpChance         = 50  // the chance of a powerup spawning
 	PowerUpHealthBonus    = 50  // how much extra health the health powerup gives
+
+	// scoring
+	CreepKilledScore  = 100 // how many points to add for killing a creep
+	PlayerKilledScore = 200 // how many points to add for killing a player
+	PickedUpPowerup   = 50  // how many points to add for picking up a powerup
 )

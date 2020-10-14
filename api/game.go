@@ -167,7 +167,7 @@ func getGameInfo(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param game_id path string true "game uuid"
-// @Success 200 {object} EventsResponse
+// @Success 200 {object} GameEventsResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /game/events/{game_id} [get]
 func getEvents(c *gin.Context) {
@@ -190,9 +190,55 @@ func getEvents(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &EventsResponse{
+	c.JSON(http.StatusOK, &GameEventsResponse{
 		Events: game.Games[params.GameID].Events,
 	})
+}
+
+// GetScores godoc
+// @Summary Get game scores
+// @Description Get's the scores for a game defined by UUID
+// @Tags Game
+// @Accept json
+// @Produce json
+// @Param game_id path string true "game uuid"
+// @Success 200 {object} GameScoresResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /game/scores/{game_id} [get]
+func getScores(c *gin.Context) {
+
+	params := &GetGameDetailRequest{}
+
+	if err := c.BindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read uri param`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	s := &GameScoresResponse{}
+
+	for _, player := range game.Games[params.GameID].Players {
+		s.Scores = append(s.Scores, &PlayerScore{
+			Name:          player.Name,
+			Score:         player.Score,
+			DamageDealt:   player.DamageDealt,
+			DamageTaken:   player.DamageTaken,
+			CreepKilled:   player.CreepKilled,
+			PlayersKilled: player.PlayersKilled,
+		})
+	}
+
+	c.JSON(http.StatusOK, &s)
 }
 
 // StartGame godoc

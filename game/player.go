@@ -23,17 +23,26 @@ type Player struct {
 	PowerUpBuffs []PowerUpType `json:"buffs"`
 	Actions      ActionChannel `json:"-"`
 	ActionCount  int           `json:"action_count"`
+
+	Score         int `json:"score"`
+	DamageTaken   int `json:"damage_taken"`
+	DamageDealt   int `json:"damage_dealt"`
+	CreepKilled   int `json:"creep_killed"`
+	PlayersKilled int `json:"players_killed"`
 }
 
 // NewPlayer starts a new Player instance
 func NewPlayer(p *storage.Player) *Player {
 
 	return &Player{
-		Name:     p.Name,
-		ID:       p.UUID,
-		Health:   100,
-		Position: NewPosition(),
-		Actions:  make(chan Action, PlayerRoundMoves),
+		Name:        p.Name,
+		ID:          p.UUID,
+		Health:      100,
+		Position:    NewPosition(),
+		Actions:     make(chan Action, PlayerRoundMoves),
+		Score:       0,
+		DamageDealt: 0,
+		DamageTaken: 0,
 	}
 }
 
@@ -103,6 +112,8 @@ func (p *Player) TakeDamage(dmg int, multiplier int) (int, int) {
 	if p.Health < 0 {
 		p.Health = 0
 	}
+
+	p.AddDamageTaken(dmg)
 
 	return dmg, p.Health
 }
@@ -185,4 +196,50 @@ func (p *Player) RemovePowerUp(powerup *PowerUp) {
 
 		break
 	}
+}
+
+// AddScore adds to the players existing score
+func (p *Player) AddScore(amount int) {
+	p.Score += amount
+}
+
+// AddDamageTaken adds to the players existing damage taken
+func (p *Player) AddDamageTaken(amount int) {
+	p.DamageTaken += amount
+}
+
+// AddDamageDealt adds to the players existing damage dealt
+func (p *Player) AddDamageDealt(amount int) {
+	p.DamageDealt += amount
+}
+
+// RecordCreepKilled records a score for a killed creep
+func (p *Player) RecordCreepKilled() {
+	p.Score += CreepKilledScore
+	p.CreepKilled++
+}
+
+// RecordPlayerKilled records a score for a killed creep
+func (p *Player) RecordPlayerKilled() {
+	p.Score += PlayerKilledScore
+	p.PlayersKilled++
+}
+
+// SaveFinalScore stores the players score
+func (p *Player) SaveFinalScore(gameid string, position int) {
+	// todo: figure out a position multiplier
+	var player storage.Player
+	storage.Storage.Get().Where("uuid = ?", p.ID).First(&player)
+
+	score := &storage.PlayerGameScore{
+		PlayerID:      player.ID,
+		BoardID:       gameid,
+		Position:      position,
+		Score:         p.Score,
+		DamageTaken:   p.DamageTaken,
+		DamageDealt:   p.DamageDealt,
+		CreepKilled:   p.CreepKilled,
+		PlayersKilled: p.PlayersKilled,
+	}
+	storage.Storage.Get().Create(&score)
 }

@@ -54,7 +54,22 @@ type GameEntitiesResponse struct {
 	PowerUps     int `json:"powerups"`
 }
 
-// EventsResponse is a response with a games' events
-type EventsResponse struct {
+// GameEventsResponse is a response with a games' events
+type GameEventsResponse struct {
 	Events []*storage.Event `json:"events"`
+}
+
+// GameScoresResponse is a response with a games' events
+type GameScoresResponse struct {
+	Scores []*PlayerScore `json:"scores"`
+}
+
+// PlayerScore contains a players score
+type PlayerScore struct {
+	Name          string `json:"name"`
+	Score         int    `json:"score"`
+	DamageDealt   int    `json:"damage_dealt"`
+	DamageTaken   int    `json:"damage_taken"`
+	CreepKilled   int    `json:"killed_creep"`
+	PlayersKilled int    `json:"killed_players"`
 }

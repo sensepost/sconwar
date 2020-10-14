@@ -10,8 +10,23 @@ import (
 type Player struct {
 	gorm.Model
 
-	Name string
-	UUID string
+	Name   string
+	UUID   string
+	Scores []PlayerGameScore
+}
+
+// PlayerGameScore records the score for a player per game played
+type PlayerGameScore struct {
+	gorm.Model
+
+	PlayerID      uint   `json:"-"`
+	BoardID       string `json:"board_id"`
+	Position      int    `json:"position"`
+	Score         int    `json:"score"`
+	DamageTaken   int    `json:"damage_taken"`
+	DamageDealt   int    `json:"damage_dealt"`
+	CreepKilled   int    `json:"killed_creep"`
+	PlayersKilled int    `json:"killed_players"`
 }
 
 // Board is the board model
