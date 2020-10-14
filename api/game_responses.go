@@ -26,6 +26,7 @@ type GameDetailResponse struct {
 // GameInfoResponse is a response summary for a game
 type GameInfoResponse struct {
 	Name          string               `json:"name"`
+	Status        game.BoardStatus     `json:"status"`
 	SizeX         int                  `json:"size_x"`
 	SizeY         int                  `json:"size_y"`
 	Fow           float64              `json:"fow"`

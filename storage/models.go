@@ -19,6 +19,7 @@ type Board struct {
 	gorm.Model
 
 	Name    string
+	Status  int
 	UUID    string
 	Created time.Time
 	Started time.Time

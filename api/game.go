@@ -135,6 +135,7 @@ func getGameInfo(c *gin.Context) {
 
 	i := &GameInfoResponse{
 		Name:          board.Name,
+		Status:        board.Status,
 		SizeX:         board.SizeX,
 		SizeY:         board.SizeY,
 		CurrentPlayer: board.CurrentPlayer,

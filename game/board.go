@@ -13,13 +13,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// BoardStatus is the board status
+type BoardStatus int
+
+// The board statuses
+const (
+	BoardStatusNew BoardStatus = iota
+	BoardStatusRunning
+	BoardStatusFinished
+)
+
 // Board is the game board
 type Board struct {
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	SizeX         int     `json:"size_x"`
-	SizeY         int     `json:"size_y"`
-	FOWDistance   float64 `json:"fow_distance"`
+	ID            string      `json:"id"`
+	Name          string      `json:"name"`
+	Status        BoardStatus `json:"status"`
+	SizeX         int         `json:"size_x"`
+	SizeY         int         `json:"size_y"`
+	FOWDistance   float64     `json:"fow_distance"`
 	Events        []*storage.Event
 	CurrentPlayer string `json:"current_player"`
 
@@ -39,6 +50,7 @@ func NewBoard(id string, name string) *Board {
 	b := &Board{
 		ID:      id,
 		Name:    name,
+		Status:  BoardStatusNew,
 		SizeX:   BoardX,
 		SizeY:   BoardY,
 		Created: time.Now(),
@@ -110,6 +122,7 @@ func (b *Board) JoinPlayer(p *Player) {
 func (b *Board) Run() {
 
 	b.Started = time.Now()
+	b.Status = BoardStatusRunning
 	b.updateDbModel()
 
 	for {
@@ -163,6 +176,7 @@ func (b *Board) Run() {
 	}
 
 	b.dbModel.Ended = time.Now()
+	b.Status = BoardStatusFinished
 	b.updateDbModel()
 }
 
