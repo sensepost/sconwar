@@ -27,8 +27,8 @@ type Player struct {
 	Score         int `json:"score"`
 	DamageTaken   int `json:"damage_taken"`
 	DamageDealt   int `json:"damage_dealt"`
-	CreepKilled   int `json:"creep_killed"`
-	PlayersKilled int `json:"players_killed"`
+	CreepKilled   int `json:"killed_creep"`
+	PlayersKilled int `json:"killed_players"`
 }
 
 // NewPlayer starts a new Player instance
