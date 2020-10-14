@@ -50,6 +50,7 @@ func SetupRouter() (r *gin.Engine) {
 
 		player := api.Group("/player")
 		{
+			player.POST("/", getPlayer)
 			player.POST("/register", registerPlayer)
 
 			player.POST("/status", playerStatus)

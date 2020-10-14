@@ -8,6 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
+// PlayerRequest is a request for a player
+type PlayerRequest struct {
+	PlayerID string `json:"player_id" binding:"required,uuid" example:"6d950e36-b82b-4253-93d7-faa63d3a0e63"`
+}
+
+// Validation validates request values
+func (r *PlayerRequest) Validation() error {
+
+	var player storage.Player
+	res := storage.Storage.Get().Where("UUID = ?", r.PlayerID).First(&player)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return errors.New("invalid player uuid")
+	}
+
+	return nil
+}
+
 // RegisterPlayerRequest is a request to register a player
 type RegisterPlayerRequest struct {
 	Name string `json:"name" binding:"required" example:"my name"`

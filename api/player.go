@@ -9,6 +9,43 @@ import (
 	"github.com/sensepost/sconwar/storage"
 )
 
+// GetPlayer godoc
+// @Summary Get player information
+// @Description Get's information about a player by UUID
+// @Tags Player
+// @Accept json
+// @Produce json
+// @Param data body	PlayerRequest true "PlayerRequest Request"
+// @Success 200 {object} storage.Player
+// @Failure 400 {object} ErrorResponse
+// @Failure 403 {object} ErrorResponse
+// @Router /player/ [post]
+func getPlayer(c *gin.Context) {
+
+	params := &PlayerRequest{}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read post params`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	var player storage.Player
+	storage.Storage.Get().Where("uuid = ?", params.PlayerID).Preload("Scores").First(&player)
+
+	c.JSON(http.StatusCreated, player)
+}
+
 // RegisterPlayer godoc
 // @Summary Register a new player
 // @Description Registers a new player that can join games. The returned UUID is the secret too!
