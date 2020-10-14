@@ -161,7 +161,7 @@ func (b *Board) Run() {
 				SrcEntity:   int(PlayerEntity),
 				SrcEntityID: player.ID,
 				// todo: add player name
-				Msg: `player is the last person standing`,
+				Msg: fmt.Sprintf(`player %s is the last person standing`, player.Name),
 			})
 
 			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
@@ -172,7 +172,7 @@ func (b *Board) Run() {
 		if len(b.AlivePlayers()) == 0 && len(b.AliveCreep()) > 0 {
 			b.LogEvent(&storage.Event{
 				Date: time.Now(),
-				Msg:  `all players have been eliminated. creep win`,
+				Msg:  `all players have been eliminated. the creep win!`,
 			})
 			break
 		}
@@ -193,8 +193,6 @@ func (b *Board) RemovePowerUp(powerup *PowerUp) {
 		if p != powerup {
 			continue
 		}
-
-		log.Info().Msg("removing powerup from board")
 
 		s[i] = s[len(s)-1]
 		b.PowerUps = s[:len(s)-1]
@@ -257,8 +255,7 @@ func (b *Board) processCreepTurn() {
 					SrcEntity:   int(CreepEntity),
 					SrcEntityID: creep.ID,
 					Action:      int(Nothing),
-					// todo: add creep name
-					Msg: `creep decided to do nothing`,
+					Msg:         fmt.Sprintf(`creep %s decided to do nothing`, creep.Name),
 				})
 
 				remMoves--
@@ -277,8 +274,7 @@ func (b *Board) processCreepTurn() {
 					SrcPos:      sourcepos,
 					DstPos:      creep.Position.ToSingleValue(),
 					Action:      int(Move),
-					// todo: add creep name
-					Msg: `creep moved position`,
+					Msg:         fmt.Sprintf(`creep %s moved position`, creep.Name),
 				})
 
 				remMoves--
@@ -302,8 +298,8 @@ func (b *Board) processCreepTurn() {
 						DstEntityID: target.ID,
 						DstPos:      target.Position.ToSingleValue(),
 						Action:      int(Attack),
-						// todo: add player name
-						Msg: fmt.Sprintf(`creep attacked another player for %d damage`, dmg),
+						Msg: fmt.Sprintf(`creep %s attacked player %s for %d damage`,
+							creep.Name, target.Name, dmg),
 					})
 
 					if h == 0 {
@@ -313,8 +309,7 @@ func (b *Board) processCreepTurn() {
 							SrcEntityID: target.ID,
 							SrcPos:      target.Position.ToSingleValue(),
 							Action:      int(Attack),
-							// todo: add player name
-							Msg: fmt.Sprintf(`player has been killed`),
+							Msg:         fmt.Sprintf(`player %s has been killed`, target.Name),
 						})
 
 						target.SaveFinalScore(b.ID, b.CurrentDeathPosition())
@@ -346,8 +341,8 @@ func (b *Board) processCreepTurn() {
 						DstEntityID: target.ID,
 						DstPos:      target.Position.ToSingleValue(),
 						Action:      int(Attack),
-						// todo: add creep name
-						Msg: fmt.Sprintf(`creep attacked another creep for %d damage`, dmg),
+						Msg: fmt.Sprintf(`creep %s attacked creep %s for %d damage`,
+							creep.Name, target.Name, dmg),
 					})
 
 					if h == 0 {
@@ -357,8 +352,7 @@ func (b *Board) processCreepTurn() {
 							SrcEntityID: target.ID,
 							SrcPos:      target.Position.ToSingleValue(),
 							Action:      int(Attack),
-							// todo: add creep name
-							Msg: fmt.Sprintf(`creep has been killed`),
+							Msg:         fmt.Sprintf(`creep %s has been killed`, target.Name),
 						})
 					}
 
@@ -398,8 +392,7 @@ func (b *Board) processPlayerTurn(ctx context.Context, p *Player) {
 				SrcEntity:   int(PlayerEntity),
 				SrcEntityID: p.ID,
 				SrcPos:      p.Position.ToSingleValue(),
-				// todo: add creep name
-				Msg: fmt.Sprintf(`timeout while waiting for player`),
+				Msg:         fmt.Sprintf(`timeout while waiting for player %s`, p.Name),
 			})
 			return
 		case action := <-p.Actions:

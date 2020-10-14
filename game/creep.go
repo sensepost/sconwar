@@ -2,12 +2,15 @@ package game
 
 import (
 	"math/rand"
+	"strings"
 
+	"github.com/Pallinder/go-randomdata"
 	"github.com/google/uuid"
 )
 
 // Creep is a creep
 type Creep struct {
+	Name     string    `json:"name"`
 	Position *Position `json:"position"`
 	Health   int       `json:"health"`
 	ID       string    `json:"id"`
@@ -17,6 +20,7 @@ type Creep struct {
 func NewCreep() *Creep {
 	// todo: choose random names for creep
 	return &Creep{
+		Name:     strings.ToLower(randomdata.SillyName()),
 		Position: NewPosition(),
 		ID:       uuid.New().String(),
 		Health:   100,
