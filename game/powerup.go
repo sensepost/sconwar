@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/google/uuid"
+	wr "github.com/mroth/weightedrand"
 )
 
 // PowerUpType is the type of power up
@@ -31,14 +32,15 @@ func NewPowerUp() *PowerUp {
 		return nil
 	}
 
-	// todo: add a chance that the powerup wont spawn,
-	// say by setting an Invalid property when
-
-	pups := []PowerUpType{Health, Teleport, DoubleDamage}
+	c := wr.NewChooser(
+		wr.Choice{Item: Health, Weight: 5},
+		wr.Choice{Item: Teleport, Weight: 5},
+		wr.Choice{Item: DoubleDamage, Weight: 5},
+	)
 
 	return &PowerUp{
 		ID:       uuid.New().String(),
-		Type:     pups[rand.Intn(len(pups))],
+		Type:     c.Pick().(PowerUpType),
 		Position: NewPosition(),
 	}
 }
