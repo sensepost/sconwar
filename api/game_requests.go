@@ -22,7 +22,11 @@ func (r *NewGameRequest) Validation() error {
 		}
 	}
 
-	// todo: check db for the name
+	var game storage.Board
+	res := storage.Storage.Get().Where("name = ?", r.Name).First(&game)
+	if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return errors.New("a game with that name already exists")
+	}
 
 	return nil
 }
