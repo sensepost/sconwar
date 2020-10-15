@@ -295,6 +295,7 @@ func startGame(c *gin.Context) {
 // @Produce json
 // @Param data body	JoinPlayerRequest true "Join Request"
 // @Success 200 {object} StatusResponse
+// @Failure 403 {object} ErrorResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /game/join [post]
 func joinGame(c *gin.Context) {
@@ -316,6 +317,14 @@ func joinGame(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `failed to validate request`,
 			Error:   err.Error(),
+		})
+		return
+	}
+
+	board := game.Games[params.GameID]
+	if board.Status != game.BoardStatusNew {
+		c.JSON(http.StatusForbidden, &ErrorResponse{
+			Message: `game is not accepting new players`,
 		})
 		return
 	}
