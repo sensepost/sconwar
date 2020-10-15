@@ -145,7 +145,7 @@ func (b *Board) Run() {
 		b.processCreepTurn()
 
 		for _, p := range b.AlivePlayers() {
-			b.CurrentPlayer = p.ID
+			b.CurrentPlayer = fmt.Sprintf(`(player) %s`, p.Name)
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
 
@@ -240,7 +240,7 @@ func (b *Board) CurrentDeathPosition() int {
 func (b *Board) processCreepTurn() {
 
 	for _, creep := range b.AliveCreep() {
-		b.CurrentPlayer = creep.ID
+		b.CurrentPlayer = fmt.Sprintf(`(creep) %s`, creep.Name)
 
 		remMoves := CreepRoundMoves
 
