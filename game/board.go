@@ -165,8 +165,7 @@ func (b *Board) Run() {
 				Date:        time.Now(),
 				SrcEntity:   int(PlayerEntity),
 				SrcEntityID: player.ID,
-				// todo: add player name
-				Msg: fmt.Sprintf(`player %s is the last person standing`, player.Name),
+				Msg:         fmt.Sprintf(`player %s is the last person standing`, player.Name),
 			})
 
 			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
@@ -267,7 +266,6 @@ func (b *Board) processCreepTurn() {
 				break
 
 			case Move:
-				// todo: move events are pretty noisy, maybe we don't need to record those?
 				sourcepos := creep.Position.ToSingleValue()
 
 				creep.Move()

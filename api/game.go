@@ -304,9 +304,6 @@ func startGame(c *gin.Context) {
 // @Router /game/join [post]
 func joinGame(c *gin.Context) {
 
-	// todo: check that player is not already in the game
-	// todo: check that the game is not already running
-
 	params := &JoinPlayerRequest{}
 
 	if err := c.BindJSON(&params); err != nil {
@@ -331,6 +328,15 @@ func joinGame(c *gin.Context) {
 			Message: `game is not accepting new players`,
 		})
 		return
+	}
+
+	for _, p := range game.Games[params.GameID].Players {
+		if params.PlayerID == p.ID {
+			c.JSON(http.StatusForbidden, &ErrorResponse{
+				Message: `player is already in the game`,
+			})
+			return
+		}
 	}
 
 	var player storage.Player

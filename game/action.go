@@ -48,8 +48,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 		SrcPos:      player.Position.ToSingleValue(),
 	}
 
-	// todo: this may be racy? especially for powerup pickups
-
 	switch a.Action {
 	case Move:
 
@@ -164,7 +162,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 			}
 		}
 
-		// todo: resolve names for the creep / player that is attacked
 		break
 	case Pickup:
 		for _, u := range board.PowerUps {
@@ -193,8 +190,15 @@ func (a *Action) Execute(player *Player, board *Board) {
 
 		break
 	default:
-		// todo: log this in the game log instead of a panic
-		panic(`no idea how you managed to queue an invalid action, but there you go`)
+		board.LogEvent(&storage.Event{
+			Date:        time.Now(),
+			SrcEntity:   int(PlayerEntity),
+			SrcEntityID: player.ID,
+			SrcPos:      player.Position.ToSingleValue(),
+			Action:      int(Attack),
+			Msg:         fmt.Sprintf(`player %s managed to queue an invalid action`, player.Name),
+		})
+		break
 	}
 
 	if len(e.Msg) == 0 {

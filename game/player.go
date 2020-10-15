@@ -164,10 +164,12 @@ func (p *Player) UsePowerUp(powerupID string) {
 	}
 
 	switch powerup.Type {
-	// todo: log events
 	case Health:
 		p.Health += PowerUpHealthBonus
-		// todo: upper limit health to say 120?
+		// ciel max health
+		if p.Health > PowerUpHealthBonusMax {
+			p.Health = PowerUpHealthBonusMax
+		}
 		break
 	case Teleport:
 		p.PowerUpBuffs = append(p.PowerUpBuffs, Teleport)

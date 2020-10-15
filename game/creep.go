@@ -18,7 +18,6 @@ type Creep struct {
 
 // NewCreep returns a new initialised Creep
 func NewCreep() *Creep {
-	// todo: choose random names for creep
 	return &Creep{
 		Name:     strings.ToLower(randomdata.SillyName()),
 		Position: NewPosition(),

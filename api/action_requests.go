@@ -27,7 +27,9 @@ func (r *ActionGamePlayerRequest) Validation() error {
 		return errors.New("invalid player uuid")
 	}
 
-	// todo: validate that the game has started
+	if game.Games[r.GameID].Status != game.BoardStatusRunning {
+		return errors.New(`game is not running and cannot accept actions`)
+	}
 
 	return nil
 }
@@ -46,8 +48,6 @@ func (r *ActionMoveRequest) Validation() error {
 		return err
 	}
 
-	// todo: validate distance
-
 	return nil
 }
 
@@ -64,8 +64,6 @@ func (r *ActionAttackRequest) Validation() error {
 	if err := r.GamePlayerIDs.Validation(); err != nil {
 		return err
 	}
-
-	// todo: validate distance
 
 	return nil
 }
@@ -84,8 +82,6 @@ func (r *ActionPickupRequest) Validation() error {
 		return err
 	}
 
-	// todo: validate distance
-
 	return nil
 }
 
@@ -102,7 +98,20 @@ func (r *ActionUseRequest) Validation() error {
 		return err
 	}
 
-	// todo: validate that the player owns the powerupid
+	owns := false
+	for _, p := range game.Games[r.GamePlayerIDs.GameID].Players {
+		if p.ID == r.GamePlayerIDs.PlayerID {
+			for _, u := range p.PowerUps {
+				if u.ID == r.PowerUpID {
+					owns = true
+				}
+			}
+		}
+	}
+
+	if !owns {
+		return errors.New(`player does not have or own this powerup id`)
+	}
 
 	return nil
 }
