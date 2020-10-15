@@ -102,7 +102,7 @@ func (p *Player) TakeDamage(dmg int, multiplier int) (int, int) {
 	}
 
 	if dmg == -1 {
-		dmg = rand.Intn(30)
+		dmg = rand.Intn(MaxDamage)
 	}
 
 	dmg = dmg * multiplier
