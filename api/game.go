@@ -60,7 +60,11 @@ func allGames(c *gin.Context) {
 
 	g := &AllGamesResponse{}
 	for _, d := range game.Games {
-		g.Games = append(g.Games, d.ID)
+		g.Games = append(g.Games, &AllGamesGame{
+			ID:     d.ID,
+			Name:   d.Name,
+			Status: int(d.Status),
+		})
 	}
 
 	c.JSON(http.StatusOK, g)
