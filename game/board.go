@@ -373,7 +373,7 @@ func (b *Board) chooseCreepAction() ActionType {
 
 	c := wr.NewChooser(
 		wr.Choice{Item: Move, Weight: 5},
-		wr.Choice{Item: Attack, Weight: 5},
+		wr.Choice{Item: Attack, Weight: 4},
 		wr.Choice{Item: Nothing, Weight: 2},
 	)
 
