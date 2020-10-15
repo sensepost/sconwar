@@ -72,7 +72,6 @@ func NewBoard(id string, name string) *Board {
 
 	for i := 0; i <= PowerUpMax; i++ {
 		if pup := NewPowerUp(); pup != nil {
-			// todo: log a new powerup spawning
 			b.PowerUps = append(b.PowerUps, pup)
 		}
 	}
@@ -139,6 +138,12 @@ func (b *Board) Run() {
 		if len(b.PowerUps) < PowerUpMax {
 			if pup := NewPowerUp(); pup != nil {
 				b.PowerUps = append(b.PowerUps, pup)
+				b.LogEvent(&storage.Event{
+					Date:        time.Now(),
+					SrcEntity:   int(PowerupEntity),
+					SrcEntityID: pup.ID,
+					Msg:         `a new powerup has spawned on the board`,
+				})
 			}
 		}
 
