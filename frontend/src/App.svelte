@@ -1,11 +1,12 @@
-<link href="./css/hacker.css" rel="stylesheet">
 <script>
-
   let baseURL = "http://localhost:8080";
   let promise = getGames();
   let currentGameUUID = "";
   let creeps = [];
   let players = [];
+  let player_id = "c82b3c5d-5983-419b-bb3b-002fd184ea1b";
+  let board_x = 20;
+  let board_y = 20;
 
   let power = false;
 
@@ -18,27 +19,27 @@
   let left = false;
   let right = false;
 
-  function hitButton(button){
-    if(button === 'select'){
+  function hitButton(button) {
+    if (button === "select") {
       select = true;
-    }else if(button === 'start'){
+    } else if (button === "start") {
       start = true;
-    }else if(button === 'a'){
+    } else if (button === "a") {
       a = true;
-    }else if(button === 'b'){
+    } else if (button === "b") {
       b = true;
-    }else if(button === 'up'){
+    } else if (button === "up") {
       up = true;
-    }else if(button === 'down'){
+    } else if (button === "down") {
       down = true;
-    }else if(button === 'left'){
+    } else if (button === "left") {
       left = true;
-    }else if(button === 'right'){
+    } else if (button === "right") {
       right = true;
     }
-    if(select && start && a && b && up && down && left && right){
+    if (select && start && a && b && up && down && left && right) {
       //do easter egg
-      new Audio('./pwned.mp3').play();
+      new Audio("./pwned.mp3").play();
       select = false;
       start = false;
       a = false;
@@ -50,11 +51,22 @@
     }
   }
 
-  function tooglePower(){
+  function tooglePower() {
     power = !power;
     currentGameUUID = "";
-    if(!power){
+    if (!power) {
       location.reload();
+    }
+  }
+
+  async function getGameInfo() {
+    const res = await fetch(`${baseURL}/api/game/info/${currentGameUUID}`);
+    const data = await res.json();
+
+    if (res.ok) {
+      return data;
+    } else {
+      throw new Error(text);
     }
   }
 
@@ -70,18 +82,24 @@
 
   function selectGame(gameID) {
     currentGameUUID = gameID;
-    new Audio('./soundtrack.mp3').play();
+    getGameInfo().then(function (data) {
+      board_x = data.size_x;
+      board_y = data.size_y;
+    });
+    new Audio("./soundtrack.mp3").play();
   }
 
   let cells = [];
   let creepPositions = new Map();
 
   function updateGameBoard(data) {
-    let x = data.game.size_x;
-    let y = data.game.size_y;
+    // let x = data.game.size_x;
+    // let y = data.game.size_y;
+    let x = board_x;
+    let y = board_y;
 
     let c = [];
-    let creepNewPos = new Map()
+    let creepNewPos = new Map();
 
     for (var i = 0; i < x; i++) {
       c.push(
@@ -90,19 +108,19 @@
         })
       );
     }
-    
-    if (data.game.creeps) {
-      creeps = data.game.creeps;
-      data.game.creeps.forEach(function (cc) {
+
+    if (data.creep) {
+      creeps = data.creep;
+      data.creep.forEach(function (cc) {
         let ch;
-        if(cc.health > 75){
-          ch = 'hi';
-        }else if(cc.health < 76 && cc.health > 40) {
-          ch = 'med';
-        }else if(cc.health < 40) {
-          ch = 'low';
-        }else{
-          ch = '';
+        if (cc.health > 75) {
+          ch = "hi";
+        } else if (cc.health < 76 && cc.health > 40) {
+          ch = "med";
+        } else if (cc.health < 40) {
+          ch = "low";
+        } else {
+          ch = "";
         }
 
         let pieceObj = {};
@@ -113,27 +131,52 @@
         pieceObj.x = cc.position.x - 1;
         pieceObj.y = cc.position.y - 1;
 
-        c[cc.position.x - 1][cc.position.y-1] = pieceObj;
+        c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
         creepNewPos.set(cc.id, pieceObj);
-       
+
         //c[cc.position.x][cc.position.y] = 2 + '/' + ch;
       });
-    }else {
+    } else {
       creeps = [];
     }
 
-    if (data.game.players) {
-      players = data.game.players;
-      data.game.players.forEach(function (cc) {
+    //This is the current player not the enemy players
+    if (data.player) {
+      //TODO : refactor this out
+      let cc = data.player;
+      let ch;
+      if (cc.health > 75) {
+        ch = "hi";
+      } else if (cc.health < 76 && cc.health > 40) {
+        ch = "med";
+      } else if (cc.health < 40) {
+        ch = "low";
+      } else {
+        ch = "";
+      }
+      let pieceObj = {};
+      pieceObj.type = 2; //Might want to change to be more identifiable
+      pieceObj.health = cc.health;
+      pieceObj.healthString = ch;
+      pieceObj.id = cc.id;
+      pieceObj.x = cc.position.x - 1;
+      pieceObj.y = cc.position.y - 1;
+
+      c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
+    }
+
+    if (data.players) {
+      players = data.players;
+      data.players.forEach(function (cc) {
         let ch;
-        if(cc.health > 75){
-          ch = 'hi';
-        }else if(cc.health < 76 && cc.health > 40) {
-          ch = 'med';
-        }else if(cc.health < 40) {
-          ch = 'low';
-        }else{
-          ch = '';
+        if (cc.health > 75) {
+          ch = "hi";
+        } else if (cc.health < 76 && cc.health > 40) {
+          ch = "med";
+        } else if (cc.health < 40) {
+          ch = "low";
+        } else {
+          ch = "";
         }
 
         let pieceObj = {};
@@ -144,47 +187,45 @@
         pieceObj.x = cc.position.x - 1;
         pieceObj.y = cc.position.y - 1;
 
-        c[cc.position.x - 1][cc.position.y-1] = pieceObj;
+        c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
       });
     } else {
       players = [];
     }
 
-    if (data.game.powerups) {
-      data.game.powerups.forEach(function (cc) {
+    if (data.powerups) {
+      data.powerups.forEach(function (cc) {
         let pieceObj = {};
         pieceObj.type = "P" + cc.type;
-        c[cc.position.x][cc.position.y] = pieceObj
+        c[cc.position.x][cc.position.y] = pieceObj;
       });
     }
 
     // find out what creeps have moved where by diffing to previous state stored in cells
     // create map of creep id and position moved
-    if(creepPositions.size > 0){
-
+    if (creepPositions.size > 0) {
       console.log(creepPositions);
 
-      for (const [key, oldPos] of creepPositions.entries()) {   
+      for (const [key, oldPos] of creepPositions.entries()) {
         let newPos = creepNewPos.get(oldPos.id);
         let xdiff = newPos.x - oldPos.x;
         let ydiff = newPos.y - oldPos.y;
-        console.log(xdiff + ',' + ydiff + '-' + oldPos.id);
-        if(xdiff === -1 && ydiff === 0){
+        console.log(xdiff + "," + ydiff + "-" + oldPos.id);
+        if (xdiff === -1 && ydiff === 0) {
           document.getElementById(oldPos.id).classList.add("moveleft");
-        }else if (xdiff === 1 && ydiff === 0){
+        } else if (xdiff === 1 && ydiff === 0) {
           document.getElementById(oldPos.id).classList.add("moveright");
-        }else if (ydiff === -1 && xdiff === 0){
+        } else if (ydiff === -1 && xdiff === 0) {
           document.getElementById(oldPos.id).classList.add("moveup");
-        }else if (ydiff === 1 && xdiff === 0){
+        } else if (ydiff === 1 && xdiff === 0) {
           document.getElementById(oldPos.id).classList.add("movedown");
-
-        }else if(xdiff === -1 && ydiff === -1){
+        } else if (xdiff === -1 && ydiff === -1) {
           document.getElementById(oldPos.id).classList.add("moveupleft");
-        }else if (xdiff === 1 && ydiff === -1){
+        } else if (xdiff === 1 && ydiff === -1) {
           document.getElementById(oldPos.id).classList.add("movedownleft");
-        }else if (xdiff === -1 && ydiff === 1){
+        } else if (xdiff === -1 && ydiff === 1) {
           document.getElementById(oldPos.id).classList.add("moveupright");
-        }else if (xdiff === 1 && ydiff === 1){
+        } else if (xdiff === 1 && ydiff === 1) {
           document.getElementById(oldPos.id).classList.add("movedownright");
         }
       }
@@ -196,8 +237,35 @@
     }, 2000);
   }
 
-  async function getGameDetails() {
-    const res = await fetch(`${baseURL}/api/game/get/${currentGameUUID}`);
+  async function getPlayerStatus() {
+    const res = await fetch(`${baseURL}/api/player/status`, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id }), // body data type must match "Content-Type" header
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      return data;
+    } else {
+      throw new Error(text);
+    }
+  }
+
+  async function getPlayerSurroundings() {
+    const res = await fetch(`${baseURL}/api/player/surroundings`, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id }), // body data type must match "Content-Type" header
+    });
+
     const data = await res.json();
 
     if (res.ok) {
@@ -208,8 +276,11 @@
   }
 
   function redrawGameBoard() {
-    getGameDetails().then(function (data) {
-      updateGameBoard(data);
+    getPlayerStatus().then(function (statusInfo) {
+      getPlayerSurroundings().then(function (data) {
+        data.player = statusInfo.player;
+        updateGameBoard(data);
+      });
     });
   }
 
@@ -233,7 +304,6 @@
     // }
     return s;
   }
-
 
   async function getGames() {
     const res = await fetch(`${baseURL}/api/game/`);
@@ -300,17 +370,22 @@
   }
 </style>
 
+<link href="./css/hacker.css" rel="stylesheet" />
 <main>
   <div style="position: absolute; left: 1000px; top: 10px;">
     <h1>Welcome to SCONWAR</h1>
+    <label>Player ID : </label> <input type="text"  bind:value={player_id}/>
     {#await promise}
       <p>...waiting</p>
-    {:then number}
-      {#if number.games}
+    {:then games}
+      {#if games.games}
         <p>Running Games</p>
-        {#each number.games as gameUUID}
+        {#each games.games as g}
           <li>
-            <button on:click={() => selectGame(gameUUID)}> {gameUUID} </button>
+            <button on:click={() => selectGame(g.id)}>
+              [{g.status == 0 ? 'Stopped' : 'Active'}]
+              {g.name}
+            </button>
           </li>
         {/each}
         <p>Selected Game : {currentGameUUID}</p>
@@ -327,37 +402,36 @@
     <div class="sidebar">
       [Creeps]
       {#each creeps as cre}
-      <div class="row">
-        {cre.health} - {cre.id}
-      </div>
-    {/each}
-    [Players]
+        <div class="row">{cre.health} - {cre.id}</div>
+      {/each}
+      [Players]
       {#each players as ply}
-      <div class="row">
-        {ply.health} - {ply.name} - {ply.id}
-      </div>
-    {/each}
+        <div class="row">{ply.health} - {ply.name} - {ply.id}</div>
+      {/each}
     </div>
   </div>
 
   <div class="gameboy">
-    <div class="{ power ? 'power-button on' : 'power-button' }" on:click={() => tooglePower()}></div>
+    <div
+      class={power ? 'power-button on' : 'power-button'}
+      on:click={() => tooglePower()} />
     <div class="gb-body">
       <div class="screen-box">
         <div class="power-box">
-          <div class="{ power ? 'power-light on' : 'power-light' }"></div>
+          <div class={power ? 'power-light on' : 'power-light'} />
           <div class="power-status">))</div>
           <div class="power-text">POWER</div>
-        </div>  
+        </div>
         <div class="screen-display">
-
           {#if currentGameUUID && power}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 {#each cells as r}
                   <div class="row">
                     {#each r as c}
-                      <div id="{c.id}" class="cell {getCellImageClass(c.type)} {getCellHealthClass(c.healthString)}"></div>
+                      <div
+                        id={c.id}
+                        class="cell {getCellImageClass(c.type)} {getCellHealthClass(c.healthString)}" />
                     {/each}
                   </div>
                 {/each}
@@ -368,133 +442,137 @@
           {#if power && !currentGameUUID}
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
-              <br/>
-              <img style="height:150px" src='./images/invader.gif'/>
-              <br/>
+              <br />
+              <img style="height:150px" src="./images/invader.gif" />
+              <br />
               Click to start
             </div>
           {/if}
-
-          
         </div>
         <div class="gameboy-color-logo">
           <span class="logo-gb">GAME BOY </span>
           <span class="logo-color">
-            <span class="logo-color-c">C</span><span class="logo-color-o1">O</span><span class="logo-color-l">L</span><span class="logo-color-o2">O</span><span class="logo-color-r">R</span>
+            <span class="logo-color-c">C</span><span
+              class="logo-color-o1">O</span><span
+              class="logo-color-l">L</span><span
+              class="logo-color-o2">O</span><span class="logo-color-r">R</span>
           </span>
-            
         </div>
       </div>
       <div class="nintendo-logo-body">Nintendo</div>
       <div class="button-box">
         <div class="arrow-group">
           <div class="up-box" on:click={() => hitButton('up')}>
-            <span class="arrow up"></span>
+            <span class="arrow up" />
           </div>
           <div class="right-box" on:click={() => hitButton('right')}>
-            <span class="arrow right"></span>
+            <span class="arrow right" />
           </div>
           <div class="down-box" on:click={() => hitButton('down')}>
-            <span class="arrow down"></span>
-          </div>  
-          <div class="center-box" >
-            <span class="dent"><span class="dent-highlight"></span></span>
+            <span class="arrow down" />
+          </div>
+          <div class="center-box">
+            <span class="dent"><span class="dent-highlight" /></span>
           </div>
           <div class="left-box" on:click={() => hitButton('left')}>
-            <span class="arrow left"></span>
+            <span class="arrow left" />
           </div>
         </div>
-        <div class="ab-button a" on:click={() => hitButton('a')}><span class="button-text-height">A</span></div>
-        <div class="ab-button b" on:click={() => hitButton('b')}><span class="button-text-height">B</span></div>
+        <div class="ab-button a" on:click={() => hitButton('a')}>
+          <span class="button-text-height">A</span>
+        </div>
+        <div class="ab-button b" on:click={() => hitButton('b')}>
+          <span class="button-text-height">B</span>
+        </div>
       </div>
-      <div class="pill-button button-select" on:click={() => hitButton('select')}>
-        <label class="select" >SELECT</label>
+      <div
+        class="pill-button button-select"
+        on:click={() => hitButton('select')}>
+        <label class="select">SELECT</label>
       </div>
       <div class="pill-button button-start" on:click={() => hitButton('start')}>
         <label class="start">START</label>
       </div>
       <div class="speaker">
-        <div class="row1">    
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+        <div class="row1">
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row2">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row3">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row4">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row5">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row6">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row7">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
-        <div class="row8">    
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+        <div class="row8">
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row9">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
         <div class="row10">
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
-          <div class="dot-hole"></div>
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
+          <div class="dot-hole" />
         </div>
       </div>
     </div>
   </div>
-
-  
 </main>
