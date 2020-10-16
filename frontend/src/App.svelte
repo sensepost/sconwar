@@ -1,4 +1,5 @@
 <link href="./css/hacker.css" rel="stylesheet">
+
 <script>
 
   let baseURL = "http://localhost:8080";
@@ -17,6 +18,8 @@
   let down = false;
   let left = false;
   let right = false;
+
+  let events = [];
 
   function hitButton(button){
     if(button === 'select'){
@@ -38,7 +41,7 @@
     }
     if(select && start && a && b && up && down && left && right){
       //do easter egg
-      new Audio('./pwned.mp3').play();
+      new Audio('./mp3/pwned.mp3').play();
       select = false;
       start = false;
       a = false;
@@ -59,6 +62,7 @@
   }
 
   async function newGame() {
+    gameover = false;
     const res = await fetch(`${baseURL}/api/game/new`);
     const data = await res.json();
     if (res.ok && data.created) {
@@ -69,14 +73,18 @@
   }
 
   function selectGame(gameID) {
+    gameover = false;
     currentGameUUID = gameID;
     new Audio('./soundtrack.mp3').play();
   }
 
   let cells = [];
   let creepPositions = new Map();
+  let gameover = false;
 
   function updateGameBoard(data) {
+    getGameEvents();
+
     let x = data.game.size_x;
     let y = data.game.size_y;
 
@@ -99,8 +107,10 @@
           ch = 'hi';
         }else if(cc.health < 76 && cc.health > 40) {
           ch = 'med';
-        }else if(cc.health < 40) {
+        }else if(cc.health < 40 && cc.health > 0) {
           ch = 'low';
+        }else if(cc.health === 0) {
+          ch = 'dead';
         }else{
           ch = '';
         }
@@ -124,14 +134,18 @@
 
     if (data.game.players) {
       players = data.game.players;
+      let alldead = 0;
       data.game.players.forEach(function (cc) {
         let ch;
         if(cc.health > 75){
           ch = 'hi';
         }else if(cc.health < 76 && cc.health > 40) {
           ch = 'med';
-        }else if(cc.health < 40) {
+        }else if(cc.health < 40 && cc.health > 0) {
           ch = 'low';
+        }else if(cc.health === 0){
+          alldead++;
+          ch = 'dead';
         }else{
           ch = '';
         }
@@ -146,6 +160,10 @@
 
         c[cc.position.x - 1][cc.position.y-1] = pieceObj;
       });
+
+      if(alldead === data.game.players.length){
+        gameover = true;
+      }
     } else {
       players = [];
     }
@@ -161,14 +179,11 @@
     // find out what creeps have moved where by diffing to previous state stored in cells
     // create map of creep id and position moved
     if(creepPositions.size > 0){
-
-      console.log(creepPositions);
-
       for (const [key, oldPos] of creepPositions.entries()) {   
         let newPos = creepNewPos.get(oldPos.id);
         let xdiff = newPos.x - oldPos.x;
         let ydiff = newPos.y - oldPos.y;
-        console.log(xdiff + ',' + ydiff + '-' + oldPos.id);
+        
         if(xdiff === -1 && ydiff === 0){
           document.getElementById(oldPos.id).classList.add("moveleft");
         }else if (xdiff === 1 && ydiff === 0){
@@ -197,7 +212,7 @@
   }
 
   async function getGameDetails() {
-    const res = await fetch(`${baseURL}/api/game/get/${currentGameUUID}`);
+    const res = await fetch(`${baseURL}/api/game/detail/${currentGameUUID}`);
     const data = await res.json();
 
     if (res.ok) {
@@ -208,9 +223,11 @@
   }
 
   function redrawGameBoard() {
-    getGameDetails().then(function (data) {
-      updateGameBoard(data);
-    });
+    if(!gameover){
+      getGameDetails().then(function (data) {
+        updateGameBoard(data);
+      });
+    }
   }
 
   function getCellImageClass(currentCellValue) {
@@ -246,6 +263,37 @@
     }
   }
 
+  async function getGameInfo() {
+    const res = await fetch(`${baseURL}/api/game/info/${currentGameUUID}`);
+    const data = await res.json();
+
+    if (res.ok) {
+      return data;
+    } else {
+      throw new Error(text);
+    }
+  }
+
+  async function getGameEvents() {
+    const res = await fetch(`${baseURL}/api/game/events/${currentGameUUID}`);
+    const data = await res.json();
+
+    const dtFormat = new Intl.DateTimeFormat('en-GB', {
+      timeStyle: 'medium',
+      timeZone: 'UTC'
+    });
+
+    data.events.forEach(e => {
+      e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
+    })
+
+    if (res.ok) {
+      events = data.events.reverse();
+    } else {
+      throw new Error(text);
+    }
+  }
+
   var intervalPointer;
   $: if (currentGameUUID != "") {
     intervalPointer = setInterval(() => redrawGameBoard(), 1000);
@@ -257,6 +305,27 @@
 
   $: if (currentGameUUID != "") {
     redrawGameBoard();
+  }
+
+
+  let leaderboardActive = false;
+  let eventsActive = false;
+  let gamestarted = false;
+
+  const toggleLeaderboard = () => {
+    leaderboardActive = !leaderboardActive;
+    if(leaderboardActive){
+      eventsActive = false;
+    }
+  }
+  const toggleEvents = () => {
+    eventsActive = !eventsActive;
+    if(eventsActive){
+      leaderboardActive = false;
+    }
+  }
+  const toggleStartGame = () => {
+    gamestarted = !gamestarted;
   }
 </script>
 
@@ -301,7 +370,8 @@
 </style>
 
 <main>
-  <div style="position: absolute; left: 1000px; top: 10px;">
+  <div style="position: absolute; left: 850px; top: 10px;">
+
     <h1>Welcome to SCONWAR</h1>
     {#await promise}
       <p>...waiting</p>
@@ -338,6 +408,14 @@
       </div>
     {/each}
     </div>
+    <div class="sidebar">
+      [Events]
+      {#each events as eve}
+        <div class="row">
+          {eve.CreatedAt} - {eve.msg}
+        </div>
+      {/each}
+    </div>
   </div>
 
   <div class="gameboy">
@@ -351,7 +429,7 @@
         </div>  
         <div class="screen-display">
 
-          {#if currentGameUUID && power}
+          {#if currentGameUUID && power && !gameover && gamestarted && !leaderboardActive && !eventsActive}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 {#each cells as r}
@@ -365,16 +443,81 @@
             </div>
           {/if}
 
-          {#if power && !currentGameUUID}
+          {#if power && !currentGameUUID && !gameover && !gamestarted && !leaderboardActive && !eventsActive}
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
               <br/>
               <img style="height:150px" src='./images/invader.gif'/>
               <br/>
-              Click to start
+              <div on:click={() => toggleStartGame()}>Click to start</div>
             </div>
           {/if}
 
+
+          {#if power && !currentGameUUID && !gameover && gamestarted && !leaderboardActive && !eventsActive}
+            <div class="info">
+              <div class="infotext">GAMES IN PLAY</div>
+              <div class="infoscroll">
+                {#await promise}
+                  <p>...loading games</p>
+                {:then number}
+                  {#if number.games}
+                    {#each number.games as gameUUID}
+                      
+                        <div class="clickable" on:click={() => selectGame(gameUUID)}> {gameUUID} </div>
+                      
+                    {/each}
+                  {:else}
+                    <p>No games running</p>
+                    <button on:click={newGame}>Start New Game</button>
+                  {/if}
+                {:catch error}
+                  <p style="color: red">
+                    Failed to get game list (check that the server is running)
+                  </p>
+                {/await}
+              </div>
+            </div>
+          {/if}
+
+          {#if power && leaderboardActive && !eventsActive}
+            <div class="info">
+              <div class="infotext">LEADERBOARD</div>
+              <div class="infotextmed">1. TEST..................................12345</div>
+              <div class="infotextmed">2. TEST..................................12345</div>
+              <div class="infotextmed">3. TEST..................................12345</div>
+              <div class="infotextmed">4. TEST..................................12345</div>
+              <div class="infotextmed">5. TEST..................................12345</div>
+              <div class="infotextmed">6. TEST..................................12345</div>
+              <div class="infotextmed">7. TEST..................................12345</div>
+              <div class="infotextmed">8. TEST..................................12345</div>
+              <div class="infotextmed">9. TEST..................................12345</div>
+              <div class="infotextmed">10. TEST..................................12345</div>
+            </div>
+          {/if}
+
+          {#if power && currentGameUUID && gamestarted && !leaderboardActive && eventsActive}
+            <div class="info">
+              <div class="infotext">EVENTS</div>
+              <div class="infotextsmall">Game ID: {currentGameUUID}</div>
+              <div class="infoscroll">
+                {#each events as eve}
+                  <div class="row" style="position:relative; top:10px; left:10px;">
+                    {eve.CreatedAt}: {eve.msg}
+                  </div>
+                {/each}
+              </div>
+
+            </div>
+          {/if}
+
+
+
+          {#if power && currentGameUUID && gameover && gamestarted && !leaderboardActive && !eventsActive}
+            <div class="background">
+              <div class="gameovertext">GAME OVER</div>
+            </div>
+          {/if}
           
         </div>
         <div class="gameboy-color-logo">
@@ -407,11 +550,11 @@
         <div class="ab-button a" on:click={() => hitButton('a')}><span class="button-text-height">A</span></div>
         <div class="ab-button b" on:click={() => hitButton('b')}><span class="button-text-height">B</span></div>
       </div>
-      <div class="pill-button button-select" on:click={() => hitButton('select')}>
-        <label class="select" >SELECT</label>
+      <div class="pill-button button-select" on:click={() => hitButton('select')}  on:click={() => toggleLeaderboard()}>
+        <label class="select">Leaderboard</label>
       </div>
-      <div class="pill-button button-start" on:click={() => hitButton('start')}>
-        <label class="start">START</label>
+      <div class="pill-button button-start" on:click={() => hitButton('start')}  on:click={() => toggleEvents()}>
+        <label class="start">Events</label>
       </div>
       <div class="speaker">
         <div class="row1">    

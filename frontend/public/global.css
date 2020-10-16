@@ -1,3 +1,14 @@
+	
+	@font-face{
+		font-family: 'arcadeFont';
+		src: url('fonts/ka1.ttf');
+	}
+
+	@font-face{
+		font-family: 'arcadeFont2';
+		src: url('fonts/ARCADE.TTF');
+	}
+	
 	html, body {
 		position: relative;
 		width: 100%;
@@ -61,22 +72,67 @@
 		border-color: #666;
 	}
 
-	/** GAME STYLING **/
+	/** GAMEOVER **/
+	.background {
+		background-image: url('./images/gameover3.gif'); 
+		height:661px;
+	}
+	.gameovertext {
+		position:relative; 
+		top:550px; 
+		font-size:3em; 
+		color:black;
+	}
 
+	/** GAME INFO **/
+	.info {
+		font-family: arcadeFont2 !important;
+		font-size:1.3em; 
+		color:black;
+	}
+	.infoscroll {
+		padding-top:10px;
+		overflow-y: scroll; 
+		height:560px;
+	}
+	.infotext {
+		position:relative; 
+		top:10px; 
+		font-size:3em; 
+		color:black;
+	}
+	.infotextmed {
+		position:relative; 
+		top:20px; 
+		font-size:2em; 
+		color:black;
+	}
+	.infotextsmall {
+		position:relative; 
+		font-size:1em; 
+		color:black;
+	}
+
+	/** LINKS **/
+	.clickable {
+		cursor: pointer;
+	}
+
+	/** GAME STYLING **/
 	.creep {
-		-webkit-mask-image: url('./images/spaceinvader.svg');
-		mask-image: url('./images/spaceinvader.svg'); 
+		-webkit-mask-image: url('./images/ghost.svg');
+		mask-image: url('./images/ghost.svg'); 
 	}
 
 	.powerup {
-		background: url('./images/mushroom.svg');
+		background: url('./images/cherry.png');
 		background-repeat: no-repeat;
 		background-size: 30px 30px;
 	}
 
-	.human {
-		background: url('./images/bomberman.svg');
-		background-repeat: no-repeat;
+	.player {
+		-webkit-mask-image: url('./images/pacman.svg');
+		mask-image: url('./images/pacman.svg'); 
 		background-size: 30px 30px;
 	}
 
@@ -96,6 +152,10 @@
 
 	.low {
 		background-color: red;
+	}
+
+	.dead {
+		background-color: white;
 	}
 
 	/** LOADING SCREEN **/
@@ -294,7 +354,7 @@
 	top: 20px;
 	left: 10px;
 	position: absolute;
-	z-index: -1;
+	/**z-index: -1;**/
   }
 
   .power-button.on {
@@ -322,7 +382,6 @@
   }	
   
   .power-box {
-  /*   background-color: blue; */
 	top: 78px;
 	left: 9px;
 	height: 22px;
@@ -666,13 +725,17 @@
   
   .select {
 	margin-top: 20px;
+	margin-left: -30px;
 	position: absolute;
+	color: rgb(81,88,80);
   }
   
   .start {
 	margin-top: 20px;
-	left: 4px;
+	margin-left: 0px;
+	left: 2px;
 	position: absolute;
+	color: rgb(81,88,80);
   }
   
   .speaker {
@@ -826,3 +889,5 @@
 	position: absolute;
 	z-index: 1;
   }
+
+  
