@@ -1,5 +1,6 @@
 <script>
-  let baseURL = "http://localhost:8080";
+  const apiUrl = __myapp.env.API_URL
+  let baseURL = apiUrl;
   let promise = getGames();
   let currentGameUUID = "";
   let creeps = [];
@@ -374,7 +375,7 @@
 <main>
   <div style="position: absolute; left: 1000px; top: 10px;">
     <h1>Welcome to SCONWAR</h1>
-    <label>Player ID : </label> <input type="text"  bind:value={player_id}/>
+    <label for="player">Player ID : </label> <input id="player" type="text"  bind:value={player_id}/>
     {#await promise}
       <p>...waiting</p>
     {:then games}
