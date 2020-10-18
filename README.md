@@ -4,8 +4,6 @@
 
 `sconwar` is a "bring your own client" programming game.
 
-[![Twitter](https://img.shields.io/badge/twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
-
 - Primary interface is via a RESTful API
 - Written in Go, clients can be in any language
 
