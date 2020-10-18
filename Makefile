@@ -12,7 +12,10 @@ clean:
 	go clean -x
 
 swagger-install:
-	go get -u github.com/swaggo/swag/cmd/swag
+	# go get -u github.com/swaggo/swag/cmd/swag
+	# pin 1.6.7 for now. something is wrong in 1.6.8
+	#	https://github.com/swaggo/swag/issues/810
+	go get github.com/swaggo/swag/cmd/swag@df209afeed2334a97c83aff34ea7abcad85c31f6
 
 swagger:
 	swag init -g api/router.go
@@ -20,12 +23,20 @@ swagger:
 install:
 	go install
 
+deps:
+	go mod download -x
+
 darwin:
 	GOOS=darwin GOARCH=amd64 go build $(LD_FLAGS) -o '$(BIN_DIR)/sconwar-$(V)-darwin-amd64'
 linux:
 	GOOS=linux GOARCH=amd64 go build $(LD_FLAGS) -o '$(BIN_DIR)/sconwar-$(V)-linux-amd64'
 windows:
 	GOOS=windows GOARCH=amd64 go build $(LD_FLAGS) -o '$(BIN_DIR)/sconwar-$(V)-windows-amd64.exe'
+docker:
+	go build $(LD_FLAGS) -o sconwar
+
+docker-image:
+	docker build -t sconwar:local .
 
 integrity:
 	cd $(BIN_DIR) && shasum *
