@@ -5,7 +5,7 @@ const (
 	BoardX                = 20
 	BoardY                = 20
 	CreepCount            = 15  // how many initial creep to spawn
-	FogOfWarPercent       = 100 // todo: fix reduce prod; how far a player can see other entities
+	FogOfWarPercent       = 30  // how far a player can see other entities
 	AttackRange           = 2   // distance considered in range for an attack
 	PlayerRoundMoves      = 2   // how many rounds a player gets to move
 	CreepRoundMoves       = 2   // how many rounds a creep gets to move
