@@ -67,6 +67,11 @@ func SetupRouter() (r *gin.Engine) {
 			action.POST("/pickup", pickupAction)
 			action.POST("/use", useAction)
 		}
+
+		meta := api.Group("/meta")
+		{
+			meta.GET("/types", getTypes)
+		}
 	}
 
 	return
