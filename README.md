@@ -1,132 +1,36 @@
-# sconwar
+# 👾 sconwar - a bring your own client programming game
 
-a bring your own client programming game
+`sconwar` is a "bring your own client" programming game.
 
-## building
+[![Twitter](https://img.shields.io/badge/twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
 
-run `make swagger install`
+<img align="right" src="./images/logo.png" height="220" alt="objection">
 
-## docker
+- Primary interface is via a RESTful API
+- Written in Go, clients can be in any language
 
-build the image with `make docker-image`
+## installation
 
-run with `docker run --rm -it -p 8080:8080 -e API_TOKEN=foo sconwar:local`
+The game server can be compiled with:
 
-## test information
-
-Example commands use [httpie](https://httpie.org/)
-
-### register a new player
-
-The UUID returned here is technically your "secret" to join games.
-
-```text
-$ post localhost:8080/api/player/register name=bob
-HTTP/1.1 200 OK
-Content-Length: 62
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:40:10 GMT
-
-{
-    "Created": true,
-    "UUID": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"
-}
+```bash
+make clean swagger-install deps swagger install
 ```
 
-### register a new game
+This will download dependencies and compile the `sconwar` executable.
 
-```text
-$ get localhost:8080/api/game/new
-HTTP/1.1 200 OK
-Content-Length: 62
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:32:09 GMT
+If you prefer docker, simply run `make docker` and then run the built image with:
 
-{
-    "Created": true,
-    "UUID": "09a997c0-e94d-41b0-97a4-d2abcbac0292"
-}
+```bash
+docker run --rm -it -p 8080:8080 -e API_TOKEN=foo sconwar:local
 ```
 
-### join the registered game
+## how to play
 
-```text
-$ post localhost:8080/api/game/join game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292 player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 16
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:32:28 GMT
+TODO
 
-{
-    "Success": true
-}
-```
+## license
 
-### start a game
+`sconwar` is licensed under a [GNU General Public v3 License](https://www.gnu.org/licenses/gpl-3.0.en.html). Permissions beyond the scope of this license may be available at [http://sensepost.com/contact/](http://sensepost.com/contact/).
 
-```text
-$ put localhost:8080/api/game/start/09a997c0-e94d-41b0-97a4-d2abcbac0292
-HTTP/1.1 200 OK
-Content-Length: 16
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:34:54 GMT
-
-{
-    "Success": true
-}
-```
-
-### get player status
-
-```text
-$ post localhost:8080/api/player/status game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292 player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 116
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:33:09 GMT
-
-{
-    "Player": {
-        "Health": 100,
-        "ID": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c",
-        "Name": "rusty-magnet",
-        "Position": {
-            "X": 0,
-            "Y": 9
-        }
-    }
-}
-```
-
-### check surroundings (creep/people in range)
-
-```text
-$ post localhost:8080/api/player/surroundings game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292  player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 29
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:33:32 GMT
-
-{
-    "Creep": null,
-    "Players": null
-}
-```
-
-### action a move command
-
-```text
-$ http -pbB post localhost:8080/api/action/move game_player_id:='{"game_id" : "09a997c0-e94d-41b0-97a4-d2abcbac0292", "player_id" : "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"}' x:=14 y:=3
-{
-    "game_player_id": {
-        "game_id": "09a997c0-e94d-41b0-97a4-d2abcbac0292",
-        "player_id": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"
-    },
-    "x": 14,
-    "y": 3
-}
-
-{
-    "Success": true
-}
-```
+The sconwar logo is a derivative work of [Mini Mike's Metro Minis](https://github.com/mikelovesrobots/mmmm), and the license is available [here](https://github.com/mikelovesrobots/mmmm/blob/master/LICENSE).
