@@ -51,11 +51,11 @@ type Event struct {
 	Date time.Time `json:"date_created"`
 
 	SrcEntity   int    `json:"src_entity"`
-	SrcEntityID string `json:"src_entity_id"`
+	SrcEntityID string `json:"-"` // don't leak id in api
 	SrcPos      int    `json:"src_pos"`
 
 	DstEntity   int    `json:"dst_entity"`
-	DstEntityID string `json:"dst_entity_id"`
+	DstEntityID string `json:"-"` // don't leak id in api
 	DstPos      int    `json:"dst_pos"`
 
 	Action int    `json:"action"`

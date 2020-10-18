@@ -15,7 +15,7 @@ type ActionChannel chan Action
 // Player represents a player of the game
 type Player struct {
 	Name   string `json:"name"`
-	ID     string `json:"id"`
+	ID     string `json:"-"` // don't leak the id in the api
 	Health int    `json:"health"`
 
 	Position     *Position     `json:"position"`
