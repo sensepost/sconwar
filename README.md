@@ -6,6 +6,12 @@ a bring your own client programming game
 
 run `make swagger install`
 
+## docker
+
+build the image with `make docker-image`
+
+run with `docker run --rm -it -p 8080:8080 -e API_TOKEN=foo sconwar:local`
+
 ## test information
 
 Example commands use [httpie](https://httpie.org/)
