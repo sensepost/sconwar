@@ -52,6 +52,7 @@ func getPlayer(c *gin.Context) {
 // @Tags Player
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param data body	RegisterPlayerRequest true "RegisterPlayerRequest Request"
 // @Success 201 {object} NewPlayerResponse
 // @Failure 400 {object} ErrorResponse

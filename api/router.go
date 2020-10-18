@@ -19,6 +19,10 @@ import (
 // @host localhost:8080
 // @BasePath /api
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name token
+
 // SetupRouter configures the HTTP routes we have
 func SetupRouter() (r *gin.Engine) {
 	r = gin.Default()

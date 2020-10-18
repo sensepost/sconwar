@@ -76,6 +76,7 @@ func allGames(c *gin.Context) {
 // @Tags Game
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param game_id path string true "game uuid"
 // @Success 200 {object} GameDetailResponse
 // @Failure 400 {object} ErrorResponse
