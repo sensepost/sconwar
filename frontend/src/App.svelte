@@ -228,27 +228,31 @@
     // find out what creeps have moved where by diffing to previous state stored in cells
     // create map of creep id and position moved
     if(creepPositions.size > 0){
+      
       for (const [key, oldPos] of creepPositions.entries()) {   
         let newPos = creepNewPos.get(oldPos.id);
-        let xdiff = newPos.x - oldPos.x;
-        let ydiff = newPos.y - oldPos.y;
-        
-        if(xdiff === -1 && ydiff === 0){
-          document.getElementById(oldPos.id).classList.add("moveleft");
-        } else if (xdiff === 1 && ydiff === 0) {
-          document.getElementById(oldPos.id).classList.add("moveright");
-        } else if (ydiff === -1 && xdiff === 0) {
-          document.getElementById(oldPos.id).classList.add("moveup");
-        } else if (ydiff === 1 && xdiff === 0) {
-          document.getElementById(oldPos.id).classList.add("movedown");
-        } else if (xdiff === -1 && ydiff === -1) {
-          document.getElementById(oldPos.id).classList.add("moveupleft");
-        } else if (xdiff === 1 && ydiff === -1) {
-          document.getElementById(oldPos.id).classList.add("movedownleft");
-        } else if (xdiff === -1 && ydiff === 1) {
-          document.getElementById(oldPos.id).classList.add("moveupright");
-        } else if (xdiff === 1 && ydiff === 1) {
-          document.getElementById(oldPos.id).classList.add("movedownright");
+
+        if(newPos){
+          let xdiff = newPos.x - oldPos.x;
+          let ydiff = newPos.y - oldPos.y;
+
+          if(xdiff === -1 && ydiff === 0){
+            document.getElementById(oldPos.id).classList.add("moveup");
+          } else if (xdiff === 1 && ydiff === 0) {
+            document.getElementById(oldPos.id).classList.add("movedown");
+          } else if (ydiff === -1 && xdiff === 0) {
+            document.getElementById(oldPos.id).classList.add("moveright");
+          } else if (ydiff === 1 && xdiff === 0) {
+            document.getElementById(oldPos.id).classList.add("moveleft");
+          } else if (xdiff === -1 && ydiff === -1) {
+            document.getElementById(oldPos.id).classList.add("moveupleft");
+          } else if (xdiff === 1 && ydiff === -1) {
+            document.getElementById(oldPos.id).classList.add("movedownleft");
+          } else if (xdiff === -1 && ydiff === 1) {
+            document.getElementById(oldPos.id).classList.add("moveupright");
+          } else if (xdiff === 1 && ydiff === 1) {
+            document.getElementById(oldPos.id).classList.add("movedownright");
+          }
         }
       }
     }

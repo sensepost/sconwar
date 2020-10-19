@@ -139,11 +139,11 @@
 		background-size: 30px 30px;
 	}
 
-	.open {
+	/* .open {
 		background: url('./images/empty.svg');
 		background-repeat: no-repeat;
 		background-size: 30px 30px;
-	}
+	} */
 
 	.hi {
 		background-color: green;
@@ -437,7 +437,7 @@
 	border-bottom-right-radius: 50% 15px;
 	box-shadow: 1px 1px black;
 	height: 785px;
-	width: 750px;
+	width: 765px;
 	position: relative;
 	margin-left: auto;
 	margin-right: auto;
