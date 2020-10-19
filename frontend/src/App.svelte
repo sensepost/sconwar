@@ -1,5 +1,5 @@
 <script>
-  const apiUrl = __myapp.env.API_URL
+  const apiUrl = __myapp.env.API_URL;
   let baseURL = apiUrl;
   let promise = getGames();
   let currentGameUUID = "";
@@ -43,7 +43,7 @@
       right = true;
     }
     if (select && start && a && b && up && down && left && right) {
-      new Audio('./mp3/pwned.mp3').play();
+      new Audio("./mp3/pwned.mp3").play();
       select = false;
       start = false;
       a = false;
@@ -76,7 +76,16 @@
 
   async function newGame() {
     gameover = false;
-    const res = await fetch(`${baseURL}/api/game/new`);
+
+    const res = await fetch(`${baseURL}/api/game/new`, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: "test_instance" }), // TODO : Make this dynamic
+    });
+
     const data = await res.json();
     if (res.ok && data.created) {
       return data;
@@ -103,6 +112,30 @@
   let creepPositions = new Map();
   let gameover = false;
 
+  function updateBoardStateForEntity(board, entity) {
+    let boardLength = board.length;
+// have to -1 on the X since we are diffing against the  board length
+    board[(boardLength - entity.x) - 1][entity.y] = entity;
+    return board;
+    // c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
+  }
+
+  function calculateHealthText(cc) {
+    let ch = "";
+    if (cc.health > 75) {
+      ch = "hi";
+    } else if (cc.health < 76 && cc.health > 40) {
+      ch = "med";
+    } else if (cc.health < 40 && cc.health > 0) {
+      ch = "low";
+    } else if (cc.health === 0) {
+      ch = "dead";
+    } else {
+      ch = "";
+    }
+    return ch;
+  }
+
   function updateGameBoard(data) {
     getGameEvents();
 
@@ -123,28 +156,15 @@
     if (data.creep) {
       creeps = data.creep;
       data.creep.forEach(function (cc) {
-        let ch;
-        if(cc.health > 75){
-          ch = "hi";
-        }else if(cc.health < 76 && cc.health > 40) {
-          ch = "med";
-        }else if(cc.health < 40 && cc.health > 0) {
-          ch = "low";
-        }else if(cc.health === 0) {
-          ch = "dead";
-        }else{
-          ch = "";
-        }
-
         let pieceObj = {};
         pieceObj.type = 1;
         pieceObj.health = cc.health;
-        pieceObj.healthString = ch;
+        pieceObj.healthString = calculateHealthText(cc);
         pieceObj.id = cc.id;
         pieceObj.x = cc.position.x - 1;
         pieceObj.y = cc.position.y - 1;
 
-        c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
+        c = updateBoardStateForEntity(c, pieceObj);
         creepNewPos.set(cc.id, pieceObj);
       });
     } else {
@@ -156,64 +176,35 @@
     if (data.player) {
       //TODO : refactor this out
       let cc = data.player;
-
-      let ch;
-      if (cc.health > 75) {
-        ch = "hi";
-      } else if (cc.health < 76 && cc.health > 40) {
-        ch = "med";
-      } else if (cc.health < 40 && cc.health > 0) {
-        ch = "low";
-      }else if(cc.health === 0){
-        alldead++;
-        ch = "dead";
-      } else {
-        ch = "";
-      }
       let pieceObj = {};
       pieceObj.type = 2; //Might want to change to be more identifiable
       pieceObj.health = cc.health;
-      pieceObj.healthString = ch;
+      pieceObj.healthString = calculateHealthText(cc);
       pieceObj.id = cc.id;
       pieceObj.x = cc.position.x - 1;
       pieceObj.y = cc.position.y - 1;
 
-      c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
+      c = updateBoardStateForEntity(c, pieceObj);
     }
 
     if (data.players) {
       players = data.players;
       data.players.forEach(function (cc) {
-        let ch;
-        if (cc.health > 75) {
-          ch = "hi";
-        } else if (cc.health < 76 && cc.health > 40) {
-          ch = "med";
-        } else if (cc.health < 40 && cc.health > 0) {
-          ch = "low";
-        }else if(cc.health === 0){
-          alldead++;
-          ch = "dead";
-        } else {
-          ch = "";
-        }
-
         let pieceObj = {};
         pieceObj.type = 2;
         pieceObj.health = cc.health;
-        pieceObj.healthString = ch;
+        pieceObj.healthString = calculateHealthText(cc);
         pieceObj.id = cc.id;
         pieceObj.x = cc.position.x - 1;
         pieceObj.y = cc.position.y - 1;
 
-        c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
+        c = updateBoardStateForEntity(c, pieceObj);
       });
-
     } else {
       players = [];
     }
 
-    if(alldead === data.players+1){
+    if (alldead === data.players + 1) {
       gameover = true;
     }
 
@@ -221,7 +212,10 @@
       data.powerups.forEach(function (cc) {
         let pieceObj = {};
         pieceObj.type = "P" + cc.type;
-        c[cc.position.x][cc.position.y] = pieceObj;
+        pieceObj.x = cc.position.x - 1;
+        pieceObj.y = cc.position.y - 1;
+
+        c = updateBoardStateForEntity(c, pieceObj);
       });
     }
 
@@ -320,7 +314,7 @@
   }
 
   function redrawGameBoard() {
-    if(!gameover){
+    if (!gameover) {
       getPlayerStatus().then(function (statusInfo) {
         getPlayerSurroundings().then(function (data) {
           data.player = statusInfo.player;
@@ -365,14 +359,14 @@
     const res = await fetch(`${baseURL}/api/game/events/${currentGameUUID}`);
     const data = await res.json();
 
-    const dtFormat = new Intl.DateTimeFormat('en-GB', {
-      timeStyle: 'medium',
-      timeZone: 'UTC'
+    const dtFormat = new Intl.DateTimeFormat("en-GB", {
+      timeStyle: "medium",
+      timeZone: "UTC",
     });
 
-    data.events.forEach(e => {
+    data.events.forEach((e) => {
       e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
-    })
+    });
 
     if (res.ok) {
       events = data.events.reverse();
@@ -400,19 +394,19 @@
 
   const toggleLeaderboard = () => {
     scoresActive = !scoresActive;
-    if(scoresActive){
+    if (scoresActive) {
       eventsActive = false;
     }
-  }
+  };
   const toggleEvents = () => {
     eventsActive = !eventsActive;
-    if(eventsActive){
+    if (eventsActive) {
       scoresActive = false;
     }
-  }
+  };
   const toggleStartGame = () => {
     gamestarted = !gamestarted;
-  }
+  };
 </script>
 
 <style>
@@ -458,9 +452,9 @@
 <link href="./css/hacker.css" rel="stylesheet" />
 <main>
   <div style="position: absolute; left: 850px; top: 10px;">
-
     <h1>Welcome to SCONWAR</h1>
-    <label for="player">Player ID : </label> <input id="player" type="text"  bind:value={player_id}/>
+    <label for="player">Player ID : </label>
+    <input id="player" type="text" bind:value={player_id} />
     {#await promise}
       <p>...waiting</p>
     {:then games}
@@ -498,9 +492,7 @@
     <div class="sidebar">
       [Events]
       {#each events as eve}
-        <div class="row">
-          {eve.CreatedAt} - {eve.msg}
-        </div>
+        <div class="row">{eve.CreatedAt} - {eve.msg}</div>
       {/each}
     </div>
   </div>
@@ -517,12 +509,13 @@
           <div class="power-text">POWER</div>
         </div>
         <div class="screen-display">
-
           {#if currentGameUUID && power && !gameover && gamestarted && !scoresActive && !eventsActive}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 <div class="row">
-                  <div class="cell central info" style="margin-left:30px">1</div>
+                  <div class="cell central info" style="margin-left:30px">
+                    1
+                  </div>
                   <div class="cell central info">2</div>
                   <div class="cell central info">3</div>
                   <div class="cell central info">4</div>
@@ -546,7 +539,7 @@
 
                 {#each cells as r, i}
                   <div class="row">
-                    <div class="cell central info">{i+1}</div>
+                    <div class="cell central info">{ (board_x - i)}</div>
                     {#each r as c}
                       <div
                         id={c.id}
@@ -561,9 +554,12 @@
           {#if power && !currentGameUUID && !gameover && !gamestarted && !scoresActive && !eventsActive}
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
-              <br/>
-              <img style="height:150px" alt="Space invader image" src='./images/invader.gif'/>
-              <br/>
+              <br />
+              <img
+                style="height:150px"
+                alt="Space invader image"
+                src="./images/invader.gif" />
+              <br />
               <div on:click={() => toggleStartGame()}>Click to start</div>
             </div>
           {/if}
@@ -577,7 +573,11 @@
                 {:then number}
                   {#if number.games}
                     {#each number.games as gameUUID}
-                        <div class="clickable" on:click={() => selectGame(gameUUID)}> {gameUUID.name} </div>
+                      <div
+                        class="clickable"
+                        on:click={() => selectGame(gameUUID)}>
+                        {gameUUID.name}
+                      </div>
                     {/each}
                   {:else}
                     <p>No games currently running</p>
@@ -595,7 +595,7 @@
             <div class="info">
               <div class="infotext">SCORES</div>
               <div class="infoscroll" style="padding-left:10px;">
-                <table style="width:100%"> 
+                <table style="width:100%">
                   <tr>
                     <th class="central">Name</th>
                     <th class="central">D+</th>
@@ -629,12 +629,14 @@
               <div class="infotextsmall">Game ID: {currentGameUUID}</div>
               <div class="infoscroll">
                 {#each events as eve}
-                  <div class="row" style="position:relative; top:10px; left:0px;">
-                    {eve.CreatedAt}: {eve.msg}
+                  <div
+                    class="row"
+                    style="position:relative; top:10px; left:0px;">
+                    {eve.CreatedAt}:
+                    {eve.msg}
                   </div>
                 {/each}
               </div>
-
             </div>
           {/if}
 
@@ -643,7 +645,6 @@
               <div class="gameovertext">GAME OVER</div>
             </div>
           {/if}
-          
         </div>
         <div class="gameboy-color-logo">
           <span class="logo-gb">GAME BOY </span>
@@ -675,10 +676,16 @@
           <span class="button-text-height">B</span>
         </div>
       </div>
-      <div class="pill-button button-select" on:click={() => hitButton('select')}  on:click={() => toggleLeaderboard()}>
+      <div
+        class="pill-button button-select"
+        on:click={() => hitButton('select')}
+        on:click={() => toggleLeaderboard()}>
         <label class="select">Scores</label>
       </div>
-      <div class="pill-button button-start" on:click={() => hitButton('start')}  on:click={() => toggleEvents()}>
+      <div
+        class="pill-button button-start"
+        on:click={() => hitButton('start')}
+        on:click={() => toggleEvents()}>
         <label class="start">Events</label>
       </div>
       <div class="speaker">
@@ -764,3 +771,4 @@
     </div>
   </div>
 </main>
+
