@@ -344,7 +344,6 @@
   }
 
   function getCellHealthClass(cell) {
-    console.log(cell);
     if(cell.type != 2){
       let s = String(cell.healthString);
       return s;
