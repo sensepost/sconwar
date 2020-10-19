@@ -60,7 +60,11 @@ func allGames(c *gin.Context) {
 
 	g := &AllGamesResponse{}
 	for _, d := range game.Games {
-		g.Games = append(g.Games, d.ID)
+		g.Games = append(g.Games, &AllGamesGame{
+			ID:     d.ID,
+			Name:   d.Name,
+			Status: int(d.Status),
+		})
 	}
 
 	c.JSON(http.StatusOK, g)
@@ -72,6 +76,7 @@ func allGames(c *gin.Context) {
 // @Tags Game
 // @Accept json
 // @Produce json
+// @Security ApiKeyAuth
 // @Param game_id path string true "game uuid"
 // @Success 200 {object} GameDetailResponse
 // @Failure 400 {object} ErrorResponse
@@ -295,12 +300,10 @@ func startGame(c *gin.Context) {
 // @Produce json
 // @Param data body	JoinPlayerRequest true "Join Request"
 // @Success 200 {object} StatusResponse
+// @Failure 403 {object} ErrorResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /game/join [post]
 func joinGame(c *gin.Context) {
-
-	// todo: check that player is not already in the game
-	// todo: check that the game is not already running
 
 	params := &JoinPlayerRequest{}
 
@@ -318,6 +321,23 @@ func joinGame(c *gin.Context) {
 			Error:   err.Error(),
 		})
 		return
+	}
+
+	board := game.Games[params.GameID]
+	if board.Status != game.BoardStatusNew {
+		c.JSON(http.StatusForbidden, &ErrorResponse{
+			Message: `game is not accepting new players`,
+		})
+		return
+	}
+
+	for _, p := range game.Games[params.GameID].Players {
+		if params.PlayerID == p.ID {
+			c.JSON(http.StatusForbidden, &ErrorResponse{
+				Message: `player is already in the game`,
+			})
+			return
+		}
 	}
 
 	var player storage.Player

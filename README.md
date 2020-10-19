@@ -1,126 +1,60 @@
-# sconwar
+# 👾 sconwar - a bring your own client programming game
 
-a bring your own client programming game
+<img align="right" src="./images/logo.png" height="220" alt="sconwar">
 
-## building
+`sconwar` is a "bring your own client" programming game where the only interface with the game is via a RESTful api. Some `sconwar` features are:
 
-run `make swagger install`
+- Primary interface is via a RESTful API
+- Turn-based game logic
+- Written in Go, clients can be in any language
 
-## test information
+## installation
 
-Example commands use [httpie](https://httpie.org/)
+The game server can be compiled with:
 
-### register a new player
-
-The UUID returned here is technically your "secret" to join games.
-
-```text
-$ post localhost:8080/api/player/register name=bob
-HTTP/1.1 200 OK
-Content-Length: 62
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:40:10 GMT
-
-{
-    "Created": true,
-    "UUID": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"
-}
+```bash
+make clean swagger-install deps swagger install
 ```
 
-### register a new game
+This will download dependencies and compile the `sconwar` executable.
 
-```text
-$ get localhost:8080/api/game/new
-HTTP/1.1 200 OK
-Content-Length: 62
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:32:09 GMT
+If you prefer docker, simply run `make docker` and then run the built image with:
 
-{
-    "Created": true,
-    "UUID": "09a997c0-e94d-41b0-97a4-d2abcbac0292"
-}
+```bash
+docker run --rm -it -p 8080:8080 -e API_TOKEN=foo sconwar:local
 ```
 
-### join the registered game
+## how to play
 
-```text
-$ post localhost:8080/api/game/join game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292 player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 16
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:32:28 GMT
+<img align="right" src="./images/api.png" height="250" alt="sconwar">
 
-{
-    "Success": true
-}
-```
+The most important resource you need to know about the is the API documentation. Once the server is running you can find the documentation by browsing to it. Unless you have a custom hosting setup, you can find this at <http://localhost:8080/>.
 
-### start a game
+### getting started overview
 
-```text
-$ put localhost:8080/api/game/start/09a997c0-e94d-41b0-97a4-d2abcbac0292
-HTTP/1.1 200 OK
-Content-Length: 16
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:34:54 GMT
+To start a `sconwar` game, you need two things:
 
-{
-    "Success": true
-}
-```
+- A player ID, obtainable by registering to the server. This ID is a secret, and you should treat it that way.
+- A game ID, obtainable by starting a new game.
 
-### get player status
+Depending on the server setup, an administrator could either share the key configured to setup new users, or you could ask for a player token.
 
-```text
-$ post localhost:8080/api/player/status game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292 player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 116
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:33:09 GMT
+### game rules
 
-{
-    "Player": {
-        "Health": 100,
-        "ID": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c",
-        "Name": "rusty-magnet",
-        "Position": {
-            "X": 0,
-            "Y": 9
-        }
-    }
-}
-```
+`sconwar` itself is really simple. A game board that is typically 20 by 20 tiles big is populated with a number of creep, powerups and other players. Players are given 30 seconds to issue commands in their turn, after which the next player will be granted a chance to issue an action. A player may queue up to two commands before their turn which will be executed as soon as its their turn.
 
-### check surroundings (creep/people in range)
+Issue enough attack, move & pickup commands to be the last person standing, and win the round!
 
-```text
-$ post localhost:8080/api/player/surroundings game_id=09a997c0-e94d-41b0-97a4-d2abcbac0292  player_id=a3b7dee8-fa38-43dc-b635-1935cf0a4d6c
-HTTP/1.1 200 OK
-Content-Length: 29
-Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2020 15:33:32 GMT
+### starting a new game
 
-{
-    "Creep": null,
-    "Players": null
-}
-```
+Games are identified by a UUID which should be used as the `gameid` whenever an API call requires that. Before playing a game of `sconwar`, you need to start and join a game.
 
-### action a move command
+To start a new game, call the `game/new` endpoint, recording the returned UUID. Next, join your player to that game with the `game/join` endpoint. Once all of the players in the game have joined, the `game/start/{uuid}` endpoint should be called to start the game.
 
-```text
-$ http -pbB post localhost:8080/api/action/move game_player_id:='{"game_id" : "09a997c0-e94d-41b0-97a4-d2abcbac0292", "player_id" : "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"}' x:=14 y:=3
-{
-    "game_player_id": {
-        "game_id": "09a997c0-e94d-41b0-97a4-d2abcbac0292",
-        "player_id": "a3b7dee8-fa38-43dc-b635-1935cf0a4d6c"
-    },
-    "x": 14,
-    "y": 3
-}
+This game & player id combination is used in all `action/*` endpoints to issue commands.
 
-{
-    "Success": true
-}
-```
+## license
+
+`sconwar` is licensed under a [GNU General Public v3 License](https://www.gnu.org/licenses/gpl-3.0.en.html). Permissions beyond the scope of this license may be available at [http://sensepost.com/contact/](http://sensepost.com/contact/).
+
+The sconwar logo is a derivative work of [Mini Mike's Metro Minis](https://github.com/mikelovesrobots/mmmm), and the license is available [here](https://github.com/mikelovesrobots/mmmm/blob/master/LICENSE).

@@ -55,3 +55,12 @@ Or remove the script via:
 ```bash
 rm scripts/setupTypeScript.js
 ```
+
+## Using Docker
+
+Run the following commands to build and run the front end
+
+```docker
+docker build -t sconwar:frontend -f Dockerfile.frontend .
+docker run -p 8081:5000 -v "$(pwd)/env.conf:/usr/src/app/.env:ro" sconwar:frontend
+```

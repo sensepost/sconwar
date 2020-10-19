@@ -15,7 +15,7 @@ type ActionChannel chan Action
 // Player represents a player of the game
 type Player struct {
 	Name   string `json:"name"`
-	ID     string `json:"id"`
+	ID     string `json:"-"` // don't leak the id in the api
 	Health int    `json:"health"`
 
 	Position     *Position     `json:"position"`
@@ -102,7 +102,7 @@ func (p *Player) TakeDamage(dmg int, multiplier int) (int, int) {
 	}
 
 	if dmg == -1 {
-		dmg = rand.Intn(30)
+		dmg = rand.Intn(MaxDamage)
 	}
 
 	dmg = dmg * multiplier
@@ -164,10 +164,12 @@ func (p *Player) UsePowerUp(powerupID string) {
 	}
 
 	switch powerup.Type {
-	// todo: log events
 	case Health:
 		p.Health += PowerUpHealthBonus
-		// todo: upper limit health to say 120?
+		// ciel max health
+		if p.Health > PowerUpHealthBonusMax {
+			p.Health = PowerUpHealthBonusMax
+		}
 		break
 	case Teleport:
 		p.PowerUpBuffs = append(p.PowerUpBuffs, Teleport)

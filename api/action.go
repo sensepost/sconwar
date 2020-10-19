@@ -150,8 +150,6 @@ func pickupAction(c *gin.Context) {
 		}
 	}
 
-	// todo: check that the powerup is in range
-
 	action := game.NewAction(game.Pickup)
 	action.SetXY(params.X, params.Y)
 

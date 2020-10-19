@@ -43,30 +43,43 @@ func (p *Position) GetPosition() (int, int) {
 	return p.X, p.Y
 }
 
-// MoveRandom moves to a random position for a
-// specific distance
+// MoveRandom moves to a random position for a specific distance
+// Both the x,y as well as direction (+ or -) is chosen randomly
 func (p *Position) MoveRandom(distance int) {
 
-	// todo: add a chance that either x or y does not
-	// change, meaning we just go up, down, left or
-	// right. right now we only go diag.
-
+	// silly filer for obvious out of bounds move attempts
 	if distance > BoardX || distance > BoardY {
 		return
 	}
 
-	// X
-	if rand.Float32() < 0.5 {
-		p.X = p.X + distance
-	} else {
-		p.X = p.X - distance
-	}
+	var (
+		movedX = false
+		movedY = false
+	)
 
-	// Y
-	if rand.Float32() < 0.5 {
-		p.Y = p.Y + distance
-	} else {
-		p.Y = p.Y - distance
+	for !movedX && !movedY {
+
+		// X
+		if rand.Float32() > 0.5 {
+			movedX = true
+
+			if rand.Float32() < 0.5 {
+				p.X = p.X + distance
+			} else {
+				p.X = p.X - distance
+			}
+		}
+
+		// Y
+		if rand.Float32() > 0.5 {
+			movedY = true
+
+			if rand.Float32() < 0.5 {
+				p.Y = p.Y + distance
+			} else {
+				p.Y = p.Y - distance
+			}
+		}
 	}
 
 	p.floorAndCeilPosition()

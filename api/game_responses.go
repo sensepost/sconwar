@@ -15,7 +15,14 @@ type NewGameResponse struct {
 
 // AllGamesResponse is a response with all games
 type AllGamesResponse struct {
-	Games []string `json:"games"`
+	Games []*AllGamesGame `json:"games"`
+}
+
+// AllGamesGame has details for a game in the all games response
+type AllGamesGame struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Status int    `json:"status"`
 }
 
 // GameDetailResponse is a response with a single game

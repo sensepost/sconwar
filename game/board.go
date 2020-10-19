@@ -72,7 +72,6 @@ func NewBoard(id string, name string) *Board {
 
 	for i := 0; i <= PowerUpMax; i++ {
 		if pup := NewPowerUp(); pup != nil {
-			// todo: log a new powerup spawning
 			b.PowerUps = append(b.PowerUps, pup)
 		}
 	}
@@ -139,13 +138,19 @@ func (b *Board) Run() {
 		if len(b.PowerUps) < PowerUpMax {
 			if pup := NewPowerUp(); pup != nil {
 				b.PowerUps = append(b.PowerUps, pup)
+				b.LogEvent(&storage.Event{
+					Date:        time.Now(),
+					SrcEntity:   int(PowerupEntity),
+					SrcEntityID: pup.ID,
+					Msg:         `a new powerup has spawned on the board`,
+				})
 			}
 		}
 
 		b.processCreepTurn()
 
 		for _, p := range b.AlivePlayers() {
-			b.CurrentPlayer = p.ID
+			b.CurrentPlayer = fmt.Sprintf(`(player) %s`, p.Name)
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
 			defer cancel()
 
@@ -160,8 +165,7 @@ func (b *Board) Run() {
 				Date:        time.Now(),
 				SrcEntity:   int(PlayerEntity),
 				SrcEntityID: player.ID,
-				// todo: add player name
-				Msg: fmt.Sprintf(`player %s is the last person standing`, player.Name),
+				Msg:         fmt.Sprintf(`player %s is the last person standing`, player.Name),
 			})
 
 			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
@@ -240,7 +244,7 @@ func (b *Board) CurrentDeathPosition() int {
 func (b *Board) processCreepTurn() {
 
 	for _, creep := range b.AliveCreep() {
-		b.CurrentPlayer = creep.ID
+		b.CurrentPlayer = fmt.Sprintf(`(creep) %s`, creep.Name)
 
 		remMoves := CreepRoundMoves
 
@@ -262,7 +266,6 @@ func (b *Board) processCreepTurn() {
 				break
 
 			case Move:
-				// todo: move events are pretty noisy, maybe we don't need to record those?
 				sourcepos := creep.Position.ToSingleValue()
 
 				creep.Move()
@@ -373,7 +376,7 @@ func (b *Board) chooseCreepAction() ActionType {
 
 	c := wr.NewChooser(
 		wr.Choice{Item: Move, Weight: 5},
-		wr.Choice{Item: Attack, Weight: 5},
+		wr.Choice{Item: Attack, Weight: 4},
 		wr.Choice{Item: Nothing, Weight: 2},
 	)
 

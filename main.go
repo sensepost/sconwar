@@ -22,5 +22,5 @@ func main() {
 	storage.InitDb()
 
 	game.Setup()
-	api.SetupRouter().Run("localhost:8080")
+	api.SetupRouter().Run(":8080")
 }
