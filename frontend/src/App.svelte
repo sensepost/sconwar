@@ -515,7 +515,7 @@
         </div>
         <div class="screen-display">
 
-          {#if currentGameUUID && power && gameover && gamestarted && !scoresActive && !eventsActive}
+          {#if currentGameUUID && power && !gameover && gamestarted && !scoresActive && !eventsActive}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 <div class="row">
@@ -635,7 +635,7 @@
             </div>
           {/if}
 
-          {#if power && currentGameUUID && !gameover && gamestarted && !scoresActive && !eventsActive}
+          {#if power && currentGameUUID && gameover && gamestarted && !scoresActive && !eventsActive}
             <div class="background">
               <div class="gameovertext">GAME OVER</div>
             </div>
