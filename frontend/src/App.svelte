@@ -2,12 +2,17 @@
   const apiUrl = __myapp.env.API_URL
   let baseURL = apiUrl;
   let promise = getGames();
+
   let currentGameUUID = "";
   let currentGame = {};
+  let fow = 0;
+  let player;
+  let error;
+
   let creeps = [];
   let players = [];
   let scores = [];
-  let player_id = "3575f9ab-889d-42a8-8fc1-0671217ad6c6";
+  let player_id;
   let board_x = 20;
   let board_y = 20;
 
@@ -68,17 +73,7 @@
     const data = await res.json();
 
     if (res.ok) {
-      return data;
-    } else {
-      throw new Error(text);
-    }
-  }
-
-  async function newGame() {
-    gameover = false;
-    const res = await fetch(`${baseURL}/api/game/new`);
-    const data = await res.json();
-    if (res.ok && data.created) {
+      fow = Math.round(data.fow);
       return data;
     } else {
       throw new Error(text);
@@ -86,17 +81,25 @@
   }
 
   function selectGame(game) {
-    gameover = false;
     currentGame = game;
     currentGameUUID = game.id;
-    getGameInfo().then(function (data) {
-      board_x = data.size_x;
-      board_y = data.size_y;
+
+    getPlayerStatus().then(function(data){
+        if(!data){
+          error = "Your player doesnt exist in that game!";
+          currentGame = null;
+          currentGameUUID = null;
+        }else{
+          error = null;
+          gameover = false;
+          getGameInfo().then(function (data) {
+            board_x = data.size_x;
+            board_y = data.size_y;
+          });
+          getScores();
+          new Audio("./mp3/soundtrack.mp3").play();
+        }
     });
-
-    getScores();
-
-    new Audio("./mp3/soundtrack.mp3").play();
   }
 
   let cells = [];
@@ -152,11 +155,13 @@
     }
 
     let alldead = 0;
+    let playerx;
+    let playery;
+
     //This is the current player not the enemy players
     if (data.player) {
       //TODO : refactor this out
       let cc = data.player;
-
       let ch;
       if (cc.health > 75) {
         ch = "hi";
@@ -177,6 +182,9 @@
       pieceObj.id = cc.id;
       pieceObj.x = cc.position.x - 1;
       pieceObj.y = cc.position.y - 1;
+
+      playerx = pieceObj.x;
+      playery = pieceObj.y;
 
       c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
     }
@@ -213,10 +221,6 @@
       players = [];
     }
 
-    if(alldead === data.players+1){
-      gameover = true;
-    }
-
     if (data.powerups) {
       data.powerups.forEach(function (cc) {
         let pieceObj = {};
@@ -225,10 +229,26 @@
       });
     }
 
+    // fow calculations
+    c.forEach(function(item, index) {
+      let rowIndex = index;
+      item.forEach(function(item, index){
+        if(rowIndex > playerx+fow || rowIndex < playerx-fow ||
+          index > playery+fow || index < playery-fow){
+            let pieceObj = {};
+            pieceObj.type = "FOG";
+            c[rowIndex][index] = pieceObj;
+        }
+      });
+    });
+
+    if(alldead === data.players+1){
+      gameover = true;
+    }
+
     // find out what creeps have moved where by diffing to previous state stored in cells
     // create map of creep id and position moved
     if(creepPositions.size > 0){
-      
       for (const [key, oldPos] of creepPositions.entries()) {   
         let newPos = creepNewPos.get(oldPos.id);
 
@@ -236,21 +256,21 @@
           let xdiff = newPos.x - oldPos.x;
           let ydiff = newPos.y - oldPos.y;
 
-          if(xdiff === -1 && ydiff === 0){
+          if(xdiff === -1 && ydiff === 0 && document.getElementById(oldPos.id)){
             document.getElementById(oldPos.id).classList.add("moveup");
-          } else if (xdiff === 1 && ydiff === 0) {
+          } else if (xdiff === 1 && ydiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedown");
-          } else if (ydiff === -1 && xdiff === 0) {
+          } else if (ydiff === -1 && xdiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveright");
-          } else if (ydiff === 1 && xdiff === 0) {
+          } else if (ydiff === 1 && xdiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveleft");
-          } else if (xdiff === -1 && ydiff === -1) {
+          } else if (xdiff === -1 && ydiff === -1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveupleft");
-          } else if (xdiff === 1 && ydiff === -1) {
+          } else if (xdiff === 1 && ydiff === -1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedownleft");
-          } else if (xdiff === -1 && ydiff === 1) {
+          } else if (xdiff === -1 && ydiff === 1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveupright");
-          } else if (xdiff === 1 && ydiff === 1) {
+          } else if (xdiff === 1 && ydiff === 1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedownright");
           }
         }
@@ -281,14 +301,33 @@
     }
   }
 
-  async function getPlayerStatus() {
-    const res = await fetch(`${baseURL}/api/player/status`, {
+  async function getPlayer() {
+    const res = await fetch(`${baseURL}/api/player/`, {
       method: "POST",
       cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id }), // body data type must match "Content-Type" header
+      body: JSON.stringify({ player_id: player_id })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) { 
+      return data;
+    } else {
+      return res.ok;
+    }
+  }
+
+  async function getPlayerStatus() {
+    const res = await fetch(`${baseURL}/api/player/status`, {
+      method: "POST",
+      cache: "no-cache", 
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id })
     });
 
     const data = await res.json();
@@ -296,7 +335,7 @@
     if (res.ok) {
       return data;
     } else {
-      throw new Error(text);
+      return res.ok;
     }
   }
 
@@ -331,23 +370,18 @@
   }
 
   function getCellImageClass(currentCellValue) {
-    if (String(currentCellValue).startsWith("1")) {
-      return "creep";
-    } else if (String(currentCellValue).startsWith("2")) {
+    if (String(currentCellValue.type).startsWith("1")) {
+      return "creep" + String(currentCellValue.healthString);
+    } else if (String(currentCellValue.type).startsWith("2")) {
       return "human";
-    } else if (typeof currentCellValue == "string") {
-      if (currentCellValue[0] == "P") {
+    } else if (typeof currentCellValue.type == "string") {
+      if (currentCellValue.type[0] == "P") {
         return "powerup";
+      } else if (currentCellValue.type == "FOG"){
+        return "fog";
       }
     }
     return "open";
-  }
-
-  function getCellHealthClass(cell) {
-    if(cell.type != 2){
-      let s = String(cell.healthString);
-      return s;
-    }
   }
 
   async function getGames() {
@@ -411,7 +445,14 @@
     }
   }
   const toggleStartGame = () => {
-    gamestarted = !gamestarted;
+    getPlayer().then(function (data) {
+      if(!data){
+        player_id = "INVALID - TRY AGAIN"
+      }else{
+        player = data;
+        gamestarted = !gamestarted;
+      }
+    });
   }
 </script>
 
@@ -437,7 +478,7 @@
   }
 
   .row {
-    margin: 1px;
+    margin: 0px;
     border: 1px black;
     display: flex;
   }
@@ -446,10 +487,14 @@
     width: 10px;
     height: 10px;
     padding: 10px;
-    margin: 1px;
-    border: 1px black;
+    margin: 0px;
+    border: 1px solid darkgrey;
     box-sizing: unset;
   }
+  .headercell {
+    border: unset;
+  }
+
   .board {
     display: block;
   }
@@ -522,35 +567,35 @@
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 <div class="row">
-                  <div class="cell central info" style="margin-left:30px">1</div>
-                  <div class="cell central info">2</div>
-                  <div class="cell central info">3</div>
-                  <div class="cell central info">4</div>
-                  <div class="cell central info">5</div>
-                  <div class="cell central info">6</div>
-                  <div class="cell central info">7</div>
-                  <div class="cell central info">8</div>
-                  <div class="cell central info">9</div>
-                  <div class="cell central info">10</div>
-                  <div class="cell central info">11</div>
-                  <div class="cell central info">12</div>
-                  <div class="cell central info">13</div>
-                  <div class="cell central info">14</div>
-                  <div class="cell central info">15</div>
-                  <div class="cell central info">16</div>
-                  <div class="cell central info">17</div>
-                  <div class="cell central info">18</div>
-                  <div class="cell central info">19</div>
-                  <div class="cell central info">20</div>
+                  <div class="cell headercell central info" style="margin-left:30px">1</div>
+                  <div class="cell headercell central info">2</div>
+                  <div class="cell headercell central info">3</div>
+                  <div class="cell headercell central info">4</div>
+                  <div class="cell headercell central info">5</div>
+                  <div class="cell headercell central info">6</div>
+                  <div class="cell headercell central info">7</div>
+                  <div class="cell headercell central info">8</div>
+                  <div class="cell headercell central info">9</div>
+                  <div class="cell headercell central info">10</div>
+                  <div class="cell headercell central info">11</div>
+                  <div class="cell headercell central info">12</div>
+                  <div class="cell headercell central info">13</div>
+                  <div class="cell headercell central info">14</div>
+                  <div class="cell headercell central info">15</div>
+                  <div class="cell headercell central info">16</div>
+                  <div class="cell headercell central info">17</div>
+                  <div class="cell headercell central info">18</div>
+                  <div class="cell headercell central info">19</div>
+                  <div class="cell headercell central info">20</div>
                 </div>
 
                 {#each cells as r, i}
                   <div class="row">
-                    <div class="cell central info">{i+1}</div>
+                    <div class="cell headercell central info">{i+1}</div>
                     {#each r as c}
                       <div
                         id={c.id}
-                        class="cell {getCellImageClass(c.type)} {getCellHealthClass(c)}" />
+                        class="cell {getCellImageClass(c)}" />
                     {/each}
                   </div>
                 {/each}
@@ -564,27 +609,59 @@
               <br/>
               <img style="height:150px" alt="Space invader image" src='./images/invader.gif'/>
               <br/>
-              <div on:click={() => toggleStartGame()}>Click to start</div>
+              <div>Enter Player ID</div>
+              <input id="player" type="text"  bind:value={player_id}/>
+              {#if player_id}
+              <div on:click={() => toggleStartGame()} >Click to start</div>
+              {/if}
             </div>
           {/if}
 
           {#if power && !currentGameUUID && !gameover && gamestarted && !scoresActive && !eventsActive}
             <div class="info">
-              <div class="infotext">GAMES IN PLAY</div>
-              <div class="infoscroll">
+              <div class="infotext">WELCOME {player.Name}</div>
+              {#if error}
+                <p style="color: red">
+                  {error}
+                </p>
+              {/if}
+              <div class="infotextmed">GAMES IN PLAY</div>
+              <div class="infoscrollhalf">
                 {#await promise}
                   <p>Loading games</p>
                 {:then number}
                   {#if number.games}
                     {#each number.games as gameUUID}
+                      {#if gameUUID.status !== 2}
                         <div class="clickable" on:click={() => selectGame(gameUUID)}> {gameUUID.name} </div>
+                      {/if}
                     {/each}
                   {:else}
                     <p>No games currently running</p>
                   {/if}
                 {:catch error}
                   <p style="color: red">
-                    Failed to get game list (check that the server is running)
+                    Failed to get current game list (check that the server is running)
+                  </p>
+                {/await}
+              </div>
+              <div class="infotextmed">GAMES FINISHED</div>
+              <div class="infoscrollhalf">
+                {#await promise}
+                  <p>Loading games</p>
+                {:then number}
+                  {#if number.games}
+                    {#each number.games as gameUUID}
+                      {#if gameUUID.status === 2}
+                        <div class="clickable" on:click={() => selectGame(gameUUID)}> {gameUUID.name} </div>
+                      {/if}
+                    {/each}
+                  {:else}
+                    <p>No games currently running</p>
+                  {/if}
+                {:catch error}
+                  <p style="color: red">
+                    Failed to get game finished list (check that the server is running)
                   </p>
                 {/await}
               </div>
@@ -646,10 +723,9 @@
           
         </div>
         <div class="gameboy-color-logo">
-          <span class="logo-gb">GAME BOY </span>
+          <span class="logo-gb">SCONWAR</span>
         </div>
       </div>
-      <div class="nintendo-logo-body">Nintendo</div>
       <div class="button-box">
         <div class="arrow-group">
           <div class="up-box" on:click={() => hitButton('up')}>

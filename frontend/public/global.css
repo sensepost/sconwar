@@ -95,6 +95,11 @@
 		overflow-y: scroll; 
 		height:530px;
 	}
+	.infoscrollhalf {
+		padding-top:10px;
+		overflow-y: scroll; 
+		height:225px;
+	}
 	.infotext {
 		position:relative; 
 		top:10px; 
@@ -126,7 +131,23 @@
 		-webkit-mask-image: url('./images/ghost.svg');
 		mask-image: url('./images/ghost.svg'); 
 	}
-
+	
+	.creephi {
+		background: url('./images/creephi.png');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+	.creepmed {
+		background: url('./images/creepmed.png');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+	.creeplow {
+		background: url('./images/creeplow.png');
+		background-repeat: no-repeat;
+		background-size: 30px 30px;
+	}
+	
 	.powerup {
 		background: url('./images/cherry.png');
 		background-repeat: no-repeat;
@@ -139,11 +160,12 @@
 		background-size: 30px 30px;
 	}
 
-	/* .open {
-		background: url('./images/empty.svg');
+	.fog {
+		/* background: url('./images/cloud.svg');
 		background-repeat: no-repeat;
-		background-size: 30px 30px;
-	} */
+		background-size: 30px 30px; */
+		background-color: grey;
+	} 
 
 	.hi {
 		background-color: green;
@@ -190,6 +212,7 @@
 		-webkit-animation: movingleft 2s;
 		animation: movingleft 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingleft {
@@ -210,6 +233,7 @@
 		-webkit-animation: movingright 2s;
 		animation: movingright 2s;
 		color: black; 
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingright {
@@ -230,6 +254,7 @@
 		-webkit-animation: movingdown 2s;
 		animation: movingdown 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingdown {
@@ -250,6 +275,7 @@
 		-webkit-animation: movingup 2s;
 		animation: movingup 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingup {
@@ -270,6 +296,7 @@
 		-webkit-animation: movingupleft 2s;
 		animation: movingupleft 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingupleft {
@@ -290,6 +317,7 @@
 		-webkit-animation: movingdownleft 2s;
 		animation: movingdownleft 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingdownleft {
@@ -310,6 +338,7 @@
 		-webkit-animation: movingupright 2s;
 		animation: movingupright 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingupright {
@@ -330,6 +359,7 @@
 		-webkit-animation: movingdownright 2s;
 		animation: movingdownright 2s;
 		color: black;
+		border: 0!important;
 	}
 
 	@-webkit-keyframes movingdownright {
