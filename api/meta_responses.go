@@ -38,3 +38,19 @@ type PowerupTypes struct {
 	Teleport     game.PowerUpType `json:"teleport"`
 	DoubleDamage game.PowerUpType `json:"double_damage"`
 }
+
+// MetaTotalScoresResponse is a response containing game types
+type MetaTotalScoresResponse struct {
+	Players []*PlayerTotalScore `json:"players"`
+}
+
+// PlayerTotalScore contains player score totals
+type PlayerTotalScore struct {
+	Name             string `json:"name"`
+	AveragePosition  int    `json:"average_position"`
+	TotalScore       int    `json:"total_score"`
+	TotalDamageTaken int    `json:"total_damage_taken"`
+	TotalDamageDealt int    `json:"total_damage_dealt"`
+	TotalCreepKills  int    `json:"total_creep_kills"`
+	TotalPlayerKills int    `json:"total_player_kills"`
+}

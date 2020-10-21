@@ -5,7 +5,46 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sensepost/sconwar/game"
+	"github.com/sensepost/sconwar/storage"
 )
+
+// GetTotalScores godoc
+// @Summary Get the total scores for everyone
+// @Description Get's total scores for everyone for every game that has been played
+// @Tags Meta
+// @Accept json
+// @Produce json
+// @Success 200 {object} MetaTotalScoresResponse
+// @Router /meta/scores/ [get]
+func getTotalScores(c *gin.Context) {
+
+	res := &MetaTotalScoresResponse{}
+
+	var players []storage.Player
+	storage.Storage.Get().Preload("Scores").Find(&players)
+
+	for _, p := range players {
+
+		score := &PlayerTotalScore{
+			Name: p.Name,
+		}
+
+		for _, ps := range p.Scores {
+			score.TotalScore += ps.Score
+			score.TotalDamageTaken += ps.DamageTaken
+			score.TotalDamageDealt += ps.DamageDealt
+			score.TotalCreepKills += ps.CreepKilled
+			score.TotalPlayerKills += ps.PlayersKilled
+			score.AveragePosition += ps.Position
+		}
+
+		score.AveragePosition = score.AveragePosition / len(p.Scores)
+
+		res.Players = append(res.Players, score)
+	}
+
+	c.JSON(http.StatusOK, res)
+}
 
 // GetTypes godoc
 // @Summary Get game type information

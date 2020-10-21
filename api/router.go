@@ -75,6 +75,7 @@ func SetupRouter() (r *gin.Engine) {
 		meta := api.Group("/meta")
 		{
 			meta.GET("/types", getTypes)
+			meta.GET("/scores", getTotalScores)
 		}
 	}
 
