@@ -516,12 +516,20 @@
   
   .gameboy-color-logo {
 	position: relative;
-	bottom: -43px;
+	bottom: 83px;
 	height: 30px;
 	margin-left: auto;
 	margin-right: auto;
 	transform: scaleY(1.2);
 	width: 165px;
+  }
+
+  .playerstatus {
+	margin-top:30px; 
+	margin-left:20px; 
+	text-align:left; 
+	height:100px;
+	color:lightgray;
   }
   
   .logo-gb {

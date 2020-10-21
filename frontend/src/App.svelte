@@ -5,6 +5,8 @@
 
   let currentGameUUID = "";
   let currentGame = {};
+  let playerStatus;
+
   let fow = 0;
   let player;
   let error;
@@ -92,6 +94,9 @@
         }else{
           error = null;
           gameover = false;
+
+          playerStatus = data;
+
           getGameInfo().then(function (data) {
             board_x = data.size_x;
             board_y = data.size_y;
@@ -120,7 +125,7 @@
       ch = "hi";
     } else if (cc.health < 76 && cc.health > 40) {
       ch = "med";
-    } else if (cc.health < 40 && cc.health > 0) {
+    } else if (cc.health < 41 && cc.health > 0) {
       ch = "low";
     } else if (cc.health === 0) {
       ch = "dead";
@@ -132,6 +137,14 @@
 
   function updateGameBoard(data) {
     getGameEvents();
+
+    // get all the player info
+    getPlayerStatus().then(function(data){
+        if(data){
+          console.log(data);
+          playerStatus = data;
+        }
+    });
 
     let x = board_x;
     let y = board_y;
@@ -715,8 +728,28 @@
             </div>
           {/if}
         </div>
-        <div class="gameboy-color-logo">
-          <span class="logo-gb">SCONWAR</span>
+
+        <div class="playerstatus" > 
+          {#if playerStatus}
+            <span>
+              Health: {playerStatus.player.health} 
+              <br/>
+              Power Ups: 
+              {#each playerStatus.player.powerups as pu}
+                {#if pu.type === 0}
+                  Health  
+                {:else if pu.type === 1}
+                  Teleport
+                {:else}
+                  Double Damage
+                {/if}
+                &nbsp;
+              {/each}
+          </span>
+          {/if}
+        </div>
+        <div class="gameboy-color-logo"> 
+          <div class="logo-gb">SCONWAR</div>
         </div>
       </div>
       <div class="button-box">
