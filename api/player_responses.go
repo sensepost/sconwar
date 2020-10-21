@@ -15,7 +15,8 @@ type PlayerStatusResponse struct {
 
 // PlayerSurroundingResponse is a surroundings response
 type PlayerSurroundingResponse struct {
-	Creep    []*game.Creep   `json:"creep"`
-	Players  []*game.Player  `json:"players"`
-	PowerUps []*game.PowerUp `json:"powerups"`
+	FOWEnabled bool            `json:"fow_enabled"`
+	Creep      []*game.Creep   `json:"creep"`
+	Players    []*game.Player  `json:"players"`
+	PowerUps   []*game.PowerUp `json:"powerups"`
 }

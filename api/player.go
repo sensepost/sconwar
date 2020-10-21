@@ -175,26 +175,39 @@ func playerSurrounding(c *gin.Context) {
 	distances := &PlayerSurroundingResponse{}
 	board := game.Games[params.GameID]
 
-	for _, u := range board.PowerUps {
-		if player.DistanceFrom(u) <= board.FOWDistance {
-			distances.PowerUps = append(distances.PowerUps, u)
-		}
-	}
+	// if the board is complete (aka, game done) we disable fow calculation
+	if board.Status == game.BoardStatusFinished {
+		distances.FOWEnabled = false
 
-	for _, c := range board.Creeps {
-		if player.DistanceFrom(c) <= board.FOWDistance && c.Health > 0 {
-			distances.Creep = append(distances.Creep, c)
-		}
-	}
+		distances.PowerUps = board.PowerUps
+		distances.Creep = board.Creeps
+		distances.Players = board.Players
+	} else {
 
-	for _, p := range board.Players {
-		if player.ID == p.ID {
-			continue
+		distances.FOWEnabled = true
+
+		for _, u := range board.PowerUps {
+			if player.DistanceFrom(u) <= board.FOWDistance {
+				distances.PowerUps = append(distances.PowerUps, u)
+			}
 		}
 
-		if player.DistanceFrom(p) <= board.FOWDistance && p.Health > 0 {
-			distances.Players = append(distances.Players, p)
+		for _, c := range board.Creeps {
+			if player.DistanceFrom(c) <= board.FOWDistance && c.Health > 0 {
+				distances.Creep = append(distances.Creep, c)
+			}
 		}
+
+		for _, p := range board.Players {
+			if player.ID == p.ID {
+				continue
+			}
+
+			if player.DistanceFrom(p) <= board.FOWDistance && p.Health > 0 {
+				distances.Players = append(distances.Players, p)
+			}
+		}
+
 	}
 
 	c.JSON(http.StatusOK, &distances)
