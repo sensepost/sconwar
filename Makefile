@@ -37,6 +37,7 @@ docker:
 
 docker-image:
 	docker build -t sconwar:local .
+	docker build -t sconwar:frontend -f  frontend/Dockerfile.frontend frontend/
 
 integrity:
 	cd $(BIN_DIR) && shasum *

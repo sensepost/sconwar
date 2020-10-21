@@ -56,6 +56,15 @@ func (a *Action) Execute(player *Player, board *Board) {
 		e.DstPos = player.Position.ToSingleValue()
 		e.Action = int(Move)
 
+		//This is a slight hack to let the player move in a random direction
+		//If the requested X/Y co-ords are set to -1 (which is not possible as it would be out of the board)
+		//The player.Move is executed which moves the player is moved in a random direction.
+		if a.X == -1 && a.Y == -1 {
+			player.Move()
+			e.Msg = fmt.Sprintf(`player %s moved to a new position`, player.Name)
+			break
+		}
+
 		distance := distanceBetween(player, &Position{X: a.X, Y: a.Y})
 
 		if player.HasAvailableBuf(Teleport) {

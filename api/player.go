@@ -3,6 +3,8 @@ package api
 import (
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sensepost/sconwar/game"
@@ -43,6 +45,7 @@ func getPlayer(c *gin.Context) {
 	var player storage.Player
 	storage.Storage.Get().Where("uuid = ?", params.PlayerID).Preload("Scores").First(&player)
 
+	game.PlayerApiActions.With(prometheus.Labels{"action": "info"}).Inc()
 	c.JSON(http.StatusCreated, player)
 }
 
@@ -87,6 +90,7 @@ func registerPlayer(c *gin.Context) {
 
 	storage.Storage.Get().Create(newPlayer)
 
+	game.PlayerApiActions.With(prometheus.Labels{"action": "register"}).Inc()
 	c.JSON(http.StatusCreated, &NewPlayerResponse{
 		Created: true,
 		UUID:    id,
@@ -130,6 +134,7 @@ func playerStatus(c *gin.Context) {
 		}
 	}
 
+	game.PlayerApiActions.With(prometheus.Labels{"action": "status"}).Inc()
 	c.JSON(http.StatusOK, &PlayerStatusResponse{
 		Player: status,
 	})
@@ -210,5 +215,6 @@ func playerSurrounding(c *gin.Context) {
 
 	}
 
+	game.PlayerApiActions.With(prometheus.Labels{"action": "surroundings"}).Inc()
 	c.JSON(http.StatusOK, &distances)
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sensepost/sconwar/storage"
 )
 
@@ -34,6 +35,7 @@ type Player struct {
 // NewPlayer starts a new Player instance
 func NewPlayer(p *storage.Player) *Player {
 
+	playerCreated.WithLabelValues().Inc()
 	return &Player{
 		Name:        p.Name,
 		ID:          p.UUID,
@@ -55,17 +57,19 @@ func (p *Player) AddAction(action Action) error {
 	}
 
 	p.ActionCount++
-
+	playerActionsQueued.WithLabelValues().Inc()
 	return nil
 }
 
 // Move moves the player to a random position
 func (p *Player) Move() {
+	distanceMovedByEntity.With(prometheus.Labels{"entity": "player"}).Inc()
 	p.Position.MoveRandom(1)
 }
 
 // MoveTo moves the player to a specific x.y
 func (p *Player) MoveTo(x int, y int) {
+	distanceMovedByEntity.With(prometheus.Labels{"entity": "player"}).Inc()
 	p.Position.MoveTo(x, y)
 }
 
@@ -114,13 +118,14 @@ func (p *Player) TakeDamage(dmg int, multiplier int) (int, int) {
 	}
 
 	p.AddDamageTaken(dmg)
-
+	damageTaken.With(prometheus.Labels{"entity": "player"}).Add(float64(dmg))
 	return dmg, p.Health
 }
 
 // GivePowerUp adds a powerup to the player
 func (p *Player) GivePowerUp(powerup PowerUp) {
 	p.PowerUps = append(p.PowerUps, &powerup)
+	powerupsCollected.WithLabelValues().Inc()
 }
 
 // HasAvailableBuf checks of a player has a buff enabled
@@ -180,6 +185,7 @@ func (p *Player) UsePowerUp(powerupID string) {
 	}
 
 	p.RemovePowerUp(powerup)
+	powerupsUsed.With(prometheus.Labels{"poweruptype": string(powerup.Type)}).Inc()
 }
 
 // RemovePowerUp removes a powerup from the player
@@ -203,6 +209,7 @@ func (p *Player) RemovePowerUp(powerup *PowerUp) {
 // AddScore adds to the players existing score
 func (p *Player) AddScore(amount int) {
 	p.Score += amount
+	scoreAwarded.WithLabelValues().Add(float64(amount))
 }
 
 // AddDamageTaken adds to the players existing damage taken
@@ -219,12 +226,14 @@ func (p *Player) AddDamageDealt(amount int) {
 func (p *Player) RecordCreepKilled() {
 	p.Score += CreepKilledScore
 	p.CreepKilled++
+	creepsKilled.WithLabelValues().Inc()
 }
 
 // RecordPlayerKilled records a score for a killed creep
 func (p *Player) RecordPlayerKilled() {
 	p.Score += PlayerKilledScore
 	p.PlayersKilled++
+	playersKilled.WithLabelValues().Inc()
 }
 
 // SaveFinalScore stores the players score

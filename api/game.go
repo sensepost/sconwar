@@ -57,7 +57,6 @@ func newGame(c *gin.Context) {
 // @Success 200 {object} AllGamesResponse
 // @Router /game/ [get]
 func allGames(c *gin.Context) {
-
 	g := &AllGamesResponse{}
 	for _, d := range game.Games {
 		g.Games = append(g.Games, &AllGamesGame{
