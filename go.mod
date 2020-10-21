@@ -11,9 +11,12 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mroth/weightedrand v0.3.1
+	github.com/prometheus/client_golang v1.8.0
 	github.com/rs/zerolog v1.20.0
+	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.8
+	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/net v0.0.0-20201016165138-7b1cca2348c0 // indirect
 	golang.org/x/tools v0.0.0-20201017001424-6003fad69a88 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect

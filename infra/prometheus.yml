@@ -1,0 +1,31 @@
+# my global config
+global:
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'sconwar'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  # - "alert.rules"
+  # - "first.rules"
+  # - "second.rules"
+
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'sconwar'
+    scrape_interval: 10s
+    static_configs:
+        - targets: ['localhost:9090','cadvisor:8080','node-exporter:9100', 'sconwarbackend:8080']
+
+  - job_name: 'traefik'
+    scrape_interval: 10s
+    static_configs:
+        - targets: ['traefik:8082']
+
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - alertmanager:9093

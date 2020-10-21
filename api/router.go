@@ -10,6 +10,8 @@ import (
 	_ "github.com/sensepost/sconwar/docs" // import auto generated docs
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
+	"github.com/sensepost/sconwar/game"
 )
 
 // @title Sconwar API
@@ -27,6 +29,11 @@ import (
 func SetupRouter() (r *gin.Engine) {
 	r = gin.Default()
 	r.Use(cors.Default())
+
+	p := ginprometheus.NewPrometheus("gin")
+	p.Use(r)
+
+	game.InitMetrics()
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")

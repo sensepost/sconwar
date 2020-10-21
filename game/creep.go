@@ -6,6 +6,7 @@ import (
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Creep is a creep
@@ -29,6 +30,7 @@ func NewCreep() *Creep {
 // Move moves a creep in a random position
 func (c *Creep) Move() {
 	c.Position.MoveRandom(MaxCreepMoveDistance)
+	distanceMovedByEntity.With(prometheus.Labels{"entity": "creep"}).Inc()
 }
 
 // GetPosition gets the x, y position of a creep
@@ -70,5 +72,6 @@ func (c *Creep) TakeDamage(dmg int, multiplier int) (int, int) {
 		c.Health = 0
 	}
 
+	damageTaken.With(prometheus.Labels{"entity": "creep"}).Add(float64(dmg))
 	return dmg, c.Health
 }

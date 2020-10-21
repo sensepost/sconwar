@@ -6,6 +6,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sensepost/sconwar/storage"
 
 	wr "github.com/mroth/weightedrand"
@@ -75,6 +76,8 @@ func NewBoard(id string, name string) *Board {
 			b.PowerUps = append(b.PowerUps, pup)
 		}
 	}
+
+	gameState.With(prometheus.Labels{"state": "created"}).Inc()
 
 	return b
 }
@@ -169,7 +172,7 @@ func (b *Board) Run() {
 			})
 
 			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
-
+			gameState.With(prometheus.Labels{"state": "player-win"}).Inc()
 			break
 		}
 
@@ -178,6 +181,7 @@ func (b *Board) Run() {
 				Date: time.Now(),
 				Msg:  `all players have been eliminated. the creep win!`,
 			})
+			gameState.With(prometheus.Labels{"state": "creep-win"}).Inc()
 			break
 		}
 	}
@@ -185,6 +189,7 @@ func (b *Board) Run() {
 	b.dbModel.Ended = time.Now()
 	b.Status = BoardStatusFinished
 	b.updateDbModel()
+	gameState.With(prometheus.Labels{"state": "finished"}).Inc()
 }
 
 // RemovePowerUp removes a powerup from the board
