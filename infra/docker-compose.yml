@@ -44,6 +44,8 @@ services:
     environment:
       - API_TOKEN=${PRIVILEGED_API_TOKEN}
       - BASE_HOST=${DOMAIN_NAME_API}
+    volumes: 
+      - "./sconwar.db:/db.sqlite"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sconwarbackend.rule=Host(`${DOMAIN_NAME_API}`)"

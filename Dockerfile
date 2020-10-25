@@ -17,4 +17,6 @@ COPY --from=build /src/sconwar /usr/local/bin
 
 EXPOSE 8080
 
+WORKDIR /
+
 ENTRYPOINT ["sconwar"]
