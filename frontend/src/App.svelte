@@ -521,7 +521,6 @@
         <p>Selected Game : {currentGameUUID}</p>
       {:else}
         <p>There are no games running</p>
-        <button on:click={newGame}>Start New Game</button>
       {/if}
     {:catch error}
       <p style="color: red">
@@ -605,10 +604,7 @@
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
               <br/>
-              <img
-                style="height:150px"
-                alt="Space invader image"
-                src="./images/invader.gif" />
+              <img style="height:150px"alt="Space invader header" src="./images/invader.gif" />
               <br/>
               <div>Enter Player ID</div>
               <input id="player" type="text"  bind:value={player_id}/>
@@ -781,13 +777,13 @@
         class="pill-button button-select"
         on:click={() => hitButton('select')}
         on:click={() => toggleLeaderboard()}>
-        <label class="select">Scores</label>
+        <span class="select">Scores</span>
       </div>
       <div
         class="pill-button button-start"
         on:click={() => hitButton('start')}
         on:click={() => toggleEvents()}>
-        <label class="start">Events</label>
+        <span class="start">Events</span>
       </div>
       <div class="speaker">
         <div class="row1">
