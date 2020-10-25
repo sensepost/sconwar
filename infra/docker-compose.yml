@@ -29,8 +29,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`${DOMAIN_NAME_TRAEFIK}`)"
       - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.middlewares=trauth"
       - "traefik.http.routers.api.entrypoints=web-secure"
       # - "traefik.http.routers.api.tls.certresolver=primary"
+      - "traefik.http.middlewares.trauth.forwardauth.address=http://trauth:8080/"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       # - "./acme.json:/acme.json"
@@ -45,6 +47,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sconwarbackend.rule=Host(`${DOMAIN_NAME_API}`)"
+      - "traefik.http.routers.sconwarbackend.middlewares=trauth"
       - "traefik.http.routers.sconwarbackend.entrypoints=web-secure"
       # - "traefik.http.routers.sconwarbackend.tls.certresolver=primary"
 
@@ -57,6 +60,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sconwarfrontend.rule=Host(`${DOMAIN_NAME_UI}`)"
+      - "traefik.http.routers.sconwarfrontend.middlewares=trauth"
       - "traefik.http.routers.sconwarfrontend.entrypoints=web-secure"
       # - "traefik.http.routers.sconwarfrontend.tls.certresolver=primary"
 
@@ -73,6 +77,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prom.rule=Host(`${DOMAIN_NAME_PROMETHEUS}`)"
+      - "traefik.http.routers.prom.middlewares=trauth"
       - "traefik.http.routers.prom.entrypoints=web-secure"
       # - "traefik.http.routers.prom.tls.certresolver=primary"
     links:
@@ -111,9 +116,20 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`${DOMAIN_NAME_GRAFANA}`)"
+      - "traefik.http.routers.grafana.middlewares=trauth"
       - "traefik.http.routers.grafana.entrypoints=web-secure"
       # - "traefik.http.routers.grafana.tls.certresolver=primary"
- 
+
+  trauth:
+    image: leonjza/trauth
+    container_name: trauth
+    environment:
+      - TRAUTH_DOMAIN=${DOMAIN_NAME}
+      - TRAUTH_PASSWORD_FILE_LOCATION=/config/htpass
+    volumes:
+      - ./htpass:/config/htpass
+    restart: unless-stopped
+
 volumes:
     grafana-storage:
     prom-storage:
