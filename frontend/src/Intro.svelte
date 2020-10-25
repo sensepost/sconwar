@@ -99,14 +99,8 @@
 
             function onDrop(event) {
                 var rect = document.getElementById('coinslot').getBoundingClientRect();
-                console.log(rect.top, rect.right, rect.bottom, rect.left);
-
-                console.log(event);
-                console.log(event.clientX);
-                console.log(event.clientY);
-
                 if(event.clientX > (rect.left-100) && event.clientX < (rect.right+100) && event.clientY > (rect.top-100) && event.clientY < (rect.bottom+100)){
-                    new Audio('./coin.mp3').play();
+                    new Audio('./mp3/coin.mp3').play();
                     document.getElementById('coin').style.display = "none";
                     document.getElementById('words').style.display = "none";
                     document.getElementById('loading').style.display = "unset";
