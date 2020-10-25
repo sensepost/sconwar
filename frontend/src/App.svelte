@@ -403,12 +403,15 @@
       timeZone: "UTC",
     });
 
-    data.events.forEach((e) => {
+    if(data.ok && data.events){
+      data.forEach((e) => {
       e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
     });
+    }
 
     if (res.ok) {
-      events = data.events.reverse();
+      //TODO Fix this , find out if a lib is missing
+      events = data.events;//.reverse();
     } else {
       throw new Error(text);
     }
@@ -503,9 +506,9 @@
 <main>
   <div style="position: absolute; left: 850px; top: 10px;">
     <h1>Welcome to SCONWAR</h1>
-    <label for="player">Player ID : </label>
-    <input id="player" type="text" bind:value={player_id} />
-    {#await promise}
+    
+    
+    <!-- {#await promise}
       <p>...waiting</p>
     {:then games}
       {#if games.games}
@@ -526,7 +529,7 @@
       <p style="color: red">
         Failed to get game list (check that the server is running)
       </p>
-    {/await}
+    {/await} -->
 
     <div class="sidebar">
       [Creeps]
@@ -540,9 +543,11 @@
     </div>
     <div class="sidebar">
       [Events]
+      {#if events}
       {#each events as eve}
         <div class="row">{eve.CreatedAt} - {eve.msg}</div>
       {/each}
+      {/if}
     </div>
   </div>
 
@@ -731,6 +736,7 @@
               Health: {playerStatus.player.health} 
               <br/>
               Power Ups: 
+              {#if playerStatus.player.powerups}
               {#each playerStatus.player.powerups as pu}
                 {#if pu.type === 0}
                   Health  
@@ -741,6 +747,7 @@
                 {/if}
                 &nbsp;
               {/each}
+              {/if}
           </span>
           {/if}
         </div>
