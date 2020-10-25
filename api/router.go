@@ -1,12 +1,15 @@
 package api
 
 import (
-	"log"
+	"errors"
 	"net/http"
 	"os"
 
+	"golang.org/x/time/rate"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	_ "github.com/sensepost/sconwar/docs" // import auto generated docs
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -75,7 +78,7 @@ func SetupRouter() (r *gin.Engine) {
 		meta := api.Group("/meta")
 		{
 			meta.GET("/types", getTypes)
-			meta.GET("/scores", getTotalScores)
+			meta.GET("/scores", Throttle(1), getTotalScores)
 		}
 	}
 
@@ -88,22 +91,37 @@ func TokenAuthMiddleWare() gin.HandlerFunc {
 	requiredToken := os.Getenv("API_TOKEN")
 
 	if requiredToken == "" {
-		log.Fatal("Please set an API_TOKEN environment variable")
+		log.Fatal().Err(errors.New(`Please set an API_TOKEN environment variable`)).Msg(`failed to read api token`)
 	}
 
 	return func(c *gin.Context) {
 		token := c.Request.Header.Get("token")
 
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "API Token required"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "API token required"})
 			return
 		}
 
 		if token != requiredToken {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid API Token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid API token"})
 			return
 		}
 
 		c.Next()
+	}
+}
+
+// Throttle rate limits an endpoint for i per second
+func Throttle(i int) gin.HandlerFunc {
+	lim := rate.NewLimiter(rate.Limit(i), i)
+
+	return func(c *gin.Context) {
+		if lim.Allow() {
+			c.Next()
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusTooManyRequests,
+			gin.H{"error": "rate limit exceeded"})
 	}
 }
