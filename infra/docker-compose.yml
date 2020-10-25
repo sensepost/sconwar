@@ -1,10 +1,11 @@
 version: "3.8"
+
 services:
   traefik:
     image: "traefik:v2.3"
     container_name: "traefik"
     command:
-      #- "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.entryPoint=metrics"
       - "--entryPoints.metrics.address=:8082"
@@ -12,42 +13,40 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web-secure.address=:443"
     ports:
-      - "80:80"
-      - "8080:8080"
+      - 80:80
+      - 443:443
+    labels: 
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${DOMAIN_NAME_TRAEFIK}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.entrypoints=web"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    
+
   sconwarbackend:
-    image: sconwar:local
+    image: sconwar-api:local
     container_name: sconwarbackend
     restart: unless-stopped
     environment:
-      - API_TOKEN=1234
-    expose:
-      - 8080
+      - API_TOKEN=${PRIVILEGED_API_TOKEN}
+      - BASE_HOST=${DOMAIN_NAME_API}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sconwarbackend.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.sconwarbackend.rule=Host(`${DOMAIN_NAME_API}`)"
       - "traefik.http.routers.sconwarbackend.entrypoints=web"
 
   sconwarfrontend:
-    image: sconwar:frontend
+    image: sconwar-ui:local
     container_name: sconwarfrontend
     restart: unless-stopped
-    environment:
-      - API_TOKEN=1234
-    expose:
-      - 5000
     volumes:
       - "${PWD}/.env:/usr/src/app/.env"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sconwarfrontend.rule=Host(`${DOMAIN_NAME_FRONT}`)"
+      - "traefik.http.routers.sconwarfrontend.rule=Host(`${DOMAIN_NAME_UI}`)"
       - "traefik.http.routers.sconwarfrontend.entrypoints=web"
-
-    #ports:
-        #- 8080:8080
 
   prometheus:
     image: prom/prometheus:latest
@@ -59,13 +58,9 @@ services:
       - "${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-    expose:
-      - 9090
-    ports:
-      - 9090:9090
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prom.rule=Host(`${DOMAIN_NAME_PROM}`)"
+      - "traefik.http.routers.prom.rule=Host(`${DOMAIN_NAME_PROMETHEUS}`)"
       - "traefik.http.routers.prom.entrypoints=web"
     links:
       - cadvisor:cadvisor
@@ -76,8 +71,6 @@ services:
     image: prom/node-exporter:latest
     container_name: monitoring_node_exporter
     restart: unless-stopped
-    expose:
-      - 9100
 
   cadvisor:
     image: google/cadvisor:latest
@@ -88,8 +81,6 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-    expose:
-      - 8080
   
   grafana:
     image: grafana/grafana:latest
@@ -99,10 +90,6 @@ services:
       - prometheus:prometheus
     volumes:
       - grafana-storage:/var/lib/grafana
-    expose:
-      - 3000
-    ports:
-      - 3000:3000
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -110,9 +97,8 @@ services:
       - GF_SMTP_ENABLED=false
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`${DOMAIN_NAME_MONITOR}`)"
+      - "traefik.http.routers.grafana.rule=Host(`${DOMAIN_NAME_GRAFANA}`)"
       - "traefik.http.routers.grafana.entrypoints=web"
-
  
 volumes:
     grafana-storage:

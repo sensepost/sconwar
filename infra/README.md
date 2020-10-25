@@ -2,10 +2,11 @@
 
 To use the config as is , add the following lines to your hosts file, the run docker-compose up -d
 
-127.0.0.1	scon.local
-127.0.0.1	front.scon.local
-127.0.0.1	monitor.scon.local
-127.0.0.1	prom.scon.local
+127.0.0.1	api.scon.local
+127.0.0.1	ui.scon.local
+127.0.0.1	grafana.scon.local
+127.0.0.1	prometheus.scon.local
+127.0.0.1	traefik.scon.local
 
 # Exposed services
 

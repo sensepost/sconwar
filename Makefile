@@ -35,9 +35,9 @@ windows:
 docker:
 	go build $(LD_FLAGS) -o sconwar
 
-docker-image:
-	docker build -t sconwar:local .
-	docker build -t sconwar:frontend -f  frontend/Dockerfile.frontend frontend/
+docker-images:
+	docker build -t sconwar-api:local .
+	docker build -t sconwar-ui:local -f frontend/Dockerfile.frontend frontend/
 
 integrity:
 	cd $(BIN_DIR) && shasum *
