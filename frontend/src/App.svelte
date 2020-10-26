@@ -272,6 +272,10 @@
           let xdiff = newPos.x - oldPos.x;
           let ydiff = newPos.y - oldPos.y;
 
+          // for animation purposes only let it animate 1 position
+          if(xdiff > 1){ xdiff = 1;}
+          if(ydiff > 1){ ydiff = 1;}
+
           if(xdiff === 1 && ydiff === 0 && document.getElementById(oldPos.id)){
             document.getElementById(oldPos.id).classList.add("moveup");
           } else if (xdiff === -1 && ydiff === 0 && document.getElementById(oldPos.id)) {
@@ -849,10 +853,10 @@
           </div>
         </div>
         <div class="ab-button a" on:click={() => hitButton('a')}>
-          <span class="button-text-height">A</span>
+          <span class="button-text-height">B</span>
         </div>
         <div class="ab-button b" on:click={() => hitButton('b')}>
-          <span class="button-text-height">B</span>
+          <span class="button-text-height">A</span>
         </div>
       </div>
       <div

@@ -726,20 +726,20 @@
   }
   
   .a {
-	right: 0px;
+	right: 5px;
 	top: 10px;
   }
   
   .b {
 	bottom: 13px;
-	right: 62px;
+	right: 68px;
   }
   
   .button-text-height {
 	transform: scaleY(2);
 	position: absolute;
 	top: 11px;
-	left: 14px;
+	left: 17px;
   }
   
   .pill-button {
