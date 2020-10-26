@@ -7,8 +7,8 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/rs/zerolog/log"
 	docs "github.com/sensepost/sconwar/docs" // import auto generated docs
 	"github.com/sensepost/sconwar/game"
