@@ -48,11 +48,6 @@ func SetupRouter() (r *gin.Engine) {
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	ui := r.Group("/ui")
-	{
-		ui.GET("/state")
-	}
-
 	api := r.Group("/api")
 	{
 
