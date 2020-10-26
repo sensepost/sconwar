@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 
+	"github.com/dariubs/percent"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sensepost/sconwar/storage"
 )
@@ -237,16 +238,25 @@ func (p *Player) RecordPlayerKilled() {
 }
 
 // SaveFinalScore stores the players score
-func (p *Player) SaveFinalScore(gameid string, position int) {
-	// todo: figure out a position multiplier
+func (p *Player) SaveFinalScore(board *Board, position int) {
+
+	positionPercent := percent.PercentOf(position, (len(board.Players) + len(board.Creeps)))
+
+	potentialBonus := 0
+	potentialBonus += len(board.Players) * PlayerBonusScore
+	potentialBonus += len(board.Creeps) * CreepBonusScore
+
+	// bonus is the remainder of the position % as a % of the potential bonus
+	bonus := int(percent.Percent(int(100-positionPercent), potentialBonus))
+
 	var player storage.Player
 	storage.Storage.Get().Where("uuid = ?", p.ID).First(&player)
 
 	score := &storage.PlayerGameScore{
 		PlayerID:      player.ID,
-		BoardID:       gameid,
+		BoardID:       board.ID,
 		Position:      position,
-		Score:         p.Score,
+		Score:         p.Score + bonus,
 		DamageTaken:   p.DamageTaken,
 		DamageDealt:   p.DamageDealt,
 		CreepKilled:   p.CreepKilled,

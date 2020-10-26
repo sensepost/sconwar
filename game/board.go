@@ -171,7 +171,7 @@ func (b *Board) Run() {
 				Msg:         fmt.Sprintf(`player %s is the last person standing`, player.Name),
 			})
 
-			player.SaveFinalScore(b.ID, b.CurrentDeathPosition())
+			player.SaveFinalScore(b, b.CurrentDeathPosition())
 			gameState.With(prometheus.Labels{"state": "player-win"}).Inc()
 			break
 		}
@@ -320,7 +320,7 @@ func (b *Board) processCreepTurn() {
 							Msg:         fmt.Sprintf(`player %s has been killed`, target.Name),
 						})
 
-						target.SaveFinalScore(b.ID, b.CurrentDeathPosition())
+						target.SaveFinalScore(b, b.CurrentDeathPosition())
 					}
 
 					remMoves--

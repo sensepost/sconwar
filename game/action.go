@@ -164,7 +164,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 					})
 
 					player.RecordPlayerKilled()
-					p.SaveFinalScore(board.ID, board.CurrentDeathPosition())
+					p.SaveFinalScore(board, board.CurrentDeathPosition())
 				}
 
 				break
