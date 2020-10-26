@@ -49,7 +49,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sconwarbackend.rule=Host(`${DOMAIN_NAME_API}`)"
-      - "traefik.http.routers.sconwarbackend.middlewares=trauth"
+      # - "traefik.http.routers.sconwarbackend.middlewares=trauth"
       - "traefik.http.routers.sconwarbackend.entrypoints=web-secure"
       # - "traefik.http.routers.sconwarbackend.tls.certresolver=primary"
 
@@ -62,7 +62,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sconwarfrontend.rule=Host(`${DOMAIN_NAME_UI}`)"
-      - "traefik.http.routers.sconwarfrontend.middlewares=trauth"
+      # - "traefik.http.routers.sconwarfrontend.middlewares=trauth"
       - "traefik.http.routers.sconwarfrontend.entrypoints=web-secure"
       # - "traefik.http.routers.sconwarfrontend.tls.certresolver=primary"
 
