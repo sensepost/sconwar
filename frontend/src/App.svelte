@@ -14,6 +14,7 @@
   let creeps = [];
   let players = [];
   let scores = [];
+  let leaderboard = [];
   let player_id;
   let board_x = 20;
   let board_y = 20;
@@ -28,7 +29,7 @@
   let down = false;
   let left = false;
   let right = false;
-
+  let extra = false;
   let events = [];
 
   function hitButton(button) {
@@ -48,8 +49,10 @@
       left = true;
     } else if (button === "right") {
       right = true;
+    } else if (button === "extra") {
+      extra = true;
     }
-    if (select && start && a && b && up && down && left && right) {
+    if (select && start && a && b && up && down && left && right && extra) {
       new Audio("./mp3/pwned.mp3").play();
       select = false;
       start = false;
@@ -59,6 +62,7 @@
       down = false;
       left = false;
       right = false;
+      extra = false;
     }
   }
 
@@ -94,6 +98,7 @@
         }else{
           error = null;
           gameover = false;
+          gameoverDisplay = false;
 
           playerStatus = data;
 
@@ -110,13 +115,13 @@
   let cells = [];
   let creepPositions = new Map();
   let gameover = false;
+  let gameoverDisplay = false;
 
   function updateBoardStateForEntity(board, entity) {
     let boardLength = board.length;
     // have to -1 on the X since we are diffing against the  board length
     board[(boardLength - entity.x) - 1][entity.y] = entity;
     return board;
-    // c[cc.position.x - 1][cc.position.y - 1] = pieceObj;
   }
 
   function calculateHealthText(cc) {
@@ -141,7 +146,6 @@
     // get all the player info
     getPlayerStatus().then(function(data){
         if(data){
-          console.log(data);
           playerStatus = data;
         }
     });
@@ -186,11 +190,12 @@
     if (data.player) {
       //TODO : refactor this out
       let cc = data.player;
+
       let pieceObj = {};
       pieceObj.type = 2; //Might want to change to be more identifiable
       pieceObj.health = cc.health;
       pieceObj.healthString = calculateHealthText(cc);
-      pieceObj.id = cc.id;
+      pieceObj.id = cc.name;
       pieceObj.x = cc.position.x - 1;
       pieceObj.y = cc.position.y - 1;
 
@@ -198,6 +203,7 @@
       playery = pieceObj.y;
 
       c = updateBoardStateForEntity(c, pieceObj);
+      alldead++;
     }
 
     if (data.players) {
@@ -207,11 +213,12 @@
         pieceObj.type = 2;
         pieceObj.health = cc.health;
         pieceObj.healthString = calculateHealthText(cc);
-        pieceObj.id = cc.id;
+        pieceObj.id = cc.name;
         pieceObj.x = cc.position.x - 1;
         pieceObj.y = cc.position.y - 1;
 
         c = updateBoardStateForEntity(c, pieceObj);
+        alldead++;
       });
     } else {
       players = [];
@@ -228,21 +235,31 @@
       });
     }
 
-    // fow calculations
-    c.forEach(function(item, index) {
-      let rowIndex = index;
-      item.forEach(function(item, index){
-        if(rowIndex > playerx+fow || rowIndex < playerx-fow ||
-          index > playery+fow || index < playery-fow){
-            let pieceObj = {};
-            pieceObj.type = "FOG";
-            c[rowIndex][index] = pieceObj;
-        }
-      });
-    });
 
-    if(alldead === data.players+1){
+    if(data.players && alldead === data.players.length+1){
       gameover = true;
+      gameoverDisplay = true;
+      setTimeout(() => {
+        gameoverDisplay = false;
+      }, 2000);
+    }
+
+    // fow calculations
+    if(!gameover){
+      c.forEach(function(item, index) {
+        let rowIndex = index;
+        item.forEach(function(item, index){
+          let rev = (board_x - playerx) - 1;
+
+          if(rowIndex > rev+fow
+            || rowIndex < rev-fow 
+            || index > playery+fow || index < playery-fow){
+              let pieceObj = {};
+              pieceObj.type = "FOG";
+              c[rowIndex][index] = pieceObj;
+          }
+        });
+      });
     }
 
     // find out what creeps have moved where by diffing to previous state stored in cells
@@ -255,21 +272,21 @@
           let xdiff = newPos.x - oldPos.x;
           let ydiff = newPos.y - oldPos.y;
 
-          if(xdiff === -1 && ydiff === 0 && document.getElementById(oldPos.id)){
+          if(xdiff === 1 && ydiff === 0 && document.getElementById(oldPos.id)){
             document.getElementById(oldPos.id).classList.add("moveup");
-          } else if (xdiff === 1 && ydiff === 0 && document.getElementById(oldPos.id)) {
+          } else if (xdiff === -1 && ydiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedown");
           } else if (ydiff === -1 && xdiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveright");
           } else if (ydiff === 1 && xdiff === 0 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("moveleft");
-          } else if (xdiff === -1 && ydiff === -1 && document.getElementById(oldPos.id)) {
-            document.getElementById(oldPos.id).classList.add("moveupleft");
           } else if (xdiff === 1 && ydiff === -1 && document.getElementById(oldPos.id)) {
+            document.getElementById(oldPos.id).classList.add("moveupleft");
+          } else if (xdiff === -1 && ydiff === -1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedownleft");
-          } else if (xdiff === -1 && ydiff === 1 && document.getElementById(oldPos.id)) {
-            document.getElementById(oldPos.id).classList.add("moveupright");
           } else if (xdiff === 1 && ydiff === 1 && document.getElementById(oldPos.id)) {
+            document.getElementById(oldPos.id).classList.add("moveupright");
+          } else if (xdiff === -1 && ydiff === 1 && document.getElementById(oldPos.id)) {
             document.getElementById(oldPos.id).classList.add("movedownright");
           }
         }
@@ -300,6 +317,22 @@
     }
   }
 
+  async function getLeaderboard() {
+    const res = await fetch(`${baseURL}/api/meta/scores`, {
+      method: "GET",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await res.json();
+    if (res.ok) {
+      leaderboard = data.players;
+    } else {
+      throw new Error(text);
+    }
+  }
+
   async function getPlayer() {
     const res = await fetch(`${baseURL}/api/player/`, {
       method: "POST",
@@ -311,7 +344,6 @@
     });
 
     const data = await res.json();
-
     if (res.ok) { 
       return data;
     } else {
@@ -403,15 +435,15 @@
       timeZone: "UTC",
     });
 
-    if(data.ok && data.events){
-      data.forEach((e) => {
-      e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
-    });
+    if(data.events){
+      data.events.forEach((e) => {
+        e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
+      });
     }
 
     if (res.ok) {
       //TODO Fix this , find out if a lib is missing
-      events = data.events;//.reverse();
+      events = data.events.reverse();
     } else {
       throw new Error(text);
     }
@@ -433,17 +465,29 @@
   let scoresActive = false;
   let eventsActive = false;
   let gamestarted = false;
+  let leaderboardActive = false;
 
-  const toggleLeaderboard = () => {
+  const toggleScoreboard = () => {
     scoresActive = !scoresActive;
     if (scoresActive) {
       eventsActive = false;
+      leaderboardActive = false;
     }
   };
   const toggleEvents = () => {
     eventsActive = !eventsActive;
     if (eventsActive) {
       scoresActive = false;
+      leaderboardActive = false;
+    }
+  };
+  const toggleLeaderboard = () => {
+    leaderboardActive = !leaderboardActive;
+    if (leaderboardActive) {
+      // refresh leaderboard with game scores
+      getLeaderboard();
+      scoresActive = false;
+      eventsActive = false;
     }
   };
   const toggleStartGame = () => {
@@ -538,7 +582,7 @@
       {/each}
       [Players]
       {#each players as ply}
-        <div class="row">{ply.health} - {ply.name} - {ply.id}</div>
+        <div class="row">{ply.health} - {ply.name}</div>
       {/each}
     </div>
     <div class="sidebar">
@@ -563,7 +607,7 @@
           <div class="power-text">POWER</div>
         </div>
         <div class="screen-display">
-          {#if currentGameUUID && power && !gameover && gamestarted && !scoresActive && !eventsActive}
+          {#if currentGameUUID && power && !gameoverDisplay && gamestarted && !scoresActive && !eventsActive && !leaderboardActive}
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 <div class="row">
@@ -605,7 +649,7 @@
             </div>
           {/if}
 
-          {#if power && !currentGameUUID && !gameover && !gamestarted && !scoresActive && !eventsActive}
+          {#if power && !currentGameUUID && !gameoverDisplay && !gamestarted && !scoresActive && !eventsActive && !leaderboardActive}
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
               <br/>
@@ -619,7 +663,7 @@
             </div>
           {/if}
 
-          {#if power && !currentGameUUID && !gameover && gamestarted && !scoresActive && !eventsActive}
+          {#if power && !currentGameUUID && !gameoverDisplay && gamestarted && !scoresActive && !eventsActive && !leaderboardActive}
             <div class="info">
               <div class="infotext">WELCOME {player.Name}</div>
               {#if error}
@@ -674,7 +718,7 @@
             </div>
           {/if}
 
-          {#if power && scoresActive && !eventsActive}
+          {#if power && scoresActive && !eventsActive && !leaderboardActive}
             <div class="info">
               <div class="infotext">SCORES</div>
               <div class="infoscroll" style="padding-left:10px;">
@@ -705,7 +749,38 @@
             </div>
           {/if}
 
-          {#if power && currentGameUUID && gamestarted && !scoresActive && eventsActive}
+          {#if power && leaderboardActive && !scoresActive && !eventsActive}
+            <div class="info">
+              <div class="infotext">LEADERBOARD</div>
+              <div class="infoscroll" style="padding-left:10px;">
+                <table style="width:100%">
+                  <tr>
+                    <th class="central">Name</th>
+                    <th class="central">D+</th>
+                    <th class="central">D-</th>
+                    <th class="central">KC</th>
+                    <th class="central">KP</th>
+                    <th class="central">Score</th>
+                  </tr>
+
+                  {#if leaderboard}
+                    {#each leaderboard as score}
+                      <tr>
+                        <td>{score.name}</td>
+                        <td>{score.total_damage_dealt}</td>
+                        <td>{score.total_damage_taken}</td>
+                        <td>{score.total_creep_kills}</td>
+                        <td>{score.total_player_kills}</td>
+                        <td>{score.total_score}</td>
+                      </tr>
+                    {/each}
+                  {/if}
+                </table>
+              </div>
+            </div>
+          {/if}
+
+          {#if power && currentGameUUID && gamestarted && !scoresActive && eventsActive && !leaderboardActive}
             <div class="info">
               <div class="infotext">EVENTS</div>
               <div class="infotextsmall">Game: {currentGame.name}</div>
@@ -723,7 +798,7 @@
             </div>
           {/if}
 
-          {#if power && currentGameUUID && gameover && gamestarted && !scoresActive && !eventsActive}
+          {#if power && currentGameUUID && gameoverDisplay && gamestarted && !scoresActive && !eventsActive && !leaderboardActive}
             <div class="background">
               <div class="gameovertext">GAME OVER</div>
             </div>
@@ -783,7 +858,7 @@
       <div
         class="pill-button button-select"
         on:click={() => hitButton('select')}
-        on:click={() => toggleLeaderboard()}>
+        on:click={() => toggleScoreboard()}>
         <span class="select">Scores</span>
       </div>
       <div
@@ -791,6 +866,12 @@
         on:click={() => hitButton('start')}
         on:click={() => toggleEvents()}>
         <span class="start">Events</span>
+      </div>
+      <div
+        class="pill-button button-extra"
+        on:click={() => hitButton('extra')}
+        on:click={() => toggleLeaderboard()}>
+        <span class="extra">Leaderboard</span>
       </div>
       <div class="speaker">
         <div class="row1">

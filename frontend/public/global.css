@@ -757,16 +757,20 @@
   }
   
   .button-select {
-	left: 350px;
+	left: 320px;
   }
   
   .button-start {
-	right: 350px;
+	right: 320px;
+  }
+
+  .button-extra {
+	right: 380px;
   }
   
   .select {
 	margin-top: 20px;
-	margin-left: -15px;
+	margin-left: -10px;
 	position: absolute;
 	color: rgb(81,88,80);
   }
@@ -774,7 +778,15 @@
   .start {
 	margin-top: 20px;
 	margin-left: 0px;
-	left: 2px;
+	left: 5px;
+	position: absolute;
+	color: rgb(81,88,80);
+  }
+
+  .extra {
+	margin-top: 20px;
+	margin-left: 0px;
+	left: -7px;
 	position: absolute;
 	color: rgb(81,88,80);
   }
