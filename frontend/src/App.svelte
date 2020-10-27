@@ -1,6 +1,9 @@
 <script>
   const apiUrl = __myapp.env.API_URL
+  const debugFlag = __myapp.env.DEBUG
+
   let baseURL = apiUrl;
+  let debug = debugFlag;
   let promise = getGames();
 
   let currentGameUUID = "";
@@ -553,32 +556,8 @@
 <link href="./css/hacker.css" rel="stylesheet" />
 <main>
   <div style="position: absolute; left: 850px; top: 10px;">
-    <h1>Welcome to SCONWAR</h1>
-    
-    
-    <!-- {#await promise}
-      <p>...waiting</p>
-    {:then games}
-      {#if games.games}
-        <p>Running Games</p>
-        {#each games.games as g}
-          <li>
-            <button on:click={() => selectGame(g)}>
-              [{g.status == 0 ? 'Stopped' : 'Active'}]
-              {g.name}
-            </button>
-          </li>
-        {/each}
-        <p>Selected Game : {currentGameUUID}</p>
-      {:else}
-        <p>There are no games running</p>
-      {/if}
-    {:catch error}
-      <p style="color: red">
-        Failed to get game list (check that the server is running)
-      </p>
-    {/await} -->
-
+   
+    {#if debug == true }
     <div class="sidebar">
       [Creeps]
       {#each creeps as cre}
@@ -597,6 +576,7 @@
       {/each}
       {/if}
     </div>
+    {/if}
   </div>
 
   <div class="gameboy">
