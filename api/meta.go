@@ -46,6 +46,46 @@ func getTotalScores(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// GetLeaderBoard godoc
+// @Summary Get the leader board
+// @Description Get's the leader board for this game server
+// @Tags Meta
+// @Accept json
+// @Produce json
+// @Success 200 {object} PlayerLeaderBoardResponse
+// @Router /meta/leaderboard/ [get]
+func getLeaderBoard(c *gin.Context) {
+
+	res := &PlayerLeaderBoardResponse{}
+
+	var scores []storage.PlayerGameScore
+	storage.Storage.Get().Order("score desc").Limit(20).Find(&scores)
+
+	for _, s := range scores {
+		var player storage.Player
+		storage.Storage.Get().Find(&player, s.PlayerID)
+
+		var board storage.Board
+		storage.Storage.Get().Where("uuid = ?", s.BoardID).First(&board)
+
+		score := &PlayerLeaderboardScore{
+			Name:        player.Name,
+			GameID:      s.BoardID,
+			GameName:    board.Name,
+			Score:       s.Score,
+			Position:    s.Position,
+			DamageTaken: s.DamageTaken,
+			DamageDealt: s.DamageDealt,
+			CreepKills:  s.CreepKilled,
+			PlayerKills: s.PlayersKilled,
+		}
+
+		res.Scores = append(res.Scores, score)
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 // GetTypes godoc
 // @Summary Get game type information
 // @Description Get's information about types & enumerations in the game

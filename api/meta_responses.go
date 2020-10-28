@@ -1,6 +1,8 @@
 package api
 
-import "github.com/sensepost/sconwar/game"
+import (
+	"github.com/sensepost/sconwar/game"
+)
 
 // MetaTypesResponse is a response containing game types
 type MetaTypesResponse struct {
@@ -53,4 +55,22 @@ type PlayerTotalScore struct {
 	TotalDamageDealt int    `json:"total_damage_dealt"`
 	TotalCreepKills  int    `json:"total_creep_kills"`
 	TotalPlayerKills int    `json:"total_player_kills"`
+}
+
+// PlayerLeaderBoardResponse contains the leader board
+type PlayerLeaderBoardResponse struct {
+	Scores []*PlayerLeaderboardScore `json:"scores"`
+}
+
+// PlayerLeaderboardScore is a player score representation
+type PlayerLeaderboardScore struct {
+	Name        string `json:"name"`
+	GameID      string `json:"game_id"`
+	GameName    string `json:"game_name"`
+	Score       int    `json:"score"`
+	Position    int    `json:"position"`
+	DamageTaken int    `json:"damage_taken"`
+	DamageDealt int    `json:"damage_dealt"`
+	CreepKills  int    `json:"creep_kills"`
+	PlayerKills int    `json:"player_kills"`
 }

@@ -86,6 +86,7 @@ func SetupRouter() (r *gin.Engine) {
 		{
 			meta.GET("/types", getTypes)
 			meta.GET("/scores", Throttle(1), getTotalScores)
+			meta.GET("/leaderboard", Throttle(1), getLeaderBoard)
 		}
 	}
 

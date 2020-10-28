@@ -325,7 +325,7 @@
   }
 
   async function getLeaderboard() {
-    const res = await fetch(`${baseURL}/api/meta/scores`, {
+    const res = await fetch(`${baseURL}/api/meta/leaderboard`, {
       method: "GET",
       cache: "no-cache",
       headers: {
@@ -334,7 +334,7 @@
     });
     const data = await res.json();
     if (res.ok) {
-      leaderboard = data.players;
+      leaderboard = data.scores;
     } else {
       throw new Error(text);
     }
@@ -739,11 +739,11 @@
               <div class="infoscroll" style="padding-left:10px;">
                 <table style="width:100%">
                   <tr>
-                    <th class="central">Name</th>
-                    <th class="central">D+</th>
-                    <th class="central">D-</th>
-                    <th class="central">KC</th>
-                    <th class="central">KP</th>
+                    <th class="central">Player</th>
+                    <th class="central">Game</th>
+                    <th class="central">Pos</th>
+                    <th class="central">D+/D-</th>
+                    <th class="central">CK/PK</th>
                     <th class="central">Score</th>
                   </tr>
 
@@ -751,11 +751,11 @@
                     {#each leaderboard as score}
                       <tr>
                         <td>{score.name}</td>
-                        <td>{score.total_damage_dealt}</td>
-                        <td>{score.total_damage_taken}</td>
-                        <td>{score.total_creep_kills}</td>
-                        <td>{score.total_player_kills}</td>
-                        <td>{score.total_score}</td>
+                        <td>{score.game_name}</td>
+                        <td>{score.position}</td>
+                        <td>{score.damage_dealt}/{score.damage_taken}</td>
+                        <td>{score.creep_kills}/{score.player_kills}</td>
+                        <td>{score.score}</td>
                       </tr>
                     {/each}
                   {/if}
