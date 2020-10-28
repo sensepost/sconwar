@@ -469,6 +469,14 @@
     redrawGameBoard();
   }
 
+  const truncate = (text, length) => {
+    length = length - 3; // make space for the ...
+    if (text.length > length) {
+      return `${text.substring(0, length)}...`;
+    }
+    return text;
+  }
+
   let scoresActive = false;
   let eventsActive = false;
   let gamestarted = false;
@@ -719,7 +727,7 @@
                   {#if scores}
                     {#each scores as score}
                       <tr>
-                        <td>{score.name}</td>
+                        <td>{truncate(score.name, 10)}</td>
                         <td>{score.damage_dealt}</td>
                         <td>{score.damage_taken}</td>
                         <td>{score.killed_creep}</td>
@@ -750,8 +758,8 @@
                   {#if leaderboard}
                     {#each leaderboard as score}
                       <tr>
-                        <td>{score.name}</td>
-                        <td>{score.game_name}</td>
+                        <td>{truncate(score.name, 10)}</td>
+                        <td>{truncate(score.game_name, 15)}</td>
                         <td>{score.position}</td>
                         <td>{score.damage_dealt}/{score.damage_taken}</td>
                         <td>{score.creep_kills}/{score.player_kills}</td>
