@@ -554,6 +554,7 @@
   }
   .headercell {
     border: unset;
+    padding: 11px;
   }
 
   .board {
