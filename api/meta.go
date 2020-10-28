@@ -38,7 +38,11 @@ func getTotalScores(c *gin.Context) {
 			score.AveragePosition += ps.Position
 		}
 
-		score.AveragePosition = score.AveragePosition / len(p.Scores)
+		if len(p.Scores) > 0 {
+			score.AveragePosition = score.AveragePosition / len(p.Scores)
+		} else {
+			score.AveragePosition = 0
+		}
 
 		res.Players = append(res.Players, score)
 	}
