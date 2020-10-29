@@ -1,6 +1,9 @@
 <script>
-  const apiUrl = __myapp.env.API_URL
-  const debugFlag = __myapp.env.DEBUG
+  import { api } from "./api.js";
+  import { game_helpers } from "./game_helpers.js";
+
+  const apiUrl = __myapp.env.API_URL;
+  const debugFlag = __myapp.env.DEBUG;
 
   let baseURL = apiUrl;
   let debug = debugFlag;
@@ -77,41 +80,36 @@
     }
   }
 
-  async function getGameInfo() {
-    const res = await fetch(`${baseURL}/api/game/info/${currentGameUUID}`);
-    const data = await res.json();
-
-    if (res.ok) {
-      fow = Math.round(data.fow);
-      return data;
-    } else {
-      throw new Error(text);
-    }
-  }
-
   function selectGame(game) {
     currentGame = game;
     currentGameUUID = game.id;
 
-    getPlayerStatus().then(function(data){
-        if(!data){
-          error = "Your player doesnt exist in that game!";
-          currentGame = null;
-          currentGameUUID = null;
-        }else{
-          error = null;
-          gameover = false;
-          gameoverDisplay = false;
+    api.getPlayerStatus(baseURL,currentGameUUID,player_id).then(function (data) {
+      if (!data) {
+        error = "Your player doesnt exist in that game!";
+        currentGame = null;
+        currentGameUUID = null;
+      } else {
+        error = null;
+        gameover = false;
+        gameoverDisplay = false;
 
-          playerStatus = data;
+        playerStatus = data;
 
-          getGameInfo().then(function (data) {
-            board_x = data.size_x;
-            board_y = data.size_y;
-          });
-          getScores();
-          new Audio("./mp3/soundtrack.mp3").play();
-        }
+        api.getGameInfo(baseURL, currentGameUUID).then(function (data) {
+          board_x = data.data.size_x;
+          board_y = data.data.size_y;
+          fow = data.fow;
+        });
+        api.getScores(baseURL, currentGameUUID).then(function (scs) {
+          scores = scs;
+          if (scores == null) {
+            scores = [];
+          }
+        });
+
+        new Audio("./mp3/soundtrack.mp3").play();
+      }
     });
   }
 
@@ -120,37 +118,14 @@
   let gameover = false;
   let gameoverDisplay = false;
 
-  function updateBoardStateForEntity(board, entity) {
-    let boardLength = board.length;
-    // have to -1 on the X since we are diffing against the  board length
-    board[(boardLength - entity.x) - 1][entity.y] = entity;
-    return board;
-  }
-
-  function calculateHealthText(cc) {
-    let ch = "";
-    if (cc.health > 75) {
-      ch = "hi";
-    } else if (cc.health < 76 && cc.health > 40) {
-      ch = "med";
-    } else if (cc.health < 41 && cc.health > 0) {
-      ch = "low";
-    } else if (cc.health === 0) {
-      ch = "dead";
-    } else {
-      ch = "";
-    }
-    return ch;
-  }
-
   function updateGameBoard(data) {
     getGameEvents();
 
     // get all the player info
-    getPlayerStatus().then(function(data){
-        if(data){
-          playerStatus = data;
-        }
+    api.getPlayerStatus(baseURL,currentGameUUID,player_id).then(function (data) {
+      if (data) {
+        playerStatus = data;
+      }
     });
 
     let x = board_x;
@@ -159,9 +134,9 @@
     let c = [];
     let creepNewPos = new Map();
 
-    for (var i = 0; i < x; i++) {
+    for (var i = 0; i < y; i++) {
       c.push(
-        Array.apply(null, Array(y)).map(function () {
+        Array.apply(null, Array(x)).map(function () {
           return 0;
         })
       );
@@ -173,12 +148,12 @@
         let pieceObj = {};
         pieceObj.type = 1;
         pieceObj.health = cc.health;
-        pieceObj.healthString = calculateHealthText(cc);
+        pieceObj.healthString = game_helpers.calculateHealthText(cc);
         pieceObj.id = cc.id;
         pieceObj.x = cc.position.x - 1;
-        pieceObj.y = cc.position.y - 1;
+        pieceObj.y = cc.position.y;
 
-        c = updateBoardStateForEntity(c, pieceObj);
+        c = game_helpers.updateBoardStateForEntity(c, pieceObj);
         creepNewPos.set(cc.id, pieceObj);
       });
     } else {
@@ -197,15 +172,15 @@
       let pieceObj = {};
       pieceObj.type = 2; //Might want to change to be more identifiable
       pieceObj.health = cc.health;
-      pieceObj.healthString = calculateHealthText(cc);
+      pieceObj.healthString = game_helpers.calculateHealthText(cc);
       pieceObj.id = cc.name;
       pieceObj.x = cc.position.x - 1;
-      pieceObj.y = cc.position.y - 1;
+      pieceObj.y = cc.position.y;
 
       playerx = pieceObj.x;
       playery = pieceObj.y;
 
-      c = updateBoardStateForEntity(c, pieceObj);
+      c = game_helpers.updateBoardStateForEntity(c, pieceObj);
       alldead++;
     }
 
@@ -215,12 +190,12 @@
         let pieceObj = {};
         pieceObj.type = 2;
         pieceObj.health = cc.health;
-        pieceObj.healthString = calculateHealthText(cc);
+        pieceObj.healthString = game_helpers.calculateHealthText(cc);
         pieceObj.id = cc.name;
         pieceObj.x = cc.position.x - 1;
-        pieceObj.y = cc.position.y - 1;
+        pieceObj.y = cc.position.y;
 
-        c = updateBoardStateForEntity(c, pieceObj);
+        c = game_helpers.updateBoardStateForEntity(c, pieceObj);
         alldead++;
       });
     } else {
@@ -232,14 +207,13 @@
         let pieceObj = {};
         pieceObj.type = "P" + cc.type;
         pieceObj.x = cc.position.x - 1;
-        pieceObj.y = cc.position.y - 1;
+        pieceObj.y = cc.position.y;
 
-        c = updateBoardStateForEntity(c, pieceObj);
+        c = game_helpers.updateBoardStateForEntity(c, pieceObj);
       });
     }
 
-
-    if(data.players && alldead === data.players.length+1){
+    if (data.players && alldead === data.players.length + 1) {
       gameover = true;
       gameoverDisplay = true;
       setTimeout(() => {
@@ -248,18 +222,19 @@
     }
 
     // fow calculations
-    if(!gameover){
-      c.forEach(function(item, index) {
-        let rowIndex = index;
-        item.forEach(function(item, index){
-          let rev = (board_x - playerx) - 1;
-
-          if(rowIndex > rev+fow
-            || rowIndex < rev-fow 
-            || index > playery+fow || index < playery-fow){
-              let pieceObj = {};
-              pieceObj.type = "FOG";
-              c[rowIndex][index] = pieceObj;
+    if (!gameover) {
+      c.forEach(function (item, rowIndex) {
+        item.forEach(function (xval, index) {
+          let py = board_y - playery;
+          if (
+            index > playerx + fow ||
+            rowIndex > py + fow ||
+            index < playerx - fow ||
+            rowIndex < py - fow
+          ) {
+            let pieceObj = {};
+            pieceObj.type = "FOG";
+            c[rowIndex][index] = pieceObj;
           }
         });
       });
@@ -267,33 +242,69 @@
 
     // find out what creeps have moved where by diffing to previous state stored in cells
     // create map of creep id and position moved
-    if(creepPositions.size > 0){
-      for (const [key, oldPos] of creepPositions.entries()) {   
+    if (creepPositions.size > 0) {
+      for (const [key, oldPos] of creepPositions.entries()) {
         let newPos = creepNewPos.get(oldPos.id);
 
-        if(newPos){
+        if (newPos) {
           let xdiff = newPos.x - oldPos.x;
           let ydiff = newPos.y - oldPos.y;
 
           // for animation purposes only let it animate 1 position
-          if(xdiff > 1){ xdiff = 1;}
-          if(ydiff > 1){ ydiff = 1;}
+          if (xdiff > 1) {
+            xdiff = 1;
+          }
+          if (ydiff > 1) {
+            ydiff = 1;
+          }
 
-          if(xdiff === 1 && ydiff === 0 && document.getElementById(oldPos.id)){
+          if (
+            xdiff === 1 &&
+            ydiff === 0 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("moveup");
-          } else if (xdiff === -1 && ydiff === 0 && document.getElementById(oldPos.id)) {
+          } else if (
+            xdiff === -1 &&
+            ydiff === 0 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("movedown");
-          } else if (ydiff === -1 && xdiff === 0 && document.getElementById(oldPos.id)) {
+          } else if (
+            ydiff === -1 &&
+            xdiff === 0 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("moveright");
-          } else if (ydiff === 1 && xdiff === 0 && document.getElementById(oldPos.id)) {
+          } else if (
+            ydiff === 1 &&
+            xdiff === 0 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("moveleft");
-          } else if (xdiff === 1 && ydiff === -1 && document.getElementById(oldPos.id)) {
+          } else if (
+            xdiff === 1 &&
+            ydiff === -1 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("moveupleft");
-          } else if (xdiff === -1 && ydiff === -1 && document.getElementById(oldPos.id)) {
+          } else if (
+            xdiff === -1 &&
+            ydiff === -1 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("movedownleft");
-          } else if (xdiff === 1 && ydiff === 1 && document.getElementById(oldPos.id)) {
+          } else if (
+            xdiff === 1 &&
+            ydiff === 1 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("moveupright");
-          } else if (xdiff === -1 && ydiff === 1 && document.getElementById(oldPos.id)) {
+          } else if (
+            xdiff === -1 &&
+            ydiff === 1 &&
+            document.getElementById(oldPos.id)
+          ) {
             document.getElementById(oldPos.id).classList.add("movedownright");
           }
         }
@@ -306,40 +317,6 @@
     }, 1000);
   }
 
-  async function getScores() {
-    const res = await fetch(`${baseURL}/api/game/scores/${currentGameUUID}`, {
-      method: "GET",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      scores = data.scores;
-    } else {
-      throw new Error(text);
-    }
-  }
-
-  async function getLeaderboard() {
-    const res = await fetch(`${baseURL}/api/meta/leaderboard`, {
-      method: "GET",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await res.json();
-    if (res.ok) {
-      leaderboard = data.scores;
-    } else {
-      throw new Error(text);
-    }
-  }
-
   async function getPlayer() {
     const res = await fetch(`${baseURL}/api/player/`, {
       method: "POST",
@@ -347,29 +324,10 @@
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ player_id: player_id })
+      body: JSON.stringify({ player_id: player_id }),
     });
 
     const data = await res.json();
-    if (res.ok) { 
-      return data;
-    } else {
-      return res.ok;
-    }
-  }
-
-  async function getPlayerStatus() {
-    const res = await fetch(`${baseURL}/api/player/status`, {
-      method: "POST",
-      cache: "no-cache", 
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id })
-    });
-
-    const data = await res.json();
-
     if (res.ok) {
       return data;
     } else {
@@ -377,29 +335,12 @@
     }
   }
 
-  async function getPlayerSurroundings() {
-    const res = await fetch(`${baseURL}/api/player/surroundings`, {
-      method: "POST",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ game_id: currentGameUUID, player_id: player_id }), // body data type must match "Content-Type" header
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      return data;
-    } else {
-      throw new Error(text);
-    }
-  }
-
+  
+  
   function redrawGameBoard() {
     if (!gameover) {
-      getPlayerStatus().then(function (statusInfo) {
-        getPlayerSurroundings().then(function (data) {
+      api.getPlayerStatus(baseURL,currentGameUUID,player_id).then(function (statusInfo) {
+        api.getPlayerSurroundings(baseURL,currentGameUUID,player_id).then(function (data) {
           data.player = statusInfo.player;
           updateGameBoard(data);
         });
@@ -415,7 +356,7 @@
     } else if (typeof currentCellValue.type == "string") {
       if (currentCellValue.type[0] == "P") {
         return "powerup";
-      } else if (currentCellValue.type == "FOG"){
+      } else if (currentCellValue.type == "FOG") {
         return "fog";
       }
     }
@@ -442,15 +383,16 @@
       timeZone: "UTC",
     });
 
-    if(data.events){
+    if (data.events) {
       data.events.forEach((e) => {
         e.CreatedAt = dtFormat.format(Date.parse(e.CreatedAt));
       });
     }
 
     if (res.ok) {
-      //TODO Fix this , find out if a lib is missing
-      events = data.events.reverse();
+      if (data.events) {
+        events = data.events.reverse();
+      }
     } else {
       throw new Error(text);
     }
@@ -475,7 +417,7 @@
       return `${text.substring(0, length)}...`;
     }
     return text;
-  }
+  };
 
   let scoresActive = false;
   let eventsActive = false;
@@ -500,21 +442,33 @@
     leaderboardActive = !leaderboardActive;
     if (leaderboardActive) {
       // refresh leaderboard with game scores
-      getLeaderboard();
+      api.getLeaderboard(baseURL).then(function (l_response) {
+        leaderboard = l_response;
+        if (leaderboard == null) {
+          leaderboard = [];
+        }
+      });
       scoresActive = false;
       eventsActive = false;
     }
   };
   const toggleStartGame = () => {
     getPlayer().then(function (data) {
-      if(!data){
-        player_id = "INVALID - TRY AGAIN"
-      }else{
+      if (!data) {
+        player_id = "INVALID - TRY AGAIN";
+      } else {
         player = data;
         gamestarted = !gamestarted;
       }
     });
-  }
+  };
+  const handleKeyup = () => {
+    if (event.code == "Enter") {
+      event.preventDefault();
+      toggleStartGame();
+      return false;
+    }
+  };
 </script>
 
 <style>
@@ -565,26 +519,25 @@
 <link href="./css/hacker.css" rel="stylesheet" />
 <main>
   <div style="position: absolute; left: 850px; top: 10px;">
-   
-    {#if debug == true }
-    <div class="sidebar">
-      [Creeps]
-      {#each creeps as cre}
-        <div class="row">{cre.health} - {cre.id}</div>
-      {/each}
-      [Players]
-      {#each players as ply}
-        <div class="row">{ply.health} - {ply.name}</div>
-      {/each}
-    </div>
-    <div class="sidebar">
-      [Events]
-      {#if events}
-      {#each events as eve}
-        <div class="row">{eve.CreatedAt} - {eve.msg}</div>
-      {/each}
-      {/if}
-    </div>
+    {#if debug == true}
+      <div class="sidebar">
+        [Creeps]
+        {#each creeps as cre}
+          <div class="row">{cre.health} - {cre.id}</div>
+        {/each}
+        [Players]
+        {#each players as ply}
+          <div class="row">{ply.health} - {ply.name}</div>
+        {/each}
+      </div>
+      <div class="sidebar">
+        [Events]
+        {#if events}
+          {#each events as eve}
+            <div class="row">{eve.CreatedAt} - {eve.msg}</div>
+          {/each}
+        {/if}
+      </div>
     {/if}
   </div>
 
@@ -604,7 +557,9 @@
             <div style="display:flex; box-sizing: unset;">
               <div class="board">
                 <div class="row">
-                  <div class="cell headercell central info" style="margin-left:30px">
+                  <div
+                    class="cell headercell central info"
+                    style="margin-left:30px">
                     1
                   </div>
                   <div class="cell headercell central info">2</div>
@@ -630,11 +585,11 @@
 
                 {#each cells as r, i}
                   <div class="row">
-                    <div class="cell headercell central info">{ (board_x - i)}</div>
+                    <div class="cell headercell central info">
+                      {board_x - i}
+                    </div>
                     {#each r as c}
-                      <div
-                        id={c.id}
-                        class="cell {getCellImageClass(c)}" />
+                      <div id={c.id} class="cell {getCellImageClass(c)}" />
                     {/each}
                   </div>
                 {/each}
@@ -645,13 +600,20 @@
           {#if power && !currentGameUUID && !gameoverDisplay && !gamestarted && !scoresActive && !eventsActive && !leaderboardActive}
             <div id="movetxt">
               <h3>Welcome to SCONWAR</h3>
-              <br/>
-              <img style="height:150px"alt="Space invader header" src="./images/invader.gif" />
-              <br/>
+              <br />
+              <img
+                style="height:150px"
+                alt="Space invader header"
+                src="./images/invader.gif" />
+              <br />
               <div>Enter Player ID</div>
-              <input id="player" type="text"  bind:value={player_id}/>
+              <input
+                id="player"
+                type="text"
+                on:keyup|preventDefault={handleKeyup}
+                bind:value={player_id} />
               {#if player_id}
-              <div on:click={() => toggleStartGame()} >Click to start</div>
+                <div on:click={() => toggleStartGame()}>Click to start</div>
               {/if}
             </div>
           {/if}
@@ -660,9 +622,7 @@
             <div class="info">
               <div class="infotext">WELCOME {player.Name}</div>
               {#if error}
-                <p style="color: red">
-                  {error}
-                </p>
+                <p style="color: red">{error}</p>
               {/if}
               <div class="infotextmed">GAMES IN PLAY</div>
               <div class="infoscrollhalf">
@@ -672,7 +632,11 @@
                   {#if number.games}
                     {#each number.games as gameUUID}
                       {#if gameUUID.status !== 2}
-                        <div class="clickable" on:click={() => selectGame(gameUUID)}> {gameUUID.name} </div>
+                        <div
+                          class="clickable"
+                          on:click={() => selectGame(gameUUID)}>
+                          {gameUUID.name}
+                        </div>
                       {/if}
                     {/each}
                   {:else}
@@ -680,7 +644,8 @@
                   {/if}
                 {:catch error}
                   <p style="color: red">
-                    Failed to get current game list (check that the server is running)
+                    Failed to get current game list (check that the server is
+                    running)
                   </p>
                 {/await}
               </div>
@@ -704,7 +669,8 @@
                   {/if}
                 {:catch error}
                   <p style="color: red">
-                    Failed to get game finished list (check that the server is running)
+                    Failed to get game finished list (check that the server is
+                    running)
                   </p>
                 {/await}
               </div>
@@ -725,7 +691,7 @@
                     <th class="central">Score</th>
                   </tr>
 
-                  {#if scores}
+                  {#if scores != null}
                     {#each scores as score}
                       <tr>
                         <td>{truncate(score.name, 10)}</td>
@@ -798,28 +764,25 @@
           {/if}
         </div>
 
-        <div class="playerstatus" > 
+        <div class="playerstatus">
           {#if playerStatus}
             <span>
-              Health: {playerStatus.player.health} 
-              <br/>
-              Power Ups: 
+              Health:
+              {playerStatus.player.health}
+              <br />
+              Power Ups:
               {#if playerStatus.player.powerups}
-              {#each playerStatus.player.powerups as pu}
-                {#if pu.type === 0}
-                  Health  
-                {:else if pu.type === 1}
-                  Teleport
-                {:else}
-                  Double Damage
-                {/if}
-                &nbsp;
-              {/each}
+                {#each playerStatus.player.powerups as pu}
+                  {#if pu.type === 0}
+                    Health
+                  {:else if pu.type === 1}Teleport{:else}Double Damage{/if}
+                  &nbsp;
+                {/each}
               {/if}
-          </span>
+            </span>
           {/if}
         </div>
-        <div class="gameboy-color-logo"> 
+        <div class="gameboy-color-logo">
           <div class="logo-gb">SCONWAR</div>
         </div>
       </div>
@@ -949,4 +912,3 @@
     </div>
   </div>
 </main>
-
