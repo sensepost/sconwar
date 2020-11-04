@@ -292,8 +292,8 @@ func startGame(c *gin.Context) {
 }
 
 // StopGame godoc
-// @Summary Start a game
-// @Description Starts a game
+// @Summary Stop a game
+// @Description Stop a game
 // @Tags Game
 // @Accept json
 // @Produce json
