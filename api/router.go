@@ -59,6 +59,7 @@ func SetupRouter() (r *gin.Engine) {
 			game.GET("/detail/:game_id", TokenAuthMiddleWare(), getGameDetail)
 			game.GET("/events/:game_id", getEvents)
 			game.PUT("/start/:game_id", startGame)
+			game.PUT("/stop/:game_id", TokenAuthMiddleWare(), stopGame)
 
 			game.GET("/info/:game_id", getGameInfo)
 			game.GET("/scores/:game_id", getScores)

@@ -291,6 +291,45 @@ func startGame(c *gin.Context) {
 	})
 }
 
+// StopGame godoc
+// @Summary Start a game
+// @Description Starts a game
+// @Tags Game
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param game_id path string true "game uuid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /game/stop/{game_id} [put]
+func stopGame(c *gin.Context) {
+
+	params := &GetGameDetailRequest{}
+
+	if err := c.BindUri(&params); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to read uri param`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	if err := params.Validation(); err != nil {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	board := game.Games[params.GameID]
+	board.Status = game.BoardStatusFinished
+
+	c.JSON(http.StatusOK, &StatusResponse{
+		Success: true,
+	})
+}
+
 // JoinGame godoc
 // @Summary Join a player to a game
 // @Description Joins a player to an existing game

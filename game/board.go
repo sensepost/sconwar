@@ -160,7 +160,23 @@ func (b *Board) Run() {
 			b.processPlayerTurn(ctx, p)
 		}
 
-		// win conditions
+		// win / stop conditions
+
+		if b.Status != BoardStatusRunning {
+			b.LogEvent(&storage.Event{
+				Date: time.Now(),
+				Msg: `game was in Run() loop, but status is not BoardStatusRunning. ` +
+					`status may have changed from the outside (eg. via api)`,
+			})
+
+			// cleanup player scores
+			for _, p := range b.AlivePlayers() {
+				p.SaveFinalScore(b, b.CurrentDeathPosition())
+			}
+
+			break
+		}
+
 		if len(b.AlivePlayers()) == 1 && len(b.AliveCreep()) == 0 {
 			player := b.AlivePlayers()[0]
 
