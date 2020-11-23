@@ -1,5 +1,11 @@
 # 👾 sconwar - a bring your own client programming game
 
+<p align="center">
+  <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40leonjza-blue.svg" alt="@leonjza" height="18"></a>
+  <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40rc1140-blue.svg" alt="@rc1140" height="18"></a>
+  <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40scoobymib3-blue.svg" alt="@scoobymib3" height="18"></a>
+</p>
+
 <img align="right" src="./images/logo.png" height="220" alt="sconwar">
 
 `sconwar` is a "bring your own client" programming game where the only interface with the game is via a RESTful api. Some `sconwar` features are:
