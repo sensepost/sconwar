@@ -2,8 +2,8 @@
 
 <p align="center">
   <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40leonjza-blue.svg" alt="@leonjza" height="18"></a>
-  <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40rc1140-blue.svg" alt="@rc1140" height="18"></a>
-  <a href="https://twitter.com/leonjza"><img src="https://img.shields.io/badge/twitter-%40scoobymib3-blue.svg" alt="@scoobymib3" height="18"></a>
+  <a href="https://twitter.com/rc1140"><img src="https://img.shields.io/badge/twitter-%40rc1140-blue.svg" alt="@rc1140" height="18"></a>
+  <a href="https://twitter.com/scoobymib3"><img src="https://img.shields.io/badge/twitter-%40scoobymib3-blue.svg" alt="@scoobymib3" height="18"></a>
 </p>
 
 <img align="right" src="./images/logo.png" height="220" alt="sconwar">
