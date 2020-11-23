@@ -8,6 +8,10 @@
 - Turn-based game logic
 - Written in Go, clients can be in any language
 
+The game itself is pretty simple. A 20 by 20 sized board is spawned, populated by creep & power ups. Players join the board taking turns to battle it out in a last person standing war. Killing other creep players will award you points, with a multiplier that applies post-game based on your position.
+
+Your goal is to write your own client to out-score your opponents and climb the leaderboard.
+
 ## installation
 
 The game server can be compiled with:
@@ -34,24 +38,48 @@ The most important resource you need to know about the is the API documentation.
 
 To start a `sconwar` game, you need two things:
 
-- A player ID, obtainable by registering to the server. This ID is a secret, and you should treat it that way.
-- A game ID, obtainable by starting a new game.
+- A `player_id`, obtainable by registering to the server. This ID is a secret, and you should treat it that way.
+- A `game_id`, obtainable by starting a new game.
 
 Depending on the server setup, an administrator could either share the key configured to setup new users, or you could ask for a player token.
 
-### game rules
+### game flow
 
-`sconwar` itself is really simple. A game board that is typically 20 by 20 tiles big is populated with a number of creep, powerups and other players. Players are given 30 seconds to issue commands in their turn, after which the next player will be granted a chance to issue an action. A player may queue up to two commands before their turn which will be executed as soon as its their turn.
+To actually play a game, a small dance needs to happen first. It's pretty simple. Create a game, join a game and then start the game. Once the game is running you can invoke Actions and Player endpoints to get an idea of your surroundings and decide what moves to make.
 
-Issue enough attack, move & pickup commands to be the last person standing, and win the round!
+Starting a game will take the following calls:
 
-### starting a new game
-
-Games are identified by a UUID which should be used as the `gameid` whenever an API call requires that. Before playing a game of `sconwar`, you need to start and join a game.
-
-To start a new game, call the `game/new` endpoint, recording the returned UUID. Next, join your player to that game with the `game/join` endpoint. Once all of the players in the game have joined, the `game/start/{uuid}` endpoint should be called to start the game.
+- Make a POST request to `game/new` with a game name. Take note of the UUID value returned. This ID's your game.
+- Make a POST request to `game/join` using your secret `player_id` and the newly obtained `game_id`.
+- When all of the players have joined, make a PUT request to `game/start/{game-uuid}` to start the game.
 
 This game & player id combination is used in all `action/*` endpoints to issue commands.
+
+### game rules
+
+Sconwar is a turned-based game. A game has both creep and players that could move, attack, decide to pick up a power up or do nothing. Creep decide what to do relatively quickly, but Players could take a little longer. For this reason, players have 30 seconds to invoke an action. While it is not your turn, you may queue up to two actions that will automatically get executed when its your turn again.
+
+As for the game itself, there are a few rules. Those are:
+
+- Players have two moves they can make per turn.
+- Players can queue up up to two actions while it is not their turn.
+- A turn lasts for a maximum of 30 seconds.
+- The maximum distance you can move / attack / pick up something is two tiles.
+- A Fog of War is applicable. That means that the surroundings endpoint won't show the entire board, unless the game is finished.
+- Activating a power up does not consume a turn.
+
+### game goal
+
+Get the top score on the leaderboard! The meta/scores endpoint will return total scores, and the meta/leaderboard endpoint will show the top scoring games!
+
+### sconwar tips
+
+While playing sconwar:
+
+- Check the player status endpoint to see which power ups you have, how much health you have left etc.
+- Check the game info endpoint to see who's turn it is now.
+- Check the surroundings endpoint as often as possible to see who and what is in range to plan your move.
+- Use the meta/types endpoint as a reference for what some of the internal ID's such as power ups, statuses and other entities in Sconwar mean.
 
 ## license
 
