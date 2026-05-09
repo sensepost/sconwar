@@ -83,7 +83,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 		player.MoveTo(a.X, a.Y)
 		e.Msg = fmt.Sprintf(`player %s moved to a new position`, player.Name)
 
-		break
 	case Attack:
 		// find entities on the x, y and if there is something, take damage
 		for _, c := range board.AliveCreep() {
@@ -171,7 +170,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 			}
 		}
 
-		break
 	case Pickup:
 		for _, u := range board.PowerUps {
 
@@ -197,7 +195,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 			}
 		}
 
-		break
 	default:
 		board.LogEvent(&storage.Event{
 			Date:        time.Now(),
@@ -207,7 +204,6 @@ func (a *Action) Execute(player *Player, board *Board) {
 			Action:      int(Attack),
 			Msg:         fmt.Sprintf(`player %s managed to queue an invalid action`, player.Name),
 		})
-		break
 	}
 
 	if len(e.Msg) == 0 {

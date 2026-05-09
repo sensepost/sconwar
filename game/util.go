@@ -5,7 +5,8 @@ import (
 )
 
 // distanceBetween calculates distance using Chebyshev distance
-// 	https://en.wikipedia.org/wiki/Chebyshev_distance
+//
+//	https://en.wikipedia.org/wiki/Chebyshev_distance
 func distanceBetween(one hasPosition, two hasPosition) float64 {
 
 	x1, y1 := one.GetPosition()

@@ -284,7 +284,6 @@ func (b *Board) processCreepTurn() {
 				})
 
 				remMoves--
-				break
 
 			case Move:
 				sourcepos := creep.Position.ToSingleValue()
@@ -302,7 +301,6 @@ func (b *Board) processCreepTurn() {
 				})
 
 				remMoves--
-				break
 
 			case Attack:
 				// process alive players before alive creep
@@ -384,15 +382,13 @@ func (b *Board) processCreepTurn() {
 
 					break // aliveCreep loop
 				}
-
-				break // attack
 			}
 		}
 	}
 }
 
 // chooseCreepAction randomly decides on an action to take
-// with a boas towards moving and attacking
+// with a bias towards moving and attacking
 func (b *Board) chooseCreepAction() ActionType {
 
 	c := wr.NewChooser(

@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"math/rand"
+	"strconv"
 
 	"github.com/dariubs/percent"
 	"github.com/prometheus/client_golang/prometheus"
@@ -11,6 +12,7 @@ import (
 
 // ActionChannel is the channel a player will recieve actions on.
 // This is actually a workaround as detailed in:
+//
 //	https://github.com/swaggo/swag/issues/680#issue-602785690
 type ActionChannel chan Action
 
@@ -176,17 +178,14 @@ func (p *Player) UsePowerUp(powerupID string) {
 		if p.Health > PowerUpHealthBonusMax {
 			p.Health = PowerUpHealthBonusMax
 		}
-		break
 	case Teleport:
 		p.PowerUpBuffs = append(p.PowerUpBuffs, Teleport)
-		break
 	case DoubleDamage:
 		p.PowerUpBuffs = append(p.PowerUpBuffs, DoubleDamage)
-		break
 	}
 
 	p.RemovePowerUp(powerup)
-	powerupsUsed.With(prometheus.Labels{"poweruptype": string(powerup.Type)}).Inc()
+	powerupsUsed.With(prometheus.Labels{"poweruptype": strconv.Itoa(int(powerup.Type))}).Inc()
 }
 
 // RemovePowerUp removes a powerup from the player

@@ -15,9 +15,9 @@ func TestCreep_CanCreateNew(t *testing.T) {
 
 func TestCreep_CanMove(t *testing.T) {
 	c := game.NewCreep()
-	pos := c.Position
+	oldX, oldY := c.Position.X, c.Position.Y
 	c.Move()
-	if c.Position.X == pos.X && c.Position.Y == pos.Y {
+	if c.Position.X == oldX && c.Position.Y == oldY {
 		t.Fatalf("expected Cords to change but remained identical")
 	}
 }
