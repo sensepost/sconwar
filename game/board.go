@@ -391,11 +391,15 @@ func (b *Board) processCreepTurn() {
 // with a bias towards moving and attacking
 func (b *Board) chooseCreepAction() ActionType {
 
-	c := wr.NewChooser(
+	c, err := wr.NewChooser(
 		wr.Choice{Item: Move, Weight: 5},
 		wr.Choice{Item: Attack, Weight: 4},
 		wr.Choice{Item: Nothing, Weight: 2},
 	)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to build creep action chooser")
+		return Move
+	}
 
 	return c.Pick().(ActionType)
 }

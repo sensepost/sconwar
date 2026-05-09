@@ -13,7 +13,7 @@ import (
 	docs "github.com/sensepost/sconwar/docs" // import auto generated docs
 	"github.com/sensepost/sconwar/game"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
+	swaggerFiles "github.com/swaggo/files"
 	ginprometheus "github.com/zsais/go-gin-prometheus"
 )
 

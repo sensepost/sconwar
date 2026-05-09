@@ -32,11 +32,18 @@ func NewPowerUp() *PowerUp {
 		return nil
 	}
 
-	c := wr.NewChooser(
+	c, err := wr.NewChooser(
 		wr.Choice{Item: Health, Weight: 5},
 		wr.Choice{Item: Teleport, Weight: 5},
 		wr.Choice{Item: DoubleDamage, Weight: 5},
 	)
+	if err != nil {
+		return &PowerUp{
+			ID:       uuid.New().String(),
+			Type:     Health,
+			Position: NewPosition(),
+		}
+	}
 
 	return &PowerUp{
 		ID:       uuid.New().String(),
