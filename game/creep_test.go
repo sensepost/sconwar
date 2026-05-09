@@ -15,6 +15,7 @@ func TestCreep_CanCreateNew(t *testing.T) {
 
 func TestCreep_CanMove(t *testing.T) {
 	c := game.NewCreep()
+	c.Position.MoveTo(10, 10)
 	oldX, oldY := c.Position.X, c.Position.Y
 	c.Move()
 	if c.Position.X == oldX && c.Position.Y == oldY {

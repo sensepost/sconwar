@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,8 +17,13 @@ type Db struct {
 
 // InitDb sets up a new DB
 func InitDb() error {
+	return InitDbPath("db.sqlite")
+}
 
-	conn, err := gorm.Open(sqlite.Open("db.sqlite?cache=shared"), &gorm.Config{
+// InitDbPath sets up a new DB at a specific sqlite file path.
+func InitDbPath(path string) error {
+
+	conn, err := gorm.Open(sqlite.Open(fmt.Sprintf("%s?cache=shared", path)), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Error),
 	})
 	if err != nil {

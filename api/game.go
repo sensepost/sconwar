@@ -40,7 +40,7 @@ func newGame(c *gin.Context) {
 	}
 
 	id := uuid.New().String()
-	game.Games[id] = game.NewBoard(id, params.Name)
+	game.CreateGame(id, game.NewBoard(id, params.Name))
 
 	c.JSON(http.StatusCreated, &NewGameResponse{
 		Created: true,
@@ -58,11 +58,11 @@ func newGame(c *gin.Context) {
 // @Router /game/ [get]
 func allGames(c *gin.Context) {
 	g := &AllGamesResponse{}
-	for _, d := range game.Games {
+	for _, d := range game.ListGames() {
 		g.Games = append(g.Games, &AllGamesGame{
 			ID:     d.ID,
 			Name:   d.Name,
-			Status: int(d.Status),
+			Status: int(d.StatusValue()),
 		})
 	}
 
@@ -101,8 +101,9 @@ func getGameDetail(c *gin.Context) {
 		return
 	}
 
+	board, _ := game.GetGame(params.GameID)
 	c.JSON(http.StatusOK, &GameDetailResponse{
-		Game: game.Games[params.GameID],
+		Game: board,
 	})
 }
 
@@ -136,17 +137,18 @@ func getGameInfo(c *gin.Context) {
 		return
 	}
 
-	board := game.Games[params.GameID]
+	board, _ := game.GetGame(params.GameID)
+	info := board.SnapshotGameInfo()
 
 	i := &GameInfoResponse{
-		Name:          board.Name,
-		Status:        board.Status,
-		SizeX:         board.SizeX,
-		SizeY:         board.SizeY,
-		CurrentPlayer: board.CurrentPlayer,
-		Fow:           board.FOWDistance,
-		Created:       board.Created,
-		Started:       board.Started,
+		Name:          info.Name,
+		Status:        info.Status,
+		SizeX:         info.SizeX,
+		SizeY:         info.SizeY,
+		CurrentPlayer: info.CurrentPlayer,
+		Fow:           info.FOWDistance,
+		Created:       info.Created,
+		Started:       info.Started,
 		GameOptions: GameOptionsResponse{
 			FogOfWarPercent:       game.FogOfWarPercent,
 			AttackRange:           game.AttackRange,
@@ -156,9 +158,9 @@ func getGameInfo(c *gin.Context) {
 			PowerUpMax:            game.PowerUpMax,
 		},
 		GameEntities: GameEntitiesResponse{
-			AliveCreep:   len(board.AliveCreep()),
-			AlivePlayers: len(board.AlivePlayers()),
-			PowerUps:     len(board.PowerUps),
+			AliveCreep:   info.AliveCreep,
+			AlivePlayers: info.AlivePlayers,
+			PowerUps:     info.PowerUps,
 		},
 	}
 
@@ -195,8 +197,9 @@ func getEvents(c *gin.Context) {
 		return
 	}
 
+	board, _ := game.GetGame(params.GameID)
 	c.JSON(http.StatusOK, &GameEventsResponse{
-		Events: game.Games[params.GameID].Events,
+		Events: board.SnapshotEvents(),
 	})
 }
 
@@ -230,9 +233,10 @@ func getScores(c *gin.Context) {
 		return
 	}
 
+	board, _ := game.GetGame(params.GameID)
 	s := &GameScoresResponse{}
 
-	for _, player := range game.Games[params.GameID].Players {
+	for _, player := range board.SnapshotPlayers() {
 		s.Scores = append(s.Scores, &PlayerScore{
 			Name:          player.Name,
 			Score:         player.Score,
@@ -276,16 +280,26 @@ func startGame(c *gin.Context) {
 		return
 	}
 
-	game := game.Games[params.GameID]
-	if len(game.Players) <= 0 {
+	board, _ := game.GetGame(params.GameID)
+	if len(board.SnapshotPlayers()) <= 0 {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `cannot start game without players`,
 		})
 		return
 	}
+	if board.StatusValue() == game.BoardStatusRunning {
+		c.JSON(http.StatusOK, &StatusResponse{Success: true})
+		return
+	}
+	if board.StatusValue() == game.BoardStatusFinished {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `game has already finished`,
+		})
+		return
+	}
 
 	// start the game
-	go game.Run()
+	go board.Run()
 
 	c.JSON(http.StatusOK, &StatusResponse{
 		Success: true,
@@ -324,8 +338,12 @@ func stopGame(c *gin.Context) {
 		return
 	}
 
-	board := game.Games[params.GameID]
-	board.Status = game.BoardStatusFinished
+	board, _ := game.GetGame(params.GameID)
+	if board.StatusValue() == game.BoardStatusFinished {
+		c.JSON(http.StatusOK, &StatusResponse{Success: true})
+		return
+	}
+	board.SetStatus(game.BoardStatusFinished)
 
 	c.JSON(http.StatusOK, &StatusResponse{
 		Success: true,
@@ -363,28 +381,18 @@ func joinGame(c *gin.Context) {
 		return
 	}
 
-	board := game.Games[params.GameID]
-	if board.Status != game.BoardStatusNew {
-		c.JSON(http.StatusForbidden, &ErrorResponse{
-			Message: `game is not accepting new players`,
-		})
-		return
-	}
-
-	for _, p := range game.Games[params.GameID].Players {
-		if params.PlayerID == p.ID {
-			c.JSON(http.StatusForbidden, &ErrorResponse{
-				Message: `player is already in the game`,
-			})
-			return
-		}
-	}
+	board, _ := game.GetGame(params.GameID)
 
 	var player storage.Player
 	storage.Storage.Get().Where("UUID = ?", params.PlayerID).First(&player)
 
 	gamePlayer := game.NewPlayer(&player)
-	game.Games[params.GameID].JoinPlayer(gamePlayer)
+	if err := board.JoinPlayerIfOpen(gamePlayer); err != nil {
+		c.JSON(http.StatusForbidden, &ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, &StatusResponse{
 		Success: true,

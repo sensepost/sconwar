@@ -2,8 +2,10 @@ package game
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -26,6 +28,7 @@ const (
 
 // Board is the game board
 type Board struct {
+	mu            sync.RWMutex
 	ID            string      `json:"id"`
 	Name          string      `json:"name"`
 	Status        BoardStatus `json:"status"`
@@ -43,6 +46,21 @@ type Board struct {
 
 	Created time.Time `json:"created"`
 	Started time.Time `json:"started"`
+}
+
+// BoardInfoSnapshot is a read-only board view for API responses.
+type BoardInfoSnapshot struct {
+	Name          string
+	Status        BoardStatus
+	SizeX         int
+	SizeY         int
+	CurrentPlayer string
+	FOWDistance   float64
+	Created       time.Time
+	Started       time.Time
+	AliveCreep    int
+	AlivePlayers  int
+	PowerUps      int
 }
 
 // NewBoard starts a new Board
@@ -99,8 +117,9 @@ func (b *Board) updateDbModel() *gorm.DB {
 
 // LogEvent logs a game event for this board
 func (b *Board) LogEvent(event *storage.Event) {
-
+	b.mu.Lock()
 	b.Events = append(b.Events, event)
+	b.mu.Unlock()
 
 	event.BoardID = b.dbModel.ID
 	storage.Storage.Get().Create(&event)
@@ -117,14 +136,154 @@ func (b *Board) LogEvent(event *storage.Event) {
 
 // JoinPlayer joins a new human player to the board
 func (b *Board) JoinPlayer(p *Player) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	b.Players = append(b.Players, p)
+}
+
+// JoinPlayerIfOpen joins a player if this board accepts new players.
+func (b *Board) JoinPlayerIfOpen(p *Player) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.Status != BoardStatusNew {
+		return errors.New("game is not accepting new players")
+	}
+
+	for _, existing := range b.Players {
+		if existing.ID == p.ID {
+			return errors.New("player is already in the game")
+		}
+	}
+
+	b.Players = append(b.Players, p)
+
+	return nil
+}
+
+// FindPlayer gets a player by id.
+func (b *Board) FindPlayer(playerID string) (*Player, bool) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	for _, p := range b.Players {
+		if p.ID == playerID {
+			return p, true
+		}
+	}
+
+	return nil, false
+}
+
+// QueuePlayerAction queues an action for a board player.
+func (b *Board) QueuePlayerAction(playerID string, action Action) error {
+	player, ok := b.FindPlayer(playerID)
+	if !ok {
+		return errors.New("this player is not part of this game")
+	}
+
+	return player.AddAction(action)
+}
+
+// StatusValue gets the current board status.
+func (b *Board) StatusValue() BoardStatus {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	return b.Status
+}
+
+// SetStatus updates the board status.
+func (b *Board) SetStatus(status BoardStatus) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.Status = status
+}
+
+// SnapshotGameInfo returns immutable board info used in API responses.
+func (b *Board) SnapshotGameInfo() BoardInfoSnapshot {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	return BoardInfoSnapshot{
+		Name:          b.Name,
+		Status:        b.Status,
+		SizeX:         b.SizeX,
+		SizeY:         b.SizeY,
+		CurrentPlayer: b.CurrentPlayer,
+		FOWDistance:   b.FOWDistance,
+		Created:       b.Created,
+		Started:       b.Started,
+		AliveCreep:    len(b.AliveCreep()),
+		AlivePlayers:  len(b.AlivePlayers()),
+		PowerUps:      len(b.PowerUps),
+	}
+}
+
+// SnapshotEvents returns a copy of board events.
+func (b *Board) SnapshotEvents() []*storage.Event {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	events := make([]*storage.Event, len(b.Events))
+	copy(events, b.Events)
+	return events
+}
+
+// SnapshotPlayers returns a copy of player pointers for read-only use.
+func (b *Board) SnapshotPlayers() []*Player {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	players := make([]*Player, len(b.Players))
+	copy(players, b.Players)
+	return players
+}
+
+// SnapshotPowerUps returns a copy of powerup pointers.
+func (b *Board) SnapshotPowerUps() []*PowerUp {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	powerups := make([]*PowerUp, len(b.PowerUps))
+	copy(powerups, b.PowerUps)
+	return powerups
+}
+
+// SnapshotCreeps returns a copy of creep pointers.
+func (b *Board) SnapshotCreeps() []*Creep {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	creeps := make([]*Creep, len(b.Creeps))
+	copy(creeps, b.Creeps)
+	return creeps
+}
+
+// PlayerHasPowerup checks ownership of a powerup by a player.
+func (b *Board) PlayerHasPowerup(playerID string, powerupID string) bool {
+	player, ok := b.FindPlayer(playerID)
+	if !ok {
+		return false
+	}
+
+	for _, u := range player.PowerUps {
+		if u.ID == powerupID {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Run runs the game loop
 func (b *Board) Run() {
 
+	b.mu.Lock()
 	b.Started = time.Now()
-	b.Status = BoardStatusRunning
+	b.mu.Unlock()
+	b.SetStatus(BoardStatusRunning)
 	b.updateDbModel()
 
 	for {
@@ -138,12 +297,17 @@ func (b *Board) Run() {
 		// respawn powerups. this is a chance-based thing so everytime
 		// we get below the max amount of powerups we will try and
 		// spawn new ones.
-		if len(b.PowerUps) < PowerUpMax {
-			if pup := NewPowerUp(); pup != nil {
-				b.PowerUps = append(b.PowerUps, pup)
-				b.LogEvent(&storage.Event{
-					Date:        time.Now(),
-					SrcEntity:   int(PowerupEntity),
+			b.mu.RLock()
+			powerupCount := len(b.PowerUps)
+			b.mu.RUnlock()
+			if powerupCount < PowerUpMax {
+				if pup := NewPowerUp(); pup != nil {
+					b.mu.Lock()
+					b.PowerUps = append(b.PowerUps, pup)
+					b.mu.Unlock()
+					b.LogEvent(&storage.Event{
+						Date:        time.Now(),
+						SrcEntity:   int(PowerupEntity),
 					SrcEntityID: pup.ID,
 					Msg:         `a new powerup has spawned on the board`,
 				})
@@ -153,16 +317,17 @@ func (b *Board) Run() {
 		b.processCreepTurn()
 
 		for _, p := range b.AlivePlayers() {
+			b.mu.Lock()
 			b.CurrentPlayer = fmt.Sprintf(`(player) %s`, p.Name)
+			b.mu.Unlock()
 			ctx, cancel := context.WithTimeout(context.Background(), MaxRoundSeconds*time.Second)
-			defer cancel()
-
 			b.processPlayerTurn(ctx, p)
+			cancel()
 		}
 
 		// win / stop conditions
 
-		if b.Status != BoardStatusRunning {
+		if b.StatusValue() != BoardStatusRunning {
 			b.LogEvent(&storage.Event{
 				Date: time.Now(),
 				Msg: `game was in Run() loop, but status is not BoardStatusRunning. ` +
@@ -203,13 +368,15 @@ func (b *Board) Run() {
 	}
 
 	b.dbModel.Ended = time.Now()
-	b.Status = BoardStatusFinished
+	b.SetStatus(BoardStatusFinished)
 	b.updateDbModel()
 	gameState.With(prometheus.Labels{"state": "finished"}).Inc()
 }
 
 // RemovePowerUp removes a powerup from the board
 func (b *Board) RemovePowerUp(powerup *PowerUp) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
 	// copy the slice to be trimmed
 	s := b.PowerUps
@@ -229,6 +396,8 @@ func (b *Board) RemovePowerUp(powerup *PowerUp) {
 
 // AliveCreep returns creep that are alive
 func (b *Board) AliveCreep() (a []*Creep) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	for _, c := range b.Creeps {
 		if c.Health > 0 {
 			a = append(a, c)
@@ -240,6 +409,8 @@ func (b *Board) AliveCreep() (a []*Creep) {
 
 // AlivePlayers returns players that are alive
 func (b *Board) AlivePlayers() (a []*Player) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 	for _, p := range b.Players {
 		if p.Health > 0 {
 			a = append(a, p)
@@ -265,7 +436,9 @@ func (b *Board) CurrentDeathPosition() int {
 func (b *Board) processCreepTurn() {
 
 	for _, creep := range b.AliveCreep() {
+		b.mu.Lock()
 		b.CurrentPlayer = fmt.Sprintf(`(creep) %s`, creep.Name)
+		b.mu.Unlock()
 
 		remMoves := CreepRoundMoves
 

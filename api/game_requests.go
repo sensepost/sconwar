@@ -16,7 +16,7 @@ type NewGameRequest struct {
 // Validation validates request values
 func (r *NewGameRequest) Validation() error {
 
-	for _, g := range game.Games {
+	for _, g := range game.ListGames() {
 		if g.Name == r.Name {
 			return errors.New("a game with that name already exists")
 		}
@@ -39,7 +39,7 @@ type GetGameDetailRequest struct {
 // Validation validates request values
 func (r *GetGameDetailRequest) Validation() error {
 
-	if game.Games[r.GameID] == nil {
+	if _, ok := game.GetGame(r.GameID); !ok {
 		return errors.New("invalid game uuid")
 	}
 
@@ -55,7 +55,7 @@ type JoinPlayerRequest struct {
 // Validation validates request values
 func (r *JoinPlayerRequest) Validation() error {
 
-	if game.Games[r.GameID] == nil {
+	if _, ok := game.GetGame(r.GameID); !ok {
 		return errors.New("invalid game uuid")
 	}
 

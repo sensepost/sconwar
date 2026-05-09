@@ -126,12 +126,8 @@ func playerStatus(c *gin.Context) {
 		return
 	}
 
-	var status *game.Player
-	for _, p := range game.Games[params.GameID].Players {
-		if p.ID == params.PlayerID {
-			status = p
-		}
-	}
+	board, _ := game.GetGame(params.GameID)
+	status, _ := board.FindPlayer(params.PlayerID)
 
 	game.PlayerApiActions.With(prometheus.Labels{"action": "status"}).Inc()
 	c.JSON(http.StatusOK, &PlayerStatusResponse{
@@ -169,45 +165,40 @@ func playerSurrounding(c *gin.Context) {
 		return
 	}
 
-	var player *game.Player
-	for _, p := range game.Games[params.GameID].Players {
-		if p.ID == params.PlayerID {
-			player = p
-		}
-	}
-
 	distances := &PlayerSurroundingResponse{}
-	board := game.Games[params.GameID]
+	board, _ := game.GetGame(params.GameID)
+	player, _ := board.FindPlayer(params.PlayerID)
 
 	// if the board is complete (aka, game done) we disable fow calculation
-	if board.Status == game.BoardStatusFinished {
+	if board.StatusValue() == game.BoardStatusFinished {
 		distances.FOWEnabled = false
 
-		distances.PowerUps = board.PowerUps
-		distances.Creep = board.Creeps
-		distances.Players = board.Players
+		distances.PowerUps = board.SnapshotPowerUps()
+		distances.Creep = board.SnapshotCreeps()
+		distances.Players = board.SnapshotPlayers()
 	} else {
 
 		distances.FOWEnabled = true
 
-		for _, u := range board.PowerUps {
-			if player.DistanceFrom(u) <= board.FOWDistance {
+		info := board.SnapshotGameInfo()
+		for _, u := range board.SnapshotPowerUps() {
+			if player.DistanceFrom(u) <= info.FOWDistance {
 				distances.PowerUps = append(distances.PowerUps, u)
 			}
 		}
 
-		for _, c := range board.Creeps {
-			if player.DistanceFrom(c) <= board.FOWDistance && c.Health > 0 {
+		for _, c := range board.SnapshotCreeps() {
+			if player.DistanceFrom(c) <= info.FOWDistance && c.Health > 0 {
 				distances.Creep = append(distances.Creep, c)
 			}
 		}
 
-		for _, p := range board.Players {
+		for _, p := range board.SnapshotPlayers() {
 			if player.ID == p.ID {
 				continue
 			}
 
-			if player.DistanceFrom(p) <= board.FOWDistance && p.Health > 0 {
+			if player.DistanceFrom(p) <= info.FOWDistance && p.Health > 0 {
 				distances.Players = append(distances.Players, p)
 			}
 		}

@@ -1,6 +1,10 @@
 package game
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
+)
 
 var PlayerApiActions = prometheus.NewCounterVec(
 	prometheus.CounterOpts{
@@ -99,17 +103,21 @@ var gameState = prometheus.NewCounterVec(
 	[]string{"state"},
 )
 
+var metricsInitOnce sync.Once
+
 //InitMetrics sets up the prometheus metrics for exposing over GIN
 func InitMetrics() {
-	prometheus.Register(attackActionExecuted)
-	prometheus.Register(playerCreated)
-	prometheus.Register(playerActionsQueued)
-	prometheus.Register(damageTaken)
-	prometheus.Register(powerupsCollected)
-	prometheus.Register(powerupsUsed)
-	prometheus.Register(scoreAwarded)
-	prometheus.Register(creepsKilled)
-	prometheus.Register(playersKilled)
-
-	prometheus.Register(PlayerApiActions)
+	metricsInitOnce.Do(func() {
+		prometheus.MustRegister(attackActionExecuted)
+		prometheus.MustRegister(playerCreated)
+		prometheus.MustRegister(playerActionsQueued)
+		prometheus.MustRegister(damageTaken)
+		prometheus.MustRegister(powerupsCollected)
+		prometheus.MustRegister(powerupsUsed)
+		prometheus.MustRegister(scoreAwarded)
+		prometheus.MustRegister(creepsKilled)
+		prometheus.MustRegister(playersKilled)
+		prometheus.MustRegister(gameState)
+		prometheus.MustRegister(PlayerApiActions)
+	})
 }

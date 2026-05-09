@@ -37,17 +37,12 @@ func moveAction(c *gin.Context) {
 		return
 	}
 
-	var player *game.Player
-	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
-		if p.ID == params.GamePlayerIDs.PlayerID {
-			player = p
-		}
-	}
+	board, _ := game.GetGame(params.GamePlayerIDs.GameID)
 
 	action := game.NewAction(game.Move)
 	action.SetXY(params.X, params.Y)
 
-	if err := player.AddAction(*action); err != nil {
+	if err := board.QueuePlayerAction(params.GamePlayerIDs.PlayerID, *action); err != nil {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `failed to buffer new action`,
 			Error:   err.Error(),
@@ -90,17 +85,12 @@ func attackAction(c *gin.Context) {
 		return
 	}
 
-	var player *game.Player
-	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
-		if p.ID == params.GamePlayerIDs.PlayerID {
-			player = p
-		}
-	}
+	board, _ := game.GetGame(params.GamePlayerIDs.GameID)
 
 	action := game.NewAction(game.Attack)
 	action.SetXY(params.X, params.Y)
 
-	if err := player.AddAction(*action); err != nil {
+	if err := board.QueuePlayerAction(params.GamePlayerIDs.PlayerID, *action); err != nil {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `failed to buffer new action`,
 			Error:   err.Error(),
@@ -143,17 +133,12 @@ func pickupAction(c *gin.Context) {
 		return
 	}
 
-	var player *game.Player
-	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
-		if p.ID == params.GamePlayerIDs.PlayerID {
-			player = p
-		}
-	}
+	board, _ := game.GetGame(params.GamePlayerIDs.GameID)
 
 	action := game.NewAction(game.Pickup)
 	action.SetXY(params.X, params.Y)
 
-	if err := player.AddAction(*action); err != nil {
+	if err := board.QueuePlayerAction(params.GamePlayerIDs.PlayerID, *action); err != nil {
 		c.JSON(http.StatusBadRequest, &ErrorResponse{
 			Message: `failed to buffer new action`,
 			Error:   err.Error(),
@@ -196,11 +181,14 @@ func useAction(c *gin.Context) {
 		return
 	}
 
-	var player *game.Player
-	for _, p := range game.Games[params.GamePlayerIDs.GameID].Players {
-		if p.ID == params.GamePlayerIDs.PlayerID {
-			player = p
-		}
+	board, _ := game.GetGame(params.GamePlayerIDs.GameID)
+	player, ok := board.FindPlayer(params.GamePlayerIDs.PlayerID)
+	if !ok {
+		c.JSON(http.StatusBadRequest, &ErrorResponse{
+			Message: `failed to validate request`,
+			Error:   `this player is not part of this game`,
+		})
+		return
 	}
 
 	player.UsePowerUp(params.PowerUpID)

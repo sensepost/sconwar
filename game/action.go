@@ -171,7 +171,7 @@ func (a *Action) Execute(player *Player, board *Board) {
 		}
 
 	case Pickup:
-		for _, u := range board.PowerUps {
+		for _, u := range board.SnapshotPowerUps() {
 
 			// use attack range for now. maybe change this to its own
 			// unique value? maybe an argument to IsInRangeOf

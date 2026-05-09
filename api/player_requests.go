@@ -57,18 +57,12 @@ func (r *PlayerGameRequest) Validation() error {
 		return errors.New("invalid player uuid")
 	}
 
-	if game.Games[r.GameID] == nil {
+	board, ok := game.GetGame(r.GameID)
+	if !ok {
 		return errors.New("invalid game uuid")
 	}
 
-	exists := false
-	for _, p := range game.Games[r.GameID].Players {
-		if p.ID == r.PlayerID {
-			exists = true
-		}
-	}
-
-	if !exists {
+	if _, exists := board.FindPlayer(r.PlayerID); !exists {
 		return errors.New("this player is not part of this game")
 	}
 

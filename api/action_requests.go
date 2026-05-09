@@ -17,7 +17,8 @@ type ActionGamePlayerRequest struct {
 // Validation validates request values
 func (r *ActionGamePlayerRequest) Validation() error {
 
-	if game.Games[r.GameID] == nil {
+	board, ok := game.GetGame(r.GameID)
+	if !ok {
 		return errors.New("invalid game uuid")
 	}
 
@@ -27,7 +28,7 @@ func (r *ActionGamePlayerRequest) Validation() error {
 		return errors.New("invalid player uuid")
 	}
 
-	if game.Games[r.GameID].Status != game.BoardStatusRunning {
+	if board.StatusValue() != game.BoardStatusRunning {
 		return errors.New(`game is not running and cannot accept actions`)
 	}
 
@@ -98,18 +99,8 @@ func (r *ActionUseRequest) Validation() error {
 		return err
 	}
 
-	owns := false
-	for _, p := range game.Games[r.GamePlayerIDs.GameID].Players {
-		if p.ID == r.GamePlayerIDs.PlayerID {
-			for _, u := range p.PowerUps {
-				if u.ID == r.PowerUpID {
-					owns = true
-				}
-			}
-		}
-	}
-
-	if !owns {
+	board, ok := game.GetGame(r.GamePlayerIDs.GameID)
+	if !ok || !board.PlayerHasPowerup(r.GamePlayerIDs.PlayerID, r.PowerUpID) {
 		return errors.New(`player does not have or own this powerup id`)
 	}
 
