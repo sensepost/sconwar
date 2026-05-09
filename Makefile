@@ -11,14 +11,8 @@ clean:
 	$(RM) $(BIN_DIR)/sconwar*
 	go clean -x
 
-swagger-install:
-	# go get -u github.com/swaggo/swag/cmd/swag
-	# pin 1.6.7 for now. something is wrong in 1.6.8
-	#	https://github.com/swaggo/swag/issues/810
-	go get github.com/swaggo/swag/cmd/swag@df209afeed2334a97c83aff34ea7abcad85c31f6
-
 swagger:
-	swag init -g api/router.go
+	go run github.com/swaggo/swag/cmd/swag@v1.16.6 init -g api/router.go --parseDependency --parseInternal
 
 install:
 	go install
