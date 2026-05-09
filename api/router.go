@@ -72,7 +72,6 @@ func SetupRouter() (r *gin.Engine) {
 
 			player.POST("/status", playerStatus)
 			player.POST("/surroundings", playerSurrounding)
-			player.POST("/inventory")
 		}
 
 		action := api.Group("/action")

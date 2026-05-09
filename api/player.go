@@ -20,7 +20,6 @@ import (
 // @Param data body	PlayerRequest true "PlayerRequest Request"
 // @Success 200 {object} storage.Player
 // @Failure 400 {object} ErrorResponse
-// @Failure 403 {object} ErrorResponse
 // @Router /player/ [post]
 func getPlayer(c *gin.Context) {
 
@@ -46,7 +45,7 @@ func getPlayer(c *gin.Context) {
 	storage.Storage.Get().Where("uuid = ?", params.PlayerID).Preload("Scores").First(&player)
 
 	game.PlayerApiActions.With(prometheus.Labels{"action": "info"}).Inc()
-	c.JSON(http.StatusCreated, player)
+	c.JSON(http.StatusOK, player)
 }
 
 // RegisterPlayer godoc
@@ -59,7 +58,7 @@ func getPlayer(c *gin.Context) {
 // @Param data body	RegisterPlayerRequest true "RegisterPlayerRequest Request"
 // @Success 201 {object} NewPlayerResponse
 // @Failure 400 {object} ErrorResponse
-// @Failure 403 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Router /player/register [post]
 func registerPlayer(c *gin.Context) {
 

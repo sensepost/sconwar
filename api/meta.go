@@ -15,7 +15,8 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} MetaTotalScoresResponse
-// @Router /meta/scores/ [get]
+// @Failure 429 {object} ErrorResponse
+// @Router /meta/scores [get]
 func getTotalScores(c *gin.Context) {
 
 	res := &MetaTotalScoresResponse{}
@@ -57,7 +58,8 @@ func getTotalScores(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} PlayerLeaderBoardResponse
-// @Router /meta/leaderboard/ [get]
+// @Failure 429 {object} ErrorResponse
+// @Router /meta/leaderboard [get]
 func getLeaderBoard(c *gin.Context) {
 
 	res := &PlayerLeaderBoardResponse{}
@@ -97,7 +99,7 @@ func getLeaderBoard(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} MetaTypesResponse
-// @Router /meta/types/ [get]
+// @Router /meta/types [get]
 func getTypes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &MetaTypesResponse{

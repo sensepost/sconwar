@@ -79,6 +79,7 @@ func allGames(c *gin.Context) {
 // @Param game_id path string true "game uuid"
 // @Success 200 {object} GameDetailResponse
 // @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Router /game/detail/{game_id} [get]
 func getGameDetail(c *gin.Context) {
 
@@ -301,6 +302,7 @@ func startGame(c *gin.Context) {
 // @Param game_id path string true "game uuid"
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
 // @Router /game/stop/{game_id} [put]
 func stopGame(c *gin.Context) {
 
