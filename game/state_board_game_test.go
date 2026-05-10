@@ -1,6 +1,7 @@
 package game
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -16,6 +17,14 @@ func resetGameTestEnv(t *testing.T) {
 	if err := storage.InitDbPath(dbPath); err != nil {
 		t.Fatalf("failed to init db: %v", err)
 	}
+	t.Cleanup(func() {
+		if storage.Storage != nil && storage.Storage.Get() != nil {
+			if sqlDB, err := storage.Storage.Get().DB(); err == nil {
+				_ = sqlDB.Close()
+			}
+		}
+		_ = os.Remove(dbPath)
+	})
 	Setup()
 }
 
